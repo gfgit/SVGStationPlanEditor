@@ -41,6 +41,12 @@ void NodeFinderStatusWidget::setMode(int mode)
     QString modeName;
     switch (modeVal)
     {
+    case NodeFinderMgr::EditingModes::NoSVGLoaded:
+        modeName = tr("No SVG");
+        break;
+    case NodeFinderMgr::EditingModes::NoEditing:
+        modeName = tr("No Editing");
+        break;
     case NodeFinderMgr::EditingModes::LabelEditing:
         modeName = tr("Label Editing");
         break;
@@ -50,7 +56,7 @@ void NodeFinderStatusWidget::setMode(int mode)
     case NodeFinderMgr::EditingModes::TrackPathEditing:
         modeName = tr("Track Path Editing");
         break;
-    default:
+    case NodeFinderMgr::EditingModes::NModes:
         modeName = tr("Unknown mode");
     }
 
