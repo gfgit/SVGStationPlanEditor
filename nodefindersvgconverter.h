@@ -30,6 +30,8 @@ public:
     bool save(QIODevice *dev);
     void reloadSVGRenderer();
 
+    int calcDefaultTrackPenWidth();
+
     void loadLabelsAndTracks();
 
     void processElements();
@@ -75,6 +77,7 @@ private:
     NodeFinderElementClass::ElementHash namedElements;
     NodeFinderElementClass::ElementHash fakeIds;
 
+    friend class NodeFinderSVGWidget;
     NodeFinderLabelModel *labelsModel;
     NodeFinderStationTracksModel *tracksModel;
 };

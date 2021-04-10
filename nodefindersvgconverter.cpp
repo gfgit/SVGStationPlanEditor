@@ -112,6 +112,15 @@ void NodeFinderSVGConverter::reloadSVGRenderer()
     mSvg->load(&xml);
 }
 
+int NodeFinderSVGConverter::calcDefaultTrackPenWidth()
+{
+    QSize sz = mSvg->viewBox().size();
+    int trackPenWidth = qMin(sz.width(), sz.height()) / 100;
+    if(trackPenWidth < 10)
+        trackPenWidth = 10;
+    return trackPenWidth;
+}
+
 void NodeFinderSVGConverter::loadLabelsAndTracks()
 {
     QVector<NodeFinderLabelModel::LabelItem> labels;
