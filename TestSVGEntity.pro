@@ -26,6 +26,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     nodefinderdockwidget.cpp \
+    nodefinderlabelmodel.cpp \
     nodefindermgr.cpp \
     nodefinderstatuswidget.cpp \
     nodefindersvgconverter.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     elementclass.h \
     mainwindow.h \
     nodefinderdockwidget.h \
+    nodefinderlabelmodel.h \
     nodefindermgr.h \
     nodefinderstatuswidget.h \
     nodefindersvgconverter.h \
