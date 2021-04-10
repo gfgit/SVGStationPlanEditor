@@ -31,17 +31,90 @@ int NodeFinderLabelModel::columnCount(const QModelIndex &parent) const
 
 QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
 {
-    if (!idx.isValid() || role != Qt::DisplayRole)
+    if (!idx.isValid())
         return QVariant();
 
     const LabelItem& item = items.at(idx.row());
-    switch (idx.column())
+
+    switch (role)
     {
-    case LabelNameCol:
-        return item.gateLetter;
+    case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case LabelNameCol:
+            return item.gateLetter;
+        }
+        break;
+    }
+    case Qt::CheckStateRole:
+    {
+        switch (idx.column())
+        {
+        case LabelNameCol:
+            return item.visible ? Qt::Checked : Qt::Unchecked;
+        }
+        break;
+    }
     }
 
     return QVariant();
+}
+
+bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value, int role)
+{
+    if (!idx.isValid())
+        return false;
+
+    LabelItem& item = items[idx.row()];
+
+    switch (role)
+    {
+    case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case LabelNameCol:
+            const QString name = value.toString().simplified();
+            if(name.isEmpty() || name.front() < 'A' || name.front() > 'Z')
+                return false;
+
+            //Set name
+            item.gateLetter = name.front();
+        }
+        break;
+    }
+    case Qt::CheckStateRole:
+    {
+        switch (idx.column())
+        {
+        case LabelNameCol:
+        {
+            Qt::CheckState cs = value.value<Qt::CheckState>();
+            item.visible = cs == Qt::Checked;
+        }
+        }
+        break;
+    }
+    }
+
+    emit dataChanged(idx, idx);
+    emit refreshSVG();
+
+    return true;
+}
+
+Qt::ItemFlags NodeFinderLabelModel::flags(const QModelIndex &idx) const
+{
+    Qt::ItemFlags f;
+    if(!idx.isValid())
+        return f;
+
+    f.setFlag(Qt::ItemIsEnabled);
+    f.setFlag(Qt::ItemIsSelectable);
+    f.setFlag(Qt::ItemIsEditable);
+    f.setFlag(Qt::ItemIsUserCheckable);
+    return f;
 }
 
 void NodeFinderLabelModel::setItems(const QVector<NodeFinderLabelModel::LabelItem> &vec)
