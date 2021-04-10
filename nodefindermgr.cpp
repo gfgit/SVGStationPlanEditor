@@ -7,7 +7,10 @@
 #include "nodefindersvgconverter.h"
 
 NodeFinderMgr::NodeFinderMgr(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    drawLabels(true),
+    drawStationTracks(true),
+    trackPenWidth(10)
 {
     converter = new NodeFinderSVGConverter(this);
 
@@ -74,6 +77,9 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
     converter->processElements();
     converter->loadLabelsAndTracks();
 
+    //This will also trigger repaint
+    setTrackPenWidth(converter->calcDefaultTrackPenWidth());
+
     setMode(EditingModes::NoEditing);
     return true;
 }
@@ -91,4 +97,11 @@ void NodeFinderMgr::selectCurrentElem()
 void NodeFinderMgr::goToNextElem()
 {
 
+}
+
+void NodeFinderMgr::setTrackPenWidth(int value)
+{
+    trackPenWidth = value;
+    emit trackPenWidthChanged(trackPenWidth);
+    emit repaintSVG();
 }
