@@ -10,6 +10,8 @@ NodeFinderMgr::NodeFinderMgr(QObject *parent) :
     QObject(parent)
 {
     converter = new NodeFinderSVGConverter(this);
+
+    setMode(EditingModes::NoEditing);
 }
 
 NodeFinderMgr::EditingModes NodeFinderMgr::mode() const
@@ -39,7 +41,11 @@ QWidget *NodeFinderMgr::getCentralWidget(QWidget *parent)
         return centralWidget;
 
     //Create a new one
-    centralWidget = new NodeFinderSVGWidget(this, parent);
+    NodeFinderSVGWidget *w = new NodeFinderSVGWidget(this, parent);
+    w->setRenderer(converter->renderer());
+    connect(this, &NodeFinderMgr::repaintSVG, w, QOverload<>::of(&QWidget::update));
+
+    centralWidget = w;
     return centralWidget;
 }
 
@@ -49,13 +55,27 @@ QWidget *NodeFinderMgr::getDockWidget(QWidget *parent)
         return dockWidget;
 
     //Create a new one
-    dockWidget = new NodeFinderDockWidget(this, parent);
+    NodeFinderDockWidget *w = new NodeFinderDockWidget(this, parent);
+    w->setModels(converter->getLabelsModel(), converter->getTracksModel());
+
+    dockWidget = w;
     return dockWidget;
 }
 
 bool NodeFinderMgr::loadSVG(QIODevice *dev)
 {
-    return false;
+    bool ret = converter->load(dev);
+    if(!ret)
+    {
+        converter->clear();
+        setMode(EditingModes::NoSVGLoaded);
+    }
+
+    converter->processElements();
+    converter->loadLabelsAndTracks();
+
+    setMode(EditingModes::NoEditing);
+    return true;
 }
 
 bool NodeFinderMgr::saveSVG(QIODevice *dev)
