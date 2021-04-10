@@ -28,6 +28,7 @@ SOURCES += \
     nodefinderdockwidget.cpp \
     nodefinderlabelmodel.cpp \
     nodefindermgr.cpp \
+    nodefinderstationtracksmodel.cpp \
     nodefinderstatuswidget.cpp \
     nodefindersvgconverter.cpp \
     nodefindersvgwidget.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
     nodefinderdockwidget.h \
     nodefinderlabelmodel.h \
     nodefindermgr.h \
+    nodefinderstationtracksmodel.h \
     nodefinderstatuswidget.h \
     nodefindersvgconverter.h \
     nodefindersvgwidget.h \
