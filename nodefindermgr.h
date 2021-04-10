@@ -18,11 +18,17 @@ public:
     //Editing mode
     enum class EditingModes
     {
-        LabelEditing = 0,
+        NoSVGLoaded = 0,
+        NoEditing,
+        LabelEditing,
         StationTrackEditing,
         TrackPathEditing,
         NModes
     };
+    static inline bool isEditing(EditingModes mode)
+    {
+        return mode >= EditingModes::LabelEditing && mode <= EditingModes::TrackPathEditing;
+    }
 
     EditingModes mode() const;
     void setMode(const EditingModes &mode);
@@ -38,6 +44,7 @@ public:
 
 signals:
     void modeChanged(int mode);
+    void repaintSVG();
 
 public slots:
     void selectCurrentElem();
