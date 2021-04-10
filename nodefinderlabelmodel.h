@@ -8,6 +8,8 @@
 #include <QDomElement>
 #include <QRectF>
 
+class NodeFinderMgr;
+
 class NodeFinderLabelModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -28,7 +30,7 @@ public:
         bool visible;
     } LabelItem;
 
-    explicit NodeFinderLabelModel(QObject *parent = nullptr);
+    explicit NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -43,11 +45,10 @@ public:
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
     void setItems(const QVector<LabelItem>& vec);
-
-signals:
-    void refreshSVG();
+    void clear();
 
 private:
+    NodeFinderMgr *nodeMgr;
     QVector<LabelItem> items;
 };
 

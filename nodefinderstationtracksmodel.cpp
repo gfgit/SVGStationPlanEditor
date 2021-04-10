@@ -1,7 +1,10 @@
 #include "nodefinderstationtracksmodel.h"
 
-NodeFinderStationTracksModel::NodeFinderStationTracksModel(QObject *parent)
-    : QAbstractTableModel(parent)
+#include "nodefindermgr.h"
+
+NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent) :
+    QAbstractTableModel(parent),
+    nodeMgr(mgr)
 {
 }
 
@@ -99,7 +102,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     }
 
     emit dataChanged(idx, idx);
-    emit refreshSVG();
+    emit nodeMgr->repaintSVG();
 
     return true;
 }
@@ -121,5 +124,13 @@ void NodeFinderStationTracksModel::setItems(const QVector<NodeFinderStationTrack
 {
     beginResetModel();
     items = vec;
+    endResetModel();
+}
+
+void NodeFinderStationTracksModel::clear()
+{
+    beginResetModel();
+    items.clear();
+    items.squeeze();
     endResetModel();
 }

@@ -8,6 +8,8 @@
 #include <QDomElement>
 #include <QPainterPath>
 
+class NodeFinderMgr;
+
 class NodeFinderStationTracksModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -28,7 +30,7 @@ public:
         bool visible;
     } TrackItem;
 
-    explicit NodeFinderStationTracksModel(QObject *parent = nullptr);
+    explicit NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -45,10 +47,10 @@ public:
 
     void setItems(const QVector<TrackItem>& vec);
 
-signals:
-    void refreshSVG();
+    void clear();
 
 private:
+    NodeFinderMgr *nodeMgr;
     QVector<TrackItem> items;
 };
 

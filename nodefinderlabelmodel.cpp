@@ -1,7 +1,10 @@
 #include "nodefinderlabelmodel.h"
 
-NodeFinderLabelModel::NodeFinderLabelModel(QObject *parent)
-    : QAbstractTableModel(parent)
+#include "nodefindermgr.h"
+
+NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
+    QAbstractTableModel(parent),
+    nodeMgr(mgr)
 {
 }
 
@@ -99,7 +102,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     }
 
     emit dataChanged(idx, idx);
-    emit refreshSVG();
+    emit nodeMgr->repaintSVG();
 
     return true;
 }
@@ -121,5 +124,13 @@ void NodeFinderLabelModel::setItems(const QVector<NodeFinderLabelModel::LabelIte
 {
     beginResetModel();
     items = vec;
+    endResetModel();
+}
+
+void NodeFinderLabelModel::clear()
+{
+    beginResetModel();
+    items.clear();
+    items.squeeze();
     endResetModel();
 }
