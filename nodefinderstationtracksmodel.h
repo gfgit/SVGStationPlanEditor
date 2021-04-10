@@ -50,6 +50,7 @@ public:
     void clear();
 
 private:
+    friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;
     QVector<TrackItem> items;
 };

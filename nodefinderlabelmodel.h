@@ -48,6 +48,8 @@ public:
     void clear();
 
 private:
+    friend class NodeFinderSVGWidget;
+
     NodeFinderMgr *nodeMgr;
     QVector<LabelItem> items;
 };

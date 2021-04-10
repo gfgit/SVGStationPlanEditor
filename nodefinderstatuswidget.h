@@ -8,6 +8,7 @@ class QToolButton;
 
 class NodeFinderMgr;
 
+//FIXME: add zoom and trackPenWidth sliders
 class NodeFinderStatusWidget : public QWidget
 {
     Q_OBJECT

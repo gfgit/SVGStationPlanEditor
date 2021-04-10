@@ -15,6 +15,9 @@ public:
 
     void setRenderer(QSvgRenderer *svg);
 
+protected:
+    void paintEvent(QPaintEvent *) override;
+
 private:
     NodeFinderMgr *nodeMgr;
 
