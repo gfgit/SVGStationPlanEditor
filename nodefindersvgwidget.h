@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class QSvgRenderer;
+
 class NodeFinderMgr;
 
 class NodeFinderSVGWidget : public QWidget
@@ -11,8 +13,12 @@ class NodeFinderSVGWidget : public QWidget
 public:
     explicit NodeFinderSVGWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
+    void setRenderer(QSvgRenderer *svg);
+
 private:
     NodeFinderMgr *nodeMgr;
+
+    QSvgRenderer *mSvg;
 };
 
 #endif // NODEFINDERSVGWIDGET_H
