@@ -381,3 +381,12 @@ void SVGTinyConverter::renameElement(QDomElement &e, const QString& newId)
     }
     qWarning() << "Renaming unregistered element";
 }
+
+void SVGTinyConverter::storeElement(QDomElement e)
+{
+    for(ElementClass &c : elementClasses)
+    {
+        if(c.preocessElement(e))
+            break; //Registered
+    }
+}

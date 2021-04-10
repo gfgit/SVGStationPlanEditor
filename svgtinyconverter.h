@@ -60,14 +60,7 @@ private:
 
     void renameElement(QDomElement &e, const QString &newId);
 
-    inline void storeElement(QDomElement e)
-    {
-        for(ElementClass &c : elementClasses)
-        {
-            if(c.preocessElement(e))
-                break; //Registered
-        }
-    }
+    void storeElement(QDomElement e);
 
     inline void registerClass(const QString& tagName)
     {
