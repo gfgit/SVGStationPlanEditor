@@ -26,6 +26,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     nodefinderdockwidget.cpp \
+    nodefinderelementclass.cpp \
     nodefinderlabelmodel.cpp \
     nodefindermgr.cpp \
     nodefinderstationtracksmodel.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     elementclass.h \
     mainwindow.h \
     nodefinderdockwidget.h \
+    nodefinderelementclass.h \
     nodefinderlabelmodel.h \
     nodefindermgr.h \
     nodefinderstationtracksmodel.h \
