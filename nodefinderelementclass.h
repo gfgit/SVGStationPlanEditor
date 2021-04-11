@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QDomElement>
-#include <QHash>
+#include <QMap>
 
 class NodeFinderSVGConverter;
 
@@ -11,15 +11,7 @@ class NodeFinderElementClass
 {
 public:
     typedef QHash<QString, QDomElement> ElementHash;
-
-    enum CallbackResult
-    {
-        ReturnCurrentElement,
-        KeepSearching,
-        AbortSearch
-    };
-
-    typedef std::function<CallbackResult(QDomElement& e)> Callback;
+    typedef QMap<QString, QDomElement> ElementMap;
 
     static const QString idAttr;
 
@@ -33,14 +25,12 @@ public:
 
     inline bool getElementById(const QString& id, QDomElement &e) const
     {
-        auto it = hash.constFind(id);
-        if(it == hash.constEnd())
+        auto it = elements.constFind(id);
+        if(it == elements.constEnd())
             return false;
         e = it.value();
         return true;
     }
-
-    CallbackResult walkElements(QDomElement& result, Callback fun);
 
     void renameElement(QDomElement &e, const QString &newId, NodeFinderSVGConverter *conv);
 
@@ -49,7 +39,8 @@ private:
     QString m_baseId;
     int serial;
 
-    ElementHash hash;
+    friend class NodeFinderElementWalker;
+    ElementMap elements;
 };
 
 #endif // NODEFINDERELEMENTCLASS_H

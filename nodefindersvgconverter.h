@@ -7,6 +7,7 @@
 #include <QHash>
 
 #include "nodefinderelementclass.h"
+#include "nodefinderelementwalker.h"
 
 class NodeFinderMgr;
 class NodeFinderLabelModel;
@@ -43,6 +44,11 @@ public:
 
     QAbstractItemModel *getLabelsModel() const;
     QAbstractItemModel *getTracksModel() const;
+
+    inline NodeFinderElementWalker walkElements(const QStringList& tagOrder)
+    {
+        return NodeFinderElementWalker(tagOrder, elementClasses);
+    }
 
 private:
     QString getFreeId_internal(const QString& base, int &counter);

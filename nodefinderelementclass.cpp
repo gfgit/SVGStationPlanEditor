@@ -41,7 +41,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
 
     if(!id.isEmpty())
     {
-        hash.insert(id, e);
+        elements.insert(id, e);
     }
 
     return true;
@@ -50,26 +50,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
 void NodeFinderElementClass::clear()
 {
     serial = 0;
-    hash.clear();
-    hash.squeeze();
-}
-
-NodeFinderElementClass::CallbackResult NodeFinderElementClass::walkElements(QDomElement &result, Callback fun)
-{
-    for(QDomElement& e : hash)
-    {
-        CallbackResult res = fun(e);
-
-        if(res == KeepSearching)
-            continue;
-
-        if(res == CallbackResult::ReturnCurrentElement)
-        {
-            result = e;
-        }
-        return res;
-    }
-    return KeepSearching;
+    elements.clear();
 }
 
 void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId, NodeFinderSVGConverter *conv)
@@ -79,7 +60,7 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
     //Remove from fake and do not insert back, because now it is used
     conv->fakeIds.remove(oldId);
     conv->namedElements.remove(oldId);
-    hash.remove(oldId);
+    elements.remove(oldId);
 
     if(newId.isEmpty())
     {
@@ -89,7 +70,7 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
     else
     {
         e.setAttribute(idAttr, newId);
-        hash.insert(newId, e);
+        elements.insert(newId, e);
         conv->namedElements.insert(newId, e);
     }
 }

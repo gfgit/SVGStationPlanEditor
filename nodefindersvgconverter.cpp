@@ -33,8 +33,8 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
 
     mSvg = new QSvgRenderer(this);
 
-    labelsModel = new NodeFinderLabelModel(this);
-    tracksModel = new NodeFinderStationTracksModel(this);
+    labelsModel = new NodeFinderLabelModel(nodeMgr, this);
+    tracksModel = new NodeFinderStationTracksModel(nodeMgr, this);
 }
 
 QSvgRenderer *NodeFinderSVGConverter::renderer() const
@@ -129,8 +129,13 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
     const QString labelAttr = QLatin1String("labelname");
     const QString trackAttr = QLatin1String("trackpos");
 
-    auto fun = [&](QDomElement& e) -> NodeFinderElementClass::CallbackResult
+    QStringList tags{"rect", "path", "line", "polyline"};
+    auto walker = walkElements(tags);
+
+    while (walker.next())
     {
+        QDomElement e = walker.element();
+
         QString labelName = e.attribute(labelAttr);
         if(!labelName.isEmpty())
         {
@@ -150,7 +155,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
                 labels.append(item);
             }
 
-            return NodeFinderElementClass::CallbackResult::KeepSearching;
+            continue;
         }
 
         QString trackPosStr = e.attribute(labelAttr);
@@ -179,22 +184,9 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
                 tracks.append(item);
             }
 
-            return NodeFinderElementClass::CallbackResult::KeepSearching;
+            continue;
         }
-
-        return NodeFinderElementClass::CallbackResult::KeepSearching;
-    };
-
-
-    QDomElement unused;
-    auto rects = elementClasses.value(QLatin1String("rect"));
-    rects.walkElements(unused, fun);
-    auto paths = elementClasses.value(QLatin1String("path"));
-    paths.walkElements(unused, fun);
-    auto lines = elementClasses.value(QLatin1String("line"));
-    lines.walkElements(unused, fun);
-    auto polylines = elementClasses.value(QLatin1String("polyline"));
-    polylines.walkElements(unused, fun);
+    }
 
     labelsModel->setItems(labels);
     tracksModel->setItems(tracks);
