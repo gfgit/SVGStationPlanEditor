@@ -5,8 +5,7 @@
 
 #include <QVector>
 
-#include <QDomElement>
-#include <QRectF>
+#include "nodefinderutils.h"
 
 class NodeFinderMgr;
 
@@ -21,14 +20,6 @@ public:
         LabelNameCol = 0,
         NCols
     };
-
-    typedef struct LabelItem
-    {
-        QChar gateLetter;
-        QDomElement elem;
-        QRectF rect;
-        bool visible;
-    } LabelItem;
 
     explicit NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
 
@@ -46,6 +37,8 @@ public:
 
     void setItems(const QVector<LabelItem>& vec);
     void clear();
+
+    QChar getLabelLetter(const ItemBase *ptr) const;
 
 private:
     friend class NodeFinderSVGWidget;

@@ -120,7 +120,7 @@ Qt::ItemFlags NodeFinderLabelModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderLabelModel::setItems(const QVector<NodeFinderLabelModel::LabelItem> &vec)
+void NodeFinderLabelModel::setItems(const QVector<LabelItem> &vec)
 {
     beginResetModel();
     items = vec;
@@ -133,4 +133,12 @@ void NodeFinderLabelModel::clear()
     items.clear();
     items.squeeze();
     endResetModel();
+}
+
+QChar NodeFinderLabelModel::getLabelLetter(const ItemBase *ptr) const
+{
+    if(ptr < items.data() || ptr >= items.data() + items.size())
+        return QChar(); //Not a label item
+
+    return static_cast<const LabelItem *>(ptr)->gateLetter;
 }
