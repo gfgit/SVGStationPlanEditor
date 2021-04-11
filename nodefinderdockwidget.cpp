@@ -45,6 +45,10 @@ NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) 
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidget(scrollAreaContents);
     mainLay->addWidget(scrollArea);
+
+    connect(addTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onAddTrack);
+    connect(editTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onEditTrack);
+    connect(remTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onRemoveTrack);
 }
 
 void NodeFinderDockWidget::setModels(QAbstractItemModel *labels, QAbstractItemModel *tracks)
