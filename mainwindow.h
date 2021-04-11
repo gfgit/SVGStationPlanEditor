@@ -3,14 +3,14 @@
 
 #include <QMainWindow>
 
-#include "svgtinyconverter.h"
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 class QScrollArea;
 class QSlider;
 class QSpinBox;
 QT_END_NAMESPACE
+
+class NodeFinderMgr;
 
 class MainWindow : public QMainWindow
 {
@@ -20,30 +20,18 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void loadSVG();
-
 public slots:
-    void setZoom(int val);
-    void setTrackPen(int val);
-
-private slots:
-    void onStationClicked(qint16 stationId, const QString &stationName, const QString &nodeName);
-
-    void startConvert();
+    void loadSVG();
     void saveConvertedSVG();
-
-private:
-    void setSVGWidget(bool finder, QIODevice *dev);
+    void setZoom(int val);
 
 private:
     Ui::MainWindow *ui;
-    QWidget *svgWidget;
     QScrollArea *scrollArea;
     QSlider *zoomSlider;
-    QSlider *trackPenSlider;
     QSpinBox *zoomSpin;
     int zoom;
 
-    SVGTinyConverter conv;
+    NodeFinderMgr *nodeMgr;
 };
 #endif // MAINWINDOW_H
