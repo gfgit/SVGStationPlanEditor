@@ -128,7 +128,7 @@ void NodeFinderStatusWidget::updateMode()
         addSubElemBut->setEnabled(true);
         remSubElemBut->setEnabled(true);
 
-        const bool showEditControls = subMode == EditingSubModes::NotEditingCurrentItem;
+        const bool showEditControls = subMode != EditingSubModes::NotEditingCurrentItem;
 
         addSubElemBut->setVisible(!showEditControls);
         remSubElemBut->setVisible(!showEditControls);
