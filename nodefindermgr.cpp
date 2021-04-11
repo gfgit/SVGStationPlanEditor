@@ -333,22 +333,23 @@ void NodeFinderMgr::startSelection(const QPointF &p)
     emit repaintSVG();
 }
 
-void NodeFinderMgr::endSelection(const QPointF &p, bool isFinal)
+void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
 {
     if(!m_isSelecting)
         return;
-    m_isSelecting = false;
     selectionEnd = p;
-    emit repaintSVG();
 
-    if(isFinal && m_subMode == EditingSubModes::AddingSubElement)
+    if(isEnd && m_subMode == EditingSubModes::AddingSubElement)
     {
+        m_isSelecting = false;
         //Restart element selection
         QStringList tags{"path", "line", "polyline"};
         if(m_mode == EditingModes::LabelEditing)
             tags.prepend("rect");
         converter->currentWalker = converter->walkElements(tags);
     }
+
+    emit repaintSVG();
 }
 
 void NodeFinderMgr::clearSelection()

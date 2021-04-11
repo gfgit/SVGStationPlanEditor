@@ -45,7 +45,7 @@ public:
 
     //Selection
     void startSelection(const QPointF& p);
-    void endSelection(const QPointF& p, bool isFinal);
+    void endOrMoveSelection(const QPointF& p, bool isEnd);
     void clearSelection();
     inline bool isSelecting() const { return m_isSelecting; }
     inline QRectF getSelectionRect() const { return QRectF(selectionStart, selectionEnd).normalized(); }

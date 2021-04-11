@@ -130,12 +130,9 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     }
 
     //Draw selection rect
-    if(nodeMgr->isSelecting())
-    {
-        QColor col(Qt::red);
-        col.setAlpha(50);
-        p.fillRect(nodeMgr->getSelectionRect(), col);
-    }
+    QColor col(nodeMgr->isSelecting() ? Qt::red : Qt::green);
+    col.setAlpha(50);
+    p.fillRect(nodeMgr->getSelectionRect(), col);
 }
 
 void NodeFinderSVGWidget::mousePressEvent(QMouseEvent *e)
@@ -164,7 +161,7 @@ void NodeFinderSVGWidget::mouseMoveEvent(QMouseEvent *e)
     const double inverseScaleFactor = source.width() / target.width();
     const QPointF pos = e->pos() * inverseScaleFactor + source.topLeft();
 
-    nodeMgr->endSelection(pos, false);
+    nodeMgr->endOrMoveSelection(pos, false);
 }
 
 void NodeFinderSVGWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -175,5 +172,5 @@ void NodeFinderSVGWidget::mouseReleaseEvent(QMouseEvent *e)
     const double inverseScaleFactor = source.width() / target.width();
     const QPointF pos = e->pos() * inverseScaleFactor + source.topLeft();
 
-    nodeMgr->endSelection(pos, true);
+    nodeMgr->endOrMoveSelection(pos, true);
 }
