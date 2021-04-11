@@ -347,6 +347,7 @@ void NodeFinderMgr::setTrackPenWidth(int value)
 
 void NodeFinderMgr::startSelection(const QPointF &p)
 {
+    clearSelection();
     m_isSelecting = true;
     selectionStart = selectionEnd = p;
     emit repaintSVG();
