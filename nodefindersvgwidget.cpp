@@ -97,13 +97,14 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     }
 
     //Draw selected item
-    if(nodeMgr->getConverter()->getCurItem())
+    ElementPath curPath = nodeMgr->getConverter()->curElementPath;
+    if(nodeMgr->getConverter()->getCurItem() || !curPath.path.isEmpty())
     {
         ItemBase *item = nodeMgr->getConverter()->getCurItem();
         const int itemSubIdx = nodeMgr->getConverter()->getCurItemSubElemIdx();
 
-        //Draw selected item in blue
-        QColor color(Qt::blue);
+        //Draw selected item in blue or current element in red
+        QColor color(curPath.path.isEmpty() ? Qt::blue : Qt::red);
         p.setBrush(color);
 
         QPen pen;
@@ -111,21 +112,32 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         {
             pen = trackPen;
             pen.setColor(color);
+        }else{
+            pen.setWidth(trackPen.width() / 2);
         }
         p.setPen(pen);
 
-        for(const auto& elem : qAsConst(item->elements))
+        if(curPath.path.isEmpty())
+        {
+            //No current elem, draw item
+            for(const auto& elem : qAsConst(item->elements))
             p.drawPath(elem.path);
 
-        if(itemSubIdx >= 0 && itemSubIdx < item->elements.size())
-        {
-            //Highligt sub element of current item
-            color = Qt::red;
-            p.setBrush(color);
-            pen.setColor(color);
-            p.setPen(pen);
+            if(itemSubIdx >= 0 && itemSubIdx < item->elements.size())
+            {
+                //Highligt sub element of current item
+                color = Qt::red;
+                p.setBrush(color);
+                pen.setColor(color);
+                p.setPen(pen);
 
-            p.drawPath(item->elements.at(itemSubIdx).path);
+                p.drawPath(item->elements.at(itemSubIdx).path);
+            }
+        }
+        else
+        {
+            //Draw current elem
+            p.drawPath(curPath.path);
         }
     }
 

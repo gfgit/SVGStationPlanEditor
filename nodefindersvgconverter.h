@@ -104,6 +104,7 @@ private:
     NodeFinderElementWalker currentWalker;
     ItemBase *curItem;
     int curItemSubElemIdx;
+    ElementPath curElementPath;
 };
 
 #endif // NODEFINDERSVGCONVERTER_H

@@ -29,6 +29,11 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     remSubElemBut->setToolTip(tr("Start item's elements selection remove sub element from current item"));
     lay->addWidget(remSubElemBut);
 
+    clearItemBut = new QToolButton;
+    clearItemBut->setText(tr("Unselect"));
+    clearItemBut->setToolTip(tr("Clear selection of current item"));
+    lay->addWidget(clearItemBut);
+
     prevElemBut = new QToolButton;
     prevElemBut->setText(tr("Prev"));
     prevElemBut->setToolTip(tr("Go to prev element"));
@@ -58,6 +63,8 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
 
     connect(addSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestAddSubElement);
     connect(remSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestRemoveSubElement);
+    connect(clearItemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::clearCurrentItem);
+
     connect(selectElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::selectCurrentElem);
     connect(prevElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::goToPrevElem);
     connect(nextElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::goToNextElem);
@@ -115,8 +122,11 @@ void NodeFinderStatusWidget::updateMode()
     {
         addSubElemBut->show();
         remSubElemBut->show();
+        clearItemBut->show();
+
         addSubElemBut->setEnabled(false);
         remSubElemBut->setEnabled(false);
+        clearItemBut->setEnabled(false);
 
         prevElemBut->hide();
         selectElemBut->hide();
@@ -127,11 +137,13 @@ void NodeFinderStatusWidget::updateMode()
     {
         addSubElemBut->setEnabled(true);
         remSubElemBut->setEnabled(true);
+        clearItemBut->setEnabled(true);
 
         const bool showEditControls = subMode != EditingSubModes::NotEditingCurrentItem;
 
         addSubElemBut->setVisible(!showEditControls);
         remSubElemBut->setVisible(!showEditControls);
+        clearItemBut->setVisible(!showEditControls);
 
         prevElemBut->setVisible(showEditControls);
         selectElemBut->setVisible(showEditControls);

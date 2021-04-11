@@ -26,6 +26,7 @@ private:
 
     QToolButton *addSubElemBut;
     QToolButton *remSubElemBut;
+    QToolButton *clearItemBut;
 
     QToolButton *selectElemBut;
     QToolButton *prevElemBut;

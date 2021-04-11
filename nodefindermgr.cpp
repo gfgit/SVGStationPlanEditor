@@ -7,6 +7,7 @@
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
+#include "svgutils.h"
 
 #include <QMessageBox>
 
@@ -134,6 +135,8 @@ void NodeFinderMgr::selectCurrentElem()
                                      tr("The element could not be added to current item."));
             }
         }
+
+        requestEndEditItem();
     }
     else if(m_subMode == EditingSubModes::RemovingSubElement)
     {
@@ -173,65 +176,6 @@ void NodeFinderMgr::goToPrevElem()
         //Walk elements
         while (true)
         {
-            if(!converter->currentWalker.next())
-            {
-                if(centralWidget)
-                {
-                    QMessageBox::warning(centralWidget, tr("End"),
-                                         tr("There aren't other elements in current selection.\n"
-                                            "Go back with 'Prev' to select one."));
-                }
-                break;
-            }
-
-            QString id = converter->currentWalker.element().attribute(NodeFinderElementClass::idAttr);
-            const QRectF bounds = converter->renderer()->boundsOnElement(id);
-            if(getSelectionRect().contains(bounds))
-                break; //It's in selection
-        }
-    }
-    else if(m_subMode == EditingSubModes::RemovingSubElement)
-    {
-        auto item = converter->getCurItem();
-        if(!item)
-        {
-            if(centralWidget)
-            {
-                QMessageBox::warning(centralWidget, tr("No item"),
-                                     tr("No item selected."));
-            }
-            return;
-        }
-
-        int subIdx = converter->getCurItemSubElemIdx();
-        subIdx++;
-        if(subIdx >= item->elements.size())
-        {
-            subIdx = item->elements.size() - 1;
-        }
-        converter->setCurItemSubElemIdx(subIdx);
-
-        if(subIdx < 0)
-        {
-            if(centralWidget)
-            {
-                QMessageBox::warning(centralWidget, tr("No sub elements"),
-                                     tr("Current item has no sub elements."));
-            }
-            return;
-        }
-    }
-
-    emit repaintSVG();
-}
-
-void NodeFinderMgr::goToNextElem()
-{
-    if(m_subMode == EditingSubModes::AddingSubElement)
-    {
-        //Walk elements
-        while (true)
-        {
             if(!converter->currentWalker.prev())
             {
                 if(centralWidget)
@@ -240,13 +184,20 @@ void NodeFinderMgr::goToNextElem()
                                          tr("There aren't previous elements in current selection.\n"
                                             "Go forward with 'Next' to select one."));
                 }
+                converter->curElementPath = ElementPath(); //Reset
                 break;
             }
 
-            QString id = converter->currentWalker.element().attribute(NodeFinderElementClass::idAttr);
+            QDomElement elem = converter->currentWalker.element();
+            QString id = elem.attribute(NodeFinderElementClass::idAttr);
             const QRectF bounds = converter->renderer()->boundsOnElement(id);
             if(getSelectionRect().contains(bounds))
-                break; //It's in selection
+            {
+                //It's in selection
+                converter->curElementPath.elem = elem;
+                if(utils::convertElementToPath(elem, converter->curElementPath.path))
+                    break; //Can be converted to path so use it.
+            }
         }
     }
     else if(m_subMode == EditingSubModes::RemovingSubElement)
@@ -287,6 +238,72 @@ void NodeFinderMgr::goToNextElem()
     emit repaintSVG();
 }
 
+void NodeFinderMgr::goToNextElem()
+{
+    if(m_subMode == EditingSubModes::AddingSubElement)
+    {
+        //Walk elements
+        while (true)
+        {
+            if(!converter->currentWalker.next())
+            {
+                if(centralWidget)
+                {
+                    QMessageBox::warning(centralWidget, tr("End"),
+                                         tr("There aren't other elements in current selection.\n"
+                                            "Go back with 'Prev' to select one."));
+                }
+                converter->curElementPath = ElementPath(); //Reset
+                break;
+            }
+
+            QDomElement elem = converter->currentWalker.element();
+            QString id = elem.attribute(NodeFinderElementClass::idAttr);
+            const QRectF bounds = converter->renderer()->boundsOnElement(id);
+            if(getSelectionRect().contains(bounds))
+            {
+                //It's in selection
+                converter->curElementPath.elem = elem;
+                if(utils::convertElementToPath(elem, converter->curElementPath.path))
+                    break; //Can be converted to path so use it.
+            }
+        }
+    }
+    else if(m_subMode == EditingSubModes::RemovingSubElement)
+    {
+        auto item = converter->getCurItem();
+        if(!item)
+        {
+            if(centralWidget)
+            {
+                QMessageBox::warning(centralWidget, tr("No item"),
+                                     tr("No item selected."));
+            }
+            return;
+        }
+
+        int subIdx = converter->getCurItemSubElemIdx();
+        subIdx++;
+        if(subIdx >= item->elements.size())
+        {
+            subIdx = item->elements.size() - 1;
+        }
+        converter->setCurItemSubElemIdx(subIdx);
+
+        if(subIdx < 0)
+        {
+            if(centralWidget)
+            {
+                QMessageBox::warning(centralWidget, tr("No sub elements"),
+                                     tr("Current item has no sub elements."));
+            }
+            return;
+        }
+    }
+
+    emit repaintSVG();
+}
+
 void NodeFinderMgr::requestAddSubElement()
 {
     setMode(m_mode, EditingSubModes::AddingSubElement);
@@ -306,8 +323,10 @@ void NodeFinderMgr::requestEndEditItem()
 
 void NodeFinderMgr::clearCurrentItem()
 {
-    requestEndEditItem();
+    //requestEndEditItem();
     converter->setCurItem(nullptr);
+    clearSelection();
+    setMode(EditingModes::NoEditing);
 }
 
 void NodeFinderMgr::requestEditItem(ItemBase *item, EditingModes m)
@@ -339,14 +358,19 @@ void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
         return;
     selectionEnd = p;
 
-    if(isEnd && m_subMode == EditingSubModes::AddingSubElement)
+    if(isEnd)
     {
         m_isSelecting = false;
-        //Restart element selection
-        QStringList tags{"path", "line", "polyline"};
-        if(m_mode == EditingModes::LabelEditing)
-            tags.prepend("rect");
-        converter->currentWalker = converter->walkElements(tags);
+
+        if(m_subMode == EditingSubModes::AddingSubElement)
+        {
+            //Restart element selection
+            QStringList tags{"path", "line", "polyline"};
+            if(m_mode == EditingModes::LabelEditing)
+                tags.prepend("rect");
+            converter->currentWalker = converter->walkElements(tags);
+            converter->curElementPath = ElementPath(); //Reset
+        }
     }
 
     emit repaintSVG();
@@ -357,5 +381,6 @@ void NodeFinderMgr::clearSelection()
     m_isSelecting = false;
     selectionStart = selectionEnd = QPointF();
     converter->currentWalker = NodeFinderElementWalker(); //Reset
+    converter->curElementPath = ElementPath();
     emit repaintSVG();
 }

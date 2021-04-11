@@ -57,6 +57,11 @@ void NodeFinderSVGConverter::clear()
     labelsModel->clear();
     tracksModel->clear();
 
+    currentWalker = NodeFinderElementWalker();
+    curItem = nullptr;
+    curItemSubElemIdx = -1;
+    curElementPath = ElementPath();
+
     mDoc.clear();
 }
 
