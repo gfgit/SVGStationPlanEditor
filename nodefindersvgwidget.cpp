@@ -15,7 +15,14 @@ NodeFinderSVGWidget::NodeFinderSVGWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
     nodeMgr(mgr)
 {
+    setBackgroundRole(QPalette::Light);
+}
 
+QSize NodeFinderSVGWidget::sizeHint() const
+{
+    if(mSvg->isValid())
+        return mSvg->defaultSize();
+    return QSize(128, 64);
 }
 
 void NodeFinderSVGWidget::setRenderer(QSvgRenderer *svg)

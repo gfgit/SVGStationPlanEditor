@@ -13,6 +13,8 @@ class NodeFinderSVGWidget : public QWidget
 public:
     explicit NodeFinderSVGWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
+    QSize sizeHint() const override;
+
     void setRenderer(QSvgRenderer *svg);
 
 protected:
