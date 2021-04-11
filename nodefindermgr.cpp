@@ -87,6 +87,8 @@ QWidget *NodeFinderMgr::getDockWidget(QWidget *parent)
 
 bool NodeFinderMgr::loadSVG(QIODevice *dev)
 {
+    clearCurrentItem();
+
     bool ret = converter->load(dev);
     if(!ret)
     {
