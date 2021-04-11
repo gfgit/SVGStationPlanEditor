@@ -21,6 +21,8 @@ bool NodeFinderElementWalker::next()
         if(m_tagIdx >= m_orderedTags.count())
         {
             m_tagIdx = m_orderedTags.count();
+            if(m_tagIdx == 0)
+                m_tagIdx = -1;
             return false; //It was last class
         }
 
