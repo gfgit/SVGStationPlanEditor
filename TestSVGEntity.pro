@@ -43,6 +43,7 @@ HEADERS += \
     customsvgwidget.h \
     elementclass.h \
     mainwindow.h \
+    nodefindeditingmodes.h \
     nodefinderdockwidget.h \
     nodefinderelementclass.h \
     nodefinderelementwalker.h \
@@ -52,6 +53,7 @@ HEADERS += \
     nodefinderstatuswidget.h \
     nodefindersvgconverter.h \
     nodefindersvgwidget.h \
+    nodefinderutils.h \
     svgtinyconverter.h \
     svgutils.h
 
