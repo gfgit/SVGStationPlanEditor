@@ -121,6 +121,7 @@ void NodeFinderStatusWidget::updateMode()
         prevElemBut->hide();
         selectElemBut->hide();
         nextElemBut->hide();
+        endEditBut->hide();
     }
     else
     {
