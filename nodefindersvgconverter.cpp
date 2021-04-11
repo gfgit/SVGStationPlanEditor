@@ -179,7 +179,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
             continue;
         }
 
-        QString trackPosStr = e.attribute(labelAttr);
+        QString trackPosStr = e.attribute(trackAttr);
         if(!trackPosStr.isEmpty())
         {
             bool ok = false;
