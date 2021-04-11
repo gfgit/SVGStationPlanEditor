@@ -16,14 +16,20 @@ public:
     explicit NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
 private slots:
-    void setMode(int mode);
+    void updateMode();
 
 private:
     NodeFinderMgr *nodeMgr;
 
     QLabel *modeLabel;
+
+    QToolButton *addSubElemBut;
+    QToolButton *remSubElemBut;
+
     QToolButton *selectElemBut;
+    QToolButton *prevElemBut;
     QToolButton *nextElemBut;
+    QToolButton *endEditBut;
 };
 
 #endif // NODEFINDERSTATUSWIDGET_H

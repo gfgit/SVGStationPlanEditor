@@ -5,8 +5,7 @@
 
 #include <QVector>
 
-#include <QDomElement>
-#include <QPainterPath>
+#include "nodefinderutils.h"
 
 class NodeFinderMgr;
 
@@ -20,15 +19,6 @@ public:
         TrackNameCol = 0,
         NCols
     };
-
-    typedef struct TrackItem
-    {
-        QString trackName;
-        int trackPos;
-        QDomElement elem;
-        QPainterPath path;
-        bool visible;
-    } TrackItem;
 
     explicit NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
 
@@ -48,6 +38,14 @@ public:
     void setItems(const QVector<TrackItem>& vec);
 
     void clear();
+
+    int getTrackPos(const ItemBase *ptr) const;
+
+    void clearElement(ElementPath &elemPath);
+
+    void addItem();
+    void removeItem(int row);
+    void editItemAt(int row);
 
 private:
     friend class NodeFinderSVGWidget;

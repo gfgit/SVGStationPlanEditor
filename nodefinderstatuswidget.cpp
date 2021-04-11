@@ -12,9 +12,22 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
 
+    addSubElemBut = new QToolButton;
+    addSubElemBut->setText(tr("Add"));
+    addSubElemBut->setToolTip(tr("Start element selection to add new sub element to current item"));
+    lay->addWidget(addSubElemBut);
+
+    remSubElemBut = new QToolButton;
+    remSubElemBut->setText(tr("Remove"));
+    remSubElemBut->setToolTip(tr("Start item's elements selection remove sub element from current item"));
+    lay->addWidget(remSubElemBut);
+
+    prevElemBut = new QToolButton;
+    prevElemBut->setText(tr("Prev"));
+    prevElemBut->setToolTip(tr("Go to prev element"));
+    lay->addWidget(prevElemBut);
+
     selectElemBut = new QToolButton;
-    selectElemBut->setText(tr("Select"));
-    selectElemBut->setToolTip(tr("Select current element"));
     lay->addWidget(selectElemBut);
 
     nextElemBut = new QToolButton;
@@ -22,43 +35,105 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     nextElemBut->setToolTip(tr("Go to next element"));
     lay->addWidget(nextElemBut);
 
+    endEditBut = new QToolButton;
+    endEditBut->setText(tr("End"));
+    endEditBut->setToolTip(tr("End editing"));
+    lay->addWidget(endEditBut);
+
     modeLabel = new QLabel;
     modeLabel->setToolTip(tr("Editing mode"));
     lay->addWidget(modeLabel);
 
-    connect(nodeMgr, &NodeFinderMgr::modeChanged, this, &NodeFinderStatusWidget::setMode);
+    connect(nodeMgr, &NodeFinderMgr::modeChanged, this, &NodeFinderStatusWidget::updateMode);
+
+    connect(addSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestAddSubElement);
+    connect(remSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestRemoveSubElement);
     connect(selectElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::selectCurrentElem);
+    connect(prevElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::goToPrevElem);
     connect(nextElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::goToNextElem);
+    connect(endEditBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestEndEditItem);
 
     //Init with current mode
-    setMode(int(nodeMgr->mode()));
+    updateMode();
 }
 
-void NodeFinderStatusWidget::setMode(int mode)
+void NodeFinderStatusWidget::updateMode()
 {
-    NodeFinderMgr::EditingModes modeVal = NodeFinderMgr::EditingModes(mode);
+    const EditingModes mode = nodeMgr->mode();
+    const EditingSubModes subMode = nodeMgr->getSubMode();
 
     QString modeName;
-    switch (modeVal)
+    switch (mode)
     {
-    case NodeFinderMgr::EditingModes::NoSVGLoaded:
+    case EditingModes::NoSVGLoaded:
         modeName = tr("No SVG");
         break;
-    case NodeFinderMgr::EditingModes::NoEditing:
+    case EditingModes::NoEditing:
         modeName = tr("No Editing");
         break;
-    case NodeFinderMgr::EditingModes::LabelEditing:
+    case EditingModes::LabelEditing:
         modeName = tr("Label Editing");
         break;
-    case NodeFinderMgr::EditingModes::StationTrackEditing:
+    case EditingModes::StationTrackEditing:
         modeName = tr("Station Track Editing");
         break;
-    case NodeFinderMgr::EditingModes::TrackPathEditing:
+    case EditingModes::TrackPathEditing:
         modeName = tr("Track Path Editing");
         break;
-    case NodeFinderMgr::EditingModes::NModes:
+    case EditingModes::NModes:
         modeName = tr("Unknown mode");
     }
 
+    switch (nodeMgr->getSubMode())
+    {
+    case EditingSubModes::AddingSubElement:
+        modeName.append(tr(", ADD"));
+        break;
+    case EditingSubModes::RemovingSubElement:
+        modeName.append(tr(", REM"));
+        break;
+    case EditingSubModes::NotEditingCurrentItem:
+    case EditingSubModes::NSubModes:
+        break;
+    }
+
     modeLabel->setText(modeName);
+
+    const bool isEditing = mode > EditingModes::NoEditing && mode < EditingModes::NModes;
+
+    if(!isEditing)
+    {
+        addSubElemBut->show();
+        remSubElemBut->show();
+        addSubElemBut->setEnabled(false);
+        remSubElemBut->setEnabled(false);
+
+        prevElemBut->hide();
+        selectElemBut->hide();
+        nextElemBut->hide();
+    }
+    else
+    {
+        addSubElemBut->setEnabled(true);
+        remSubElemBut->setEnabled(true);
+
+        const bool showEditControls = subMode == EditingSubModes::NotEditingCurrentItem;
+
+        addSubElemBut->setVisible(!showEditControls);
+        remSubElemBut->setVisible(!showEditControls);
+
+        prevElemBut->setVisible(showEditControls);
+        selectElemBut->setVisible(showEditControls);
+        nextElemBut->setVisible(showEditControls);
+        endEditBut->setVisible(showEditControls);
+
+        if(subMode == EditingSubModes::AddingSubElement)
+        {
+            selectElemBut->setText(tr("Select"));
+            selectElemBut->setToolTip(tr("Add element to current item"));
+        }else{
+            selectElemBut->setText(tr("Remove"));
+            selectElemBut->setToolTip(tr("Remove sub element"));
+        }
+    }
 }
