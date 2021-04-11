@@ -105,7 +105,6 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 
         //Draw selected item in blue or current element in red
         QColor color(curPath.path.isEmpty() ? Qt::blue : Qt::red);
-        p.setBrush(color);
 
         QPen pen;
         if(nodeMgr->mode() == EditingModes::StationTrackEditing || nodeMgr->mode() == EditingModes::TrackPathEditing)
@@ -114,6 +113,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
             pen.setColor(color);
         }else{
             pen.setWidth(trackPen.width() / 2);
+            p.setBrush(color);
         }
         p.setPen(pen);
 
