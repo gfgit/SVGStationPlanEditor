@@ -12,6 +12,9 @@ NodeFinderElementWalker::NodeFinderElementWalker(const QStringList &orderedTags,
 
 bool NodeFinderElementWalker::next()
 {
+    if(m_currentMap)
+        m_iter++;
+
     while(!m_currentMap || m_iter == m_currentMap->end())
     {
         //Go to next class
@@ -28,7 +31,7 @@ bool NodeFinderElementWalker::next()
 
         const QString tag = m_orderedTags.at(m_tagIdx);
         auto it = m_elementClasses.find(tag);
-        if(it == m_elementClasses.end())
+        if(it == m_elementClasses.end() || it.value().elements.isEmpty())
             continue; //Skip tag
 
         m_currentMap = &it.value().elements;
@@ -37,11 +40,7 @@ bool NodeFinderElementWalker::next()
         return true;
     }
 
-    if(!m_currentMap)
-        return false;
-
-    m_iter++;
-    return true;
+    return m_currentMap != nullptr;
 }
 
 bool NodeFinderElementWalker::prev()
@@ -60,7 +59,7 @@ bool NodeFinderElementWalker::prev()
 
         const QString tag = m_orderedTags.at(m_tagIdx);
         auto it = m_elementClasses.find(tag);
-        if(it == m_elementClasses.end())
+        if(it == m_elementClasses.end() || it.value().elements.isEmpty())
             continue; //Skip tag
 
         m_currentMap = &it.value().elements;
@@ -69,11 +68,10 @@ bool NodeFinderElementWalker::prev()
         return true;
     }
 
-    if(!m_currentMap)
-        return false;
+    if(m_currentMap)
+        m_iter--;
 
-    m_iter--;
-    return true;
+    return m_currentMap != nullptr;
 }
 
 bool NodeFinderElementWalker::isValid() const
