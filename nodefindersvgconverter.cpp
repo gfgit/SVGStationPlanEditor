@@ -23,7 +23,8 @@ static const QString tspanTag = QLatin1String("tspan");
 
 NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
     QObject(parent),
-    nodeMgr(parent)
+    nodeMgr(parent),
+    curItem(nullptr)
 {
     registerClass("g"); //Groups
     registerClass("rect");
@@ -123,8 +124,8 @@ int NodeFinderSVGConverter::calcDefaultTrackPenWidth()
 
 void NodeFinderSVGConverter::loadLabelsAndTracks()
 {
-    QVector<NodeFinderLabelModel::LabelItem> labels;
-    QVector<NodeFinderStationTracksModel::TrackItem> tracks;
+    QVector<LabelItem> labels;
+    QVector<TrackItem> tracks;
 
     const QString labelAttr = QLatin1String("labelname");
     const QString trackAttr = QLatin1String("trackpos");
@@ -139,20 +140,35 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
         QString labelName = e.attribute(labelAttr);
         if(!labelName.isEmpty())
         {
-            //FIXME: allow only A-Z
             labelName = labelName.simplified();
-            if(labelName.isEmpty())
+            if(labelName.isEmpty() || labelName.front() < 'A' || labelName.front() > 'Z')
             {
                 e.removeAttribute(labelAttr);
             }
             else
             {
-                NodeFinderLabelModel::LabelItem item;
-                item.gateLetter = labelName.front();
-                item.elem = e;
-                item.rect = mSvg->boundsOnElement(e.attribute(NodeFinderElementClass::idAttr));
-                item.visible = true;
-                labels.append(item);
+                QChar gateLetter = labelName.front();
+
+                int i = 0;
+                for(; i < labels.size(); i++)
+                {
+                    if(labels.at(i).gateLetter == gateLetter)
+                        break;
+                }
+                if(i >= labels.size())
+                {
+                    LabelItem newItem;
+                    newItem.gateLetter = gateLetter;
+                    newItem.visible = false;
+                    labels.append(newItem);
+                    i = labels.size() - 1;
+                }
+
+                QPainterPath path;
+                path.addRect(mSvg->boundsOnElement(e.attribute(NodeFinderElementClass::idAttr)));
+
+                LabelItem &item = labels[i];
+                item.elements.append({e, path});
             }
 
             continue;
@@ -176,12 +192,24 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
             }
             else
             {
-                NodeFinderStationTracksModel::TrackItem item;
-                item.trackName = QString::number(trackPos); //TODO: real name from database
-                item.elem = e;
-                item.path = path;
-                item.visible = false;
-                tracks.append(item);
+                int i = 0;
+                for(; i < tracks.size(); i++)
+                {
+                    if(tracks.at(i).trackPos == trackPos)
+                        break;
+                }
+                if(i >= tracks.size())
+                {
+                    TrackItem newItem;
+                    newItem.trackName = QString::number(trackPos); //TODO: real name from database
+                    newItem.trackPos = trackPos;
+                    newItem.visible = false;
+                    tracks.append(newItem);
+                    i = tracks.size() - 1;
+                }
+
+                TrackItem &item = tracks[i];
+                item.elements.append({e, path});
             }
 
             continue;
@@ -243,6 +271,74 @@ QAbstractItemModel *NodeFinderSVGConverter::getLabelsModel() const
 QAbstractItemModel *NodeFinderSVGConverter::getTracksModel() const
 {
     return tracksModel;
+}
+
+void NodeFinderSVGConverter::removeCurrentSubElementFromItem()
+{
+    if(!curItem || curItemSubElemIdx < 0 || curItemSubElemIdx >= curItem->elements.size())
+        return;
+
+    ElementPath path = curItem->elements.takeAt(curItemSubElemIdx);
+    curItemSubElemIdx = -1; //Reset sub element selection
+
+    const QString labelAttr = QLatin1String("labelname");
+
+    //TODO: properly update models
+    if(nodeMgr->mode() == EditingModes::LabelEditing)
+    {
+        path.elem.removeAttribute(labelAttr);
+        QModelIndex idx;
+        emit labelsModel->dataChanged(idx, idx);
+    }
+    else if(nodeMgr->mode() == EditingModes::StationTrackEditing)
+    {
+        tracksModel->clearElement(path);
+        QModelIndex idx;
+        emit tracksModel->dataChanged(idx, idx);
+    }
+}
+
+bool NodeFinderSVGConverter::addCurrentElementToItem()
+{
+    if(!currentWalker.isValid() || !curItem)
+        return false;
+
+    ElementPath path;
+    path.elem = currentWalker.element();
+    if(!utils::convertElementToPath(path.elem, path.path))
+        return false;
+
+    //TODO: make these attr names global
+    const QString labelAttr = QLatin1String("labelname");
+    const QString trackAttr = QLatin1String("trackpos");
+
+    //TODO: properly update models
+    if(nodeMgr->mode() == EditingModes::LabelEditing)
+    {
+        QChar gateLetter = labelsModel->getLabelLetter(curItem);
+        if(gateLetter.isNull())
+            return false;
+
+        path.elem.setAttribute(labelAttr, gateLetter);
+        curItem->elements.append(path);
+
+        QModelIndex idx;
+        emit labelsModel->dataChanged(idx, idx);
+    }
+    else if(nodeMgr->mode() == EditingModes::StationTrackEditing)
+    {
+        int trackPos = tracksModel->getTrackPos(curItem);
+        if(trackPos < 0)
+            return false;
+
+        path.elem.setAttribute(trackAttr, QString::number(trackPos));
+        curItem->elements.append(path);
+
+        QModelIndex idx;
+        emit tracksModel->dataChanged(idx, idx);
+    }
+
+    return true;
 }
 
 QString NodeFinderSVGConverter::getFreeId_internal(const QString &base, int &counter)
@@ -483,4 +579,25 @@ void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement 
 
         n = n.nextSibling();
     }
+}
+
+int NodeFinderSVGConverter::getCurItemSubElemIdx() const
+{
+    return curItemSubElemIdx;
+}
+
+void NodeFinderSVGConverter::setCurItemSubElemIdx(int value)
+{
+    curItemSubElemIdx = value;
+}
+
+ItemBase *NodeFinderSVGConverter::getCurItem() const
+{
+    return curItem;
+}
+
+void NodeFinderSVGConverter::setCurItem(ItemBase *value)
+{
+    curItem = value;
+    curItemSubElemIdx = -1;
 }

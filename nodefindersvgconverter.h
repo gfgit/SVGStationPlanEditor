@@ -9,6 +9,8 @@
 #include "nodefinderelementclass.h"
 #include "nodefinderelementwalker.h"
 
+#include "nodefinderutils.h"
+
 class NodeFinderMgr;
 class NodeFinderLabelModel;
 class NodeFinderStationTracksModel;
@@ -50,6 +52,15 @@ public:
         return NodeFinderElementWalker(tagOrder, elementClasses);
     }
 
+    void removeCurrentSubElementFromItem();
+    bool addCurrentElementToItem();
+
+    ItemBase *getCurItem() const;
+    void setCurItem(ItemBase *value);
+
+    int getCurItemSubElemIdx() const;
+    void setCurItemSubElemIdx(int value);
+
 private:
     QString getFreeId_internal(const QString& base, int &counter);
 
@@ -71,21 +82,28 @@ private:
     void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
 
 private:
+    friend class NodeFinderElementClass;
+    friend class NodeFinderSVGWidget;
+    friend class NodeFinderMgr;
+
     NodeFinderMgr *nodeMgr;
 
     QSvgRenderer *mSvg;
 
     QDomDocument mDoc;
 
-    friend class NodeFinderElementClass;
     QHash<QString, NodeFinderElementClass> elementClasses;
 
     NodeFinderElementClass::ElementHash namedElements;
     NodeFinderElementClass::ElementHash fakeIds;
 
-    friend class NodeFinderSVGWidget;
     NodeFinderLabelModel *labelsModel;
     NodeFinderStationTracksModel *tracksModel;
+
+    //Current selection
+    NodeFinderElementWalker currentWalker;
+    ItemBase *curItem;
+    int curItemSubElemIdx;
 };
 
 #endif // NODEFINDERSVGCONVERTER_H
