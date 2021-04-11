@@ -97,7 +97,6 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
     converter->processElements();
     converter->loadLabelsAndTracks();
 
-    //This will also trigger repaint
     setTrackPenWidth(converter->calcDefaultTrackPenWidth());
 
     setMode(EditingModes::NoEditing);
@@ -318,6 +317,8 @@ void NodeFinderMgr::requestEditItem(ItemBase *item, EditingModes m)
 
 void NodeFinderMgr::setTrackPenWidth(int value)
 {
+    if(trackPenWidth == value)
+        return;
     trackPenWidth = value;
     emit trackPenWidthChanged(trackPenWidth);
     emit repaintSVG();

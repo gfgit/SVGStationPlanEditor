@@ -3,14 +3,21 @@
 #include "nodefindermgr.h"
 
 #include <QHBoxLayout>
+
 #include <QLabel>
 #include <QToolButton>
+#include <QSlider>
 
 NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
     nodeMgr(mgr)
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
+
+    trackPenWidthSlider = new QSlider(Qt::Horizontal, this);
+    trackPenWidthSlider->setRange(10, 200);
+    trackPenWidthSlider->setToolTip(tr("Track Pen Width"));
+    lay->addWidget(trackPenWidthSlider);
 
     addSubElemBut = new QToolButton;
     addSubElemBut->setText(tr("Add"));
@@ -45,6 +52,9 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     lay->addWidget(modeLabel);
 
     connect(nodeMgr, &NodeFinderMgr::modeChanged, this, &NodeFinderStatusWidget::updateMode);
+
+    connect(trackPenWidthSlider, &QSlider::valueChanged, nodeMgr, &NodeFinderMgr::setTrackPenWidth);
+    connect(nodeMgr, &NodeFinderMgr::trackPenWidthChanged, trackPenWidthSlider, &QSlider::setValue);
 
     connect(addSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestAddSubElement);
     connect(remSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestRemoveSubElement);

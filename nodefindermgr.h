@@ -41,7 +41,6 @@ public:
     inline bool shouldDrawStationTracks() const { return drawStationTracks; }
 
     //Track Pen
-    void setTrackPenWidth(int value);
     inline int getTrackPenWidth() const { return trackPenWidth; }
 
     //Selection
@@ -57,6 +56,9 @@ signals:
     void repaintSVG();
 
 public slots:
+    //Track Pen
+    void setTrackPenWidth(int value);
+
     void selectCurrentElem();
     void goToPrevElem();
     void goToNextElem();

@@ -5,6 +5,7 @@
 
 class QLabel;
 class QToolButton;
+class QSlider;
 
 class NodeFinderMgr;
 
@@ -30,6 +31,8 @@ private:
     QToolButton *prevElemBut;
     QToolButton *nextElemBut;
     QToolButton *endEditBut;
+
+    QSlider *trackPenWidthSlider;
 };
 
 #endif // NODEFINDERSTATUSWIDGET_H
