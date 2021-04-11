@@ -5,6 +5,7 @@
 
 class NodeFinderMgr;
 
+class QToolButton;
 class QTableView;
 class QAbstractItemModel;
 
@@ -16,11 +17,20 @@ public:
 
     void setModels(QAbstractItemModel *labels, QAbstractItemModel *tracks);
 
+private slots:
+    void onAddTrack();
+    void onEditTrack();
+    void onRemoveTrack();
+
 private:
     NodeFinderMgr *nodeMgr;
 
     QTableView *labelsView;
+
     QTableView *tracksView;
+    QToolButton *addTrackBut;
+    QToolButton *editTrackBut;
+    QToolButton *remTrackBut;
 };
 
 #endif // NODEFINDERDOCKWIDGET_H
