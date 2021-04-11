@@ -195,6 +195,7 @@ void NodeFinderMgr::goToPrevElem()
             {
                 //It's in selection
                 converter->curElementPath.elem = elem;
+                converter->curElementPath.path.clear();
                 if(utils::convertElementToPath(elem, converter->curElementPath.path))
                     break; //Can be converted to path so use it.
             }
@@ -215,7 +216,7 @@ void NodeFinderMgr::goToPrevElem()
 
         int subIdx = converter->getCurItemSubElemIdx();
         subIdx--;
-        if(subIdx <= 0)
+        if(subIdx < 0)
         {
             if(item->elements.isEmpty())
                 subIdx = -1;
@@ -224,7 +225,7 @@ void NodeFinderMgr::goToPrevElem()
         }
         converter->setCurItemSubElemIdx(subIdx);
 
-        if(subIdx <= 0)
+        if(subIdx < 0)
         {
             if(centralWidget)
             {
@@ -264,6 +265,7 @@ void NodeFinderMgr::goToNextElem()
             {
                 //It's in selection
                 converter->curElementPath.elem = elem;
+                converter->curElementPath.path.clear();
                 if(utils::convertElementToPath(elem, converter->curElementPath.path))
                     break; //Can be converted to path so use it.
             }
@@ -307,6 +309,7 @@ void NodeFinderMgr::goToNextElem()
 void NodeFinderMgr::requestAddSubElement()
 {
     setMode(m_mode, EditingSubModes::AddingSubElement);
+    clearSelection();
 }
 
 void NodeFinderMgr::requestRemoveSubElement()
