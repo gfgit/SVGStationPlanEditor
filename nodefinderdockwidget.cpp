@@ -12,7 +12,6 @@ NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) 
     QWidget(parent),
     nodeMgr(mgr)
 {
-
     QWidget *scrollAreaContents = new QWidget;
     QVBoxLayout *scrollLay = new QVBoxLayout(scrollAreaContents);
 
@@ -44,11 +43,14 @@ NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) 
     QVBoxLayout *mainLay = new QVBoxLayout(this);
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidget(scrollAreaContents);
+    scrollArea->setWidgetResizable(true);
     mainLay->addWidget(scrollArea);
 
     connect(addTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onAddTrack);
     connect(editTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onEditTrack);
     connect(remTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onRemoveTrack);
+
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 }
 
 void NodeFinderDockWidget::setModels(QAbstractItemModel *labels, QAbstractItemModel *tracks)
