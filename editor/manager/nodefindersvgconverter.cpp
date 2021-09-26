@@ -82,7 +82,7 @@ bool NodeFinderSVGConverter::load(QIODevice *dev)
 
 bool NodeFinderSVGConverter::save(QIODevice *dev)
 {
-    const int IndentSize = 1;
+    const int IndentSize = 3;
 
     removeFakeIDs();
 
