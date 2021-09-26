@@ -2,8 +2,6 @@
 
 #include "nodefindersvgconverter.h"
 
-const QString NodeFinderElementClass::idAttr = QLatin1String("id");
-
 NodeFinderElementClass::NodeFinderElementClass(const QString &tag, const QString &baseId) :
     tagName(tag),
     m_baseId(baseId),
@@ -22,7 +20,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
     if(e.tagName() != tagName)
         return false;
 
-    QString id = e.attribute(idAttr);
+    QString id = e.attribute(svg_attr::ID);
     if(id.isEmpty())
     {
         //Generate a fake ID so we can query
@@ -34,7 +32,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
         if(!id.isEmpty())
         {
             //Remember the generated ID to remove it later
-            e.setAttribute(idAttr, id);
+            e.setAttribute(svg_attr::ID, id);
             conv->fakeIds.insert(id, e);
         }
     }
@@ -55,7 +53,7 @@ void NodeFinderElementClass::clear()
 
 void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId, NodeFinderSVGConverter *conv)
 {
-    const QString oldId = e.attribute(idAttr);
+    const QString oldId = e.attribute(svg_attr::ID);
 
     //Remove from fake and do not insert back, because now it is used
     conv->fakeIds.remove(oldId);
@@ -65,11 +63,11 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
     if(newId.isEmpty())
     {
         //No new ID
-        e.removeAttribute(idAttr);
+        e.removeAttribute(svg_attr::ID);
     }
     else
     {
-        e.setAttribute(idAttr, newId);
+        e.setAttribute(svg_attr::ID, newId);
         elements.insert(newId, e);
         conv->namedElements.insert(newId, e);
     }

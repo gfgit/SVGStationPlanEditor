@@ -13,24 +13,16 @@
 
 #include <QDebug>
 
-static const QStringList tspanPassAttrs{"x", "y", "fill", "stroke", "font-family", "font-size", "font-weight"};
-static const QStringList tspanPassToTextAttrs{"x", "y"};
-
-static const QString defsTag = QLatin1String("defs");
-static const QString fontTag = QLatin1String("font");
-static const QString textTag = QLatin1String("text");
-static const QString tspanTag = QLatin1String("tspan");
-
 NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
     QObject(parent),
     nodeMgr(parent),
     curItem(nullptr)
 {
-    registerClass("g"); //Groups
-    registerClass("rect");
-    registerClass("path");
-    registerClass("line");
-    registerClass("polyline");
+    registerClass(svg_tag::GroupTag); //Groups
+    registerClass(svg_tag::RectTag);
+    registerClass(svg_tag::PathTag);
+    registerClass(svg_tag::LineTag);
+    registerClass(svg_tag::PolylineTag);
 
     mSvg = new QSvgRenderer(this);
 
@@ -132,7 +124,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
     QVector<LabelItem> labels;
     QVector<TrackItem> tracks;
 
-    QStringList tags{"rect", "path", "line", "polyline"};
+    QStringList tags{svg_tag::RectTag, svg_tag::PathTag, svg_tag::LineTag, svg_tag::PolylineTag};
     auto walker = walkElements(tags);
 
     while (walker.next())
@@ -167,7 +159,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
                 }
 
                 QPainterPath path;
-                path.addRect(mSvg->boundsOnElement(e.attribute(NodeFinderElementClass::idAttr)));
+                path.addRect(mSvg->boundsOnElement(e.attribute(svg_attr::ID)));
 
                 LabelItem &item = labels[i];
                 item.elements.append({e, path});
@@ -252,7 +244,7 @@ void NodeFinderSVGConverter::removeFakeIDs()
     //Remove unused generated IDs
     for(QDomElement& e : fakeIds)
     {
-        e.removeAttribute(NodeFinderElementClass::idAttr);
+        e.removeAttribute(svg_attr::ID);
     }
 }
 
@@ -261,7 +253,7 @@ void NodeFinderSVGConverter::restoreFakeIDs()
     //Restore generated IDs
     for(auto it = fakeIds.begin(); it != fakeIds.end(); it++)
     {
-        it.value().setAttribute(NodeFinderElementClass::idAttr, it.key());
+        it.value().setAttribute(svg_attr::ID, it.key());
     }
 }
 
@@ -378,21 +370,21 @@ void NodeFinderSVGConverter::processDefs(QDomElement &g)
         QDomElement e = n.toElement(); // try to convert the node to an element.
         if(!e.isNull())
         {
-            if(e.tagName() == defsTag)
+            if(e.tagName() == svg_tag::DefsTag)
             {
                 processDefs(e);
             }
-            else if(e.tagName() == fontTag)
+            else if(e.tagName() == svg_tag::FontTag)
             {
                 //Add ID if missing
-                if(!e.hasAttribute(NodeFinderElementClass::idAttr))
+                if(!e.hasAttribute(svg_attr::ID))
                 {
                     int counter = 0;
                     const QString newId = getFreeId_internal(QLatin1String("font_"), counter);
                     if(newId.isEmpty())
                         qWarning() << "EMPTY FONT ID";
                     else
-                        e.setAttribute(NodeFinderElementClass::idAttr, newId);
+                        e.setAttribute(svg_attr::ID, newId);
                 }
             }
         }
@@ -411,33 +403,33 @@ void NodeFinderSVGConverter::processGroup(QDomElement &g, int &generatedIdSerial
         {
             // The node really is an element.
 
-            if(e.hasAttribute(NodeFinderElementClass::idAttr))
+            if(e.hasAttribute(svg_attr::ID))
             {
-                QString id = e.attribute(NodeFinderElementClass::idAttr);
+                QString id = e.attribute(svg_attr::ID);
                 if(namedElements.contains(id))
                 {
                     //Duplicate id, rename element
                     id = getFreeId_internal(generatedIdBase, generatedIdSerial);
                     if(id.isEmpty())
-                        e.removeAttribute(NodeFinderElementClass::idAttr);
+                        e.removeAttribute(svg_attr::ID);
                     else
-                        e.setAttribute(NodeFinderElementClass::idAttr, id);
+                        e.setAttribute(svg_attr::ID, id);
                 }
                 namedElements.insert(id, e);
             }
 
             storeElement(e);
 
-            if(e.tagName() == 'g')
+            if(e.tagName() == svg_tag::GroupTag)
             {
                 //Process also sub elements
                 processGroup(e, generatedIdSerial, generatedIdBase);
             }
-            else if(e.tagName() == textTag)
+            else if(e.tagName() == svg_tag::TextTag)
             {
                 processText(e, generatedIdSerial, generatedIdBase);
             }
-            else if(e.tagName() == defsTag)
+            else if(e.tagName() == svg_tag::DefsTag)
             {
                 processDefs(e);
             }
@@ -462,7 +454,7 @@ void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSeri
             if(!e.isNull())
             {
                 //The node really is an element.
-                if(e.tagName() == textTag)
+                if(e.tagName() == svg_tag::TextTag)
                 {
                     qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
                     QDomNode old = n;
@@ -471,19 +463,19 @@ void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSeri
                 }
                 else
                 {
-                    if(e.tagName() == tspanTag)
+                    if(e.tagName() == svg_tag::TSpanTag)
                     {
-                        if(e.hasAttribute(NodeFinderElementClass::idAttr))
+                        if(e.hasAttribute(svg_attr::ID))
                         {
-                            QString id = e.attribute(NodeFinderElementClass::idAttr);
+                            QString id = e.attribute(svg_attr::ID);
                             if(namedElements.contains(id))
                             {
                                 //Duplicate id, rename element
                                 id = getFreeId_internal(generatedIdBase, generatedIdSerial);
                                 if(id.isEmpty())
-                                    e.removeAttribute(NodeFinderElementClass::idAttr);
+                                    e.removeAttribute(svg_attr::ID);
                                 else
-                                    e.setAttribute(NodeFinderElementClass::idAttr, id);
+                                    e.setAttribute(svg_attr::ID, id);
                             }
                             namedElements.insert(id, e);
                         }
@@ -520,7 +512,7 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
             if(!e.isNull())
             {
                 // the node really is an element.
-                if(e.tagName() == QLatin1String("tspan"))
+                if(e.tagName() == svg_tag::TSpanTag)
                 {
                     processInternalTspan(tspan, e, value);
                 }
@@ -534,7 +526,7 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
 
     }
 
-    for(const QString& attr : tspanPassToTextAttrs)
+    for(const QString& attr : svg_attr::TSpanPassToTextAttrs)
     {
         if(!text.hasAttribute(attr))
             text.setAttribute(attr, tspan.attribute(attr));
@@ -547,7 +539,7 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
 
 void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement &cur, QString &value)
 {
-    for(const QString& attr : tspanPassAttrs)
+    for(const QString& attr : svg_attr::TSpanPassAttrs)
     {
         if(!top.hasAttribute(attr) && cur.hasAttribute(attr))
             top.setAttribute(attr, cur.attribute(attr));
@@ -566,7 +558,7 @@ void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement 
             if(!e.isNull())
             {
                 // the node really is an element.
-                if(e.tagName() == QLatin1String("tspan"))
+                if(e.tagName() == svg_tag::TSpanTag)
                 {
                     processInternalTspan(top, e, value);
                 }

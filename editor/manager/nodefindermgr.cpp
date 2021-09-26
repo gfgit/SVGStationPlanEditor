@@ -189,7 +189,7 @@ void NodeFinderMgr::goToPrevElem()
             }
 
             QDomElement elem = converter->currentWalker.element();
-            QString id = elem.attribute(NodeFinderElementClass::idAttr);
+            QString id = elem.attribute(svg_attr::ID);
             const QRectF bounds = converter->renderer()->boundsOnElement(id);
             if(getSelectionRect().contains(bounds))
             {
@@ -259,7 +259,7 @@ void NodeFinderMgr::goToNextElem()
             }
 
             QDomElement elem = converter->currentWalker.element();
-            QString id = elem.attribute(NodeFinderElementClass::idAttr);
+            QString id = elem.attribute(svg_attr::ID);
             const QRectF bounds = converter->renderer()->boundsOnElement(id);
             if(getSelectionRect().contains(bounds))
             {
@@ -369,9 +369,9 @@ void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
         if(m_subMode == EditingSubModes::AddingSubElement)
         {
             //Restart element selection
-            QStringList tags{"path", "line", "polyline"};
+            QStringList tags{svg_tag::PathTag, svg_tag::LineTag, svg_tag::PolylineTag};
             if(m_mode == EditingModes::LabelEditing)
-                tags.prepend("rect");
+                tags.prepend(svg_tag::RectTag);
             converter->currentWalker = converter->walkElements(tags);
             converter->curElementPath = ElementPath(); //Reset
         }

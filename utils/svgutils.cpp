@@ -1,5 +1,7 @@
 #include "svgutils.h"
 
+#include "nodefinderutils.h"
+
 bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
 {
     //Calc number length
@@ -78,7 +80,7 @@ bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRel
 
 bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
 {
-    if(e.tagName() == QLatin1String("line"))
+    if(e.tagName() == svg_tag::LineTag)
     {
         bool ok = false;
         QString str = e.attribute(QLatin1String("x1"));
@@ -113,7 +115,7 @@ bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
         path.lineTo(x2, y2);
         return true;
     }
-    if(e.tagName() == QLatin1String("polyline"))
+    if(e.tagName() == svg_tag::PolylineTag)
     {
         QString str = e.attribute(QLatin1String("points"));
         if(str.isEmpty())
@@ -140,7 +142,7 @@ bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
 
         return true;
     }
-    if(e.tagName() == QLatin1String("path"))
+    if(e.tagName() == svg_tag::PathTag)
     {
         QString str = e.attribute(QLatin1String("d"));
         if(str.isEmpty())

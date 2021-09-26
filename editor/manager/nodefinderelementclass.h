@@ -13,8 +13,6 @@ public:
     typedef QHash<QString, QDomElement> ElementHash;
     typedef QMap<QString, QDomElement> ElementMap;
 
-    static const QString idAttr;
-
     NodeFinderElementClass(const QString& tag, const QString& baseId);
 
     QString getTagName() const;
