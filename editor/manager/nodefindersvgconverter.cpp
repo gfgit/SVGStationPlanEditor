@@ -458,8 +458,8 @@ void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSeri
                 {
                     qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
                     QDomNode old = n;
-                    text.removeChild(old);
                     n = n.nextSibling();
+                    text.removeChild(old);
                 }
                 else
                 {
