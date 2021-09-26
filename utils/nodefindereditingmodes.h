@@ -1,5 +1,5 @@
-#ifndef NODEFINDEDITINGMODES_H
-#define NODEFINDEDITINGMODES_H
+#ifndef NODEFINDEREDITINGMODES_H
+#define NODEFINDEREDITINGMODES_H
 
 //Editing mode
 enum class EditingModes
@@ -20,4 +20,4 @@ enum class EditingSubModes
     NSubModes
 };
 
-#endif // NODEFINDEDITINGMODES_H
+#endif // NODEFINDEREDITINGMODES_H

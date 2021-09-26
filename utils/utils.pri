@@ -4,6 +4,6 @@ SOURCES += \
     $$PWD/svgutils.cpp
 
 HEADERS += \
-    $$PWD/nodefindeditingmodes.h \
+    $$PWD/nodefindereditingmodes.h \
     $$PWD/nodefinderutils.h \
     $$PWD/svgutils.h

@@ -1,8 +1,8 @@
 #include "nodefindermgr.h"
 
-#include "nodefinderstatuswidget.h"
-#include "nodefindersvgwidget.h"
-#include "nodefinderdockwidget.h"
+#include "editor/view/nodefinderstatuswidget.h"
+#include "editor/view/nodefindersvgwidget.h"
+#include "editor/view/nodefinderdockwidget.h"
 
 #include "nodefindersvgconverter.h"
 

@@ -1,6 +1,6 @@
 #include "nodefinderlabelmodel.h"
 
-#include "nodefindermgr.h"
+#include "editor/manager/nodefindermgr.h"
 
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
     QAbstractTableModel(parent),

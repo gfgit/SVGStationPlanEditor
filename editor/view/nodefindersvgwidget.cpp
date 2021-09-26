@@ -1,9 +1,9 @@
 #include "nodefindersvgwidget.h"
 
-#include "nodefindermgr.h"
-#include "nodefindersvgconverter.h"
-#include "nodefinderlabelmodel.h"
-#include "nodefinderstationtracksmodel.h"
+#include "editor/manager/nodefindermgr.h"
+#include "editor/manager/nodefindersvgconverter.h"
+#include "editor/model/nodefinderlabelmodel.h"
+#include "editor/model/nodefinderstationtracksmodel.h"
 
 #include <QSvgRenderer>
 

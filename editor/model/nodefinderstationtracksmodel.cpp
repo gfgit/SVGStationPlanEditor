@@ -1,6 +1,6 @@
 #include "nodefinderstationtracksmodel.h"
 
-#include "nodefindermgr.h"
+#include "editor/manager/nodefindermgr.h"
 
 #include <QBrush>
 

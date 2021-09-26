@@ -6,7 +6,7 @@
 
 #include <QBoxLayout>
 
-#include "nodefinderstationtracksmodel.h"
+#include "editor/model/nodefinderstationtracksmodel.h"
 
 NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
