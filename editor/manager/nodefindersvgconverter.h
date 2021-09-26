@@ -29,7 +29,7 @@ public:
 
     void clear();
 
-    bool load(QIODevice *dev);
+    bool loadDocument(QIODevice *dev);
     bool save(QIODevice *dev);
     void reloadSVGRenderer();
 

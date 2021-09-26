@@ -57,7 +57,7 @@ void NodeFinderSVGConverter::clear()
     mDoc.clear();
 }
 
-bool NodeFinderSVGConverter::load(QIODevice *dev)
+bool NodeFinderSVGConverter::loadDocument(QIODevice *dev)
 {
     //FIXME: error reporting
     clear();
@@ -66,16 +66,6 @@ bool NodeFinderSVGConverter::load(QIODevice *dev)
     xml.setNamespaceProcessing(false);
 
     bool ret = mDoc.setContent(&xml, xml.namespaceProcessing());
-    if(!ret)
-        return false;
-
-    //Read again from start
-    ret = dev->reset();
-    xml.setDevice(dev);
-    if(!ret)
-        return false;
-
-    ret = mSvg->load(&xml);
 
     return ret;
 }
@@ -440,54 +430,60 @@ void NodeFinderSVGConverter::processGroup(QDomElement &g, int &generatedIdSerial
 
 void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSerial, const QString& generatedIdBase)
 {
+    //xml:space="preserve" moves text to right, remove it
+    text.removeAttribute(svg_attr::XmlSpace);
+
     QDomNode n = text.firstChild();
     while(!n.isNull())
     {
         if(n.isText())
         {
-            //Skip normal text
+            //Skip normal text (leave it as is)
             n = n.nextSibling();
+            continue;
+        }
+
+        //Try to convert the node to an element.
+        QDomElement e = n.toElement();
+        if(e.isNull())
+        {
+            //Node is not an element, skip it
+            n = n.nextSibling();
+            continue;
+        }
+
+        //The node really is an element.
+        if(e.tagName() == svg_tag::TextTag)
+        {
+            //Remove text elements inside a text element
+            qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
+            QDomNode old = n;
+            n = n.nextSibling();
+            text.removeChild(old);
         }
         else
         {
-            QDomElement e = n.toElement(); //Try to convert the node to an element.
-            if(!e.isNull())
+            if(e.tagName() == svg_tag::TSpanTag)
             {
-                //The node really is an element.
-                if(e.tagName() == svg_tag::TextTag)
+                if(e.hasAttribute(svg_attr::ID))
                 {
-                    qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
-                    QDomNode old = n;
-                    n = n.nextSibling();
-                    text.removeChild(old);
-                }
-                else
-                {
-                    if(e.tagName() == svg_tag::TSpanTag)
+                    QString id = e.attribute(svg_attr::ID);
+                    if(namedElements.contains(id))
                     {
-                        if(e.hasAttribute(svg_attr::ID))
-                        {
-                            QString id = e.attribute(svg_attr::ID);
-                            if(namedElements.contains(id))
-                            {
-                                //Duplicate id, rename element
-                                id = getFreeId_internal(generatedIdBase, generatedIdSerial);
-                                if(id.isEmpty())
-                                    e.removeAttribute(svg_attr::ID);
-                                else
-                                    e.setAttribute(svg_attr::ID, id);
-                            }
-                            namedElements.insert(id, e);
-                        }
-
-                        processTspan(e, text);
+                        //Duplicate id, rename element
+                        id = getFreeId_internal(generatedIdBase, generatedIdSerial);
+                        if(id.isEmpty())
+                            e.removeAttribute(svg_attr::ID);
+                        else
+                            e.setAttribute(svg_attr::ID, id);
                     }
-
-                    n = n.nextSibling();
+                    namedElements.insert(id, e);
                 }
-            }else{
-                n = n.nextSibling();
+
+                processTspan(e, text);
             }
+
+            n = n.nextSibling();
         }
     }
 }
@@ -501,36 +497,39 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
     {
         if(n.isText())
         {
+            //Keep text
             value.append(n.nodeValue());
             QDomNode old = n;
             n = n.nextSibling();
             tspan.removeChild(old);
-        }
-        else
-        {
-            QDomElement e = n.toElement(); // try to convert the node to an element.
-            if(!e.isNull())
-            {
-                // the node really is an element.
-                if(e.tagName() == svg_tag::TSpanTag)
-                {
-                    processInternalTspan(tspan, e, value);
-                }
-            }
-            n = n.nextSibling();
-            if(!e.isNull())
-            {
-                tspan.removeChild(e);
-            }
+            continue;
         }
 
+        // Try to convert the node to an element.
+        QDomElement e = n.toElement();
+        if(!e.isNull())
+        {
+            // the node really is an element.
+            if(e.tagName() == svg_tag::TSpanTag)
+            {
+                processInternalTspan(tspan, e, value);
+            }
+        }
+        n = n.nextSibling();
+        if(!e.isNull())
+        {
+            //Remove internal tspan
+            tspan.removeChild(e);
+        }
     }
 
     for(const QString& attr : svg_attr::TSpanPassToTextAttrs)
     {
-        if(!text.hasAttribute(attr))
+        if(tspan.hasAttribute(attr))
+        {
             text.setAttribute(attr, tspan.attribute(attr));
-        tspan.removeAttribute(attr);
+            tspan.removeAttribute(attr);
+        }
     }
 
     QDomText textVal = mDoc.createTextNode(value);
@@ -539,33 +538,35 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
 
 void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement &cur, QString &value)
 {
-    for(const QString& attr : svg_attr::TSpanPassAttrs)
-    {
-        if(!top.hasAttribute(attr) && cur.hasAttribute(attr))
-            top.setAttribute(attr, cur.attribute(attr));
-    }
-
     QDomNode n = cur.firstChild();
     while(!n.isNull())
     {
         if(n.isText())
         {
+            //Keep text
             value.append(n.nodeValue());
+            n = n.nextSibling();
+            continue;
         }
-        else
+
+        // Try to convert the node to an element.
+        QDomElement e = n.toElement();
+        if(!e.isNull())
         {
-            QDomElement e = n.toElement(); // try to convert the node to an element.
-            if(!e.isNull())
+            // the node really is an element.
+            if(e.tagName() == svg_tag::TSpanTag)
             {
-                // the node really is an element.
-                if(e.tagName() == svg_tag::TSpanTag)
-                {
-                    processInternalTspan(top, e, value);
-                }
+                processInternalTspan(top, e, value);
             }
         }
 
         n = n.nextSibling();
+    }
+
+    for(const QString& attr : svg_attr::TSpanPassAttrs)
+    {
+        if(cur.hasAttribute(attr))
+            top.setAttribute(attr, cur.attribute(attr));
     }
 }
 

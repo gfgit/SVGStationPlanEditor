@@ -31,12 +31,16 @@ typedef struct TrackItem : ItemBase
 //SVG attribute names
 namespace svg_attr {
 
+//Default
 const QString ID = QLatin1String("id");
+const QString XmlSpace = QLatin1String("xml:space");
+
+//Custom
 const QString LabelName = QLatin1String("labelname");
 const QString TrackPos = QLatin1String("trackpos");
 
 //Text processing, attribute white list
-const QStringList TSpanPassAttrs{"x", "y", "fill", "stroke", "font-family", "font-size", "font-weight"};
+const QStringList TSpanPassAttrs{"x", "y", "style", "fill", "stroke", "font-family", "font-size", "font-weight"};
 const QStringList TSpanPassToTextAttrs{"x", "y"};
 
 }

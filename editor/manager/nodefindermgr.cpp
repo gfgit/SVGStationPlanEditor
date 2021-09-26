@@ -90,15 +90,19 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
 {
     clearCurrentItem();
 
-    bool ret = converter->load(dev);
+    bool ret = converter->loadDocument(dev);
     if(!ret)
     {
         converter->clear();
         setMode(EditingModes::NoSVGLoaded);
     }
 
+    //Convert SVG
     converter->processElements();
     converter->loadLabelsAndTracks();
+
+    //Load view
+    converter->reloadSVGRenderer();
 
     setTrackPenWidth(converter->calcDefaultTrackPenWidth());
 
