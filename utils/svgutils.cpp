@@ -256,3 +256,121 @@ bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
     //Unsupported element
     return false;
 }
+
+int parseInteger(const QString& str, int &pos)
+{
+    int val = 0;
+    for(; pos < str.size(); pos++)
+    {
+        if(str.at(pos).isDigit())
+        {
+            val *= 10;
+            val += str.at(pos).digitValue();
+        }
+
+        if(str.at(pos) == ',')
+            break;
+    }
+    return val;
+}
+
+bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackConnectionInfo> &outVec)
+{
+    TrackConnectionInfo info;
+
+    enum class Section
+    {
+        OutsideValue,
+        GateLetter,
+        GateTrack,
+        StationTrack
+    };
+
+    Section section = Section::OutsideValue;
+
+    for(int i = 0; i < value.size(); i++)
+    {
+        //Skip spaces and commas
+        while (i < value.size() && (value.at(i).isSpace() || value.at(i) == ','))
+        {
+            i++;
+        }
+
+        if(i >= value.size())
+            break;
+
+        switch (section)
+        {
+        case Section::OutsideValue:
+        {
+            if(value.at(i) == '(')
+            {
+                section = Section::GateLetter;
+            }
+
+            break;
+        }
+        case Section::GateLetter:
+        {
+            if(value.at(i).isLetter())
+            {
+                info.gateLetter = value.at(i).toUpper();
+                section = Section::GateTrack;
+            }
+
+            break;
+        }
+        case Section::GateTrack:
+        {
+            int num = parseInteger(value, i);
+            info.gateTrackPos = num;
+            section = Section::StationTrack;
+
+            break;
+        }
+        case Section::StationTrack:
+        {
+            int num = parseInteger(value, i);
+            info.stationTrackPos = num;
+
+            //Skip spaces and commas
+            while (i < value.size() && (value.at(i).isSpace() || value.at(i) == ','))
+            {
+                i++;
+            }
+
+            if(i < value.size() && value.at(i) == ')')
+            {
+                //Store value and restart parsing
+                outVec.append(info);
+                section = Section::OutsideValue;
+            }
+
+            break;
+        }
+        }
+    }
+
+    return true;
+}
+
+QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
+{
+    QString value;
+    value.reserve(8 * vec.size());
+
+    for(const TrackConnectionInfo& info : vec)
+    {
+        value += '(';
+        value += info.gateLetter;
+        value += ',';
+        value += QString::number(info.gateTrackPos);
+        value += ',';
+        value += QString::number(info.stationTrackPos);
+        value += "),";
+    }
+    if(!value.isEmpty() && value.endsWith(','))
+        value.chop(1); //Remove last comma
+
+    return value;
+}

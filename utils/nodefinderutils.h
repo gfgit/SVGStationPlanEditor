@@ -28,6 +28,18 @@ typedef struct TrackItem : ItemBase
     int trackPos;
 } TrackItem;
 
+typedef struct TrackConnectionInfo
+{
+    int stationTrackPos;
+    int gateTrackPos;
+    QChar gateLetter;
+} TrackConnectionInfo;
+
+typedef struct TrackConnectionItem : ItemBase
+{
+    TrackConnectionInfo info;
+} TrackConnectionItem;
+
 //SVG attribute names
 namespace svg_attr {
 
@@ -38,6 +50,7 @@ const QString XmlSpace = QLatin1String("xml:space");
 //Custom
 const QString LabelName = QLatin1String("labelname");
 const QString TrackPos = QLatin1String("trackpos");
+const QString TrackConnections = QLatin1String("trackconn");
 
 //Text processing, attribute white list
 const QStringList TSpanPassAttrs{"x", "y", "style", "fill", "stroke", "font-family", "font-size", "font-weight"};
@@ -57,6 +70,38 @@ static const QString PathTag = QLatin1String("path");
 static const QString LineTag = QLatin1String("line");
 static const QString PolylineTag = QLatin1String("polyline");
 
+}
+
+//Operators
+
+inline bool operator<(const LabelItem& left, const LabelItem& right)
+{
+    return left.gateLetter < right.gateLetter;
+}
+
+inline bool operator<(const TrackItem& left, const TrackItem& right)
+{
+    return left.trackPos < right.trackPos;
+}
+
+inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
+{
+    if(left.stationTrackPos == right.stationTrackPos)
+    {
+        if(left.gateLetter == right.gateLetter)
+            return left.gateTrackPos < right.gateTrackPos;
+
+        return left.gateLetter < right.gateLetter;
+    }
+
+    return left.stationTrackPos < right.stationTrackPos;
+}
+
+inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
+{
+    return left.stationTrackPos == right.stationTrackPos &&
+           left.gateTrackPos == right.gateTrackPos &&
+           left.gateLetter == right.gateLetter;
 }
 
 #endif // NODEFINDERUTILS_H

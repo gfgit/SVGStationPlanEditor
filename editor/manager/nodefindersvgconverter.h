@@ -81,6 +81,10 @@ private:
     void processTspan(QDomElement &tspan, QDomElement &text);
     void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
 
+    bool parseLabel(QDomElement &e, QVector<LabelItem>& labels);
+    bool parsePlatform(QDomElement &e, QVector<TrackItem>& platforms);
+    bool parseTrackConnection(QDomElement &e, QVector<TrackConnectionItem>& connections);
+
 private:
     friend class NodeFinderElementClass;
     friend class NodeFinderSVGWidget;

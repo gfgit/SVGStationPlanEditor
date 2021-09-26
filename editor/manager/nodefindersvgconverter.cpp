@@ -113,6 +113,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
 {
     QVector<LabelItem> labels;
     QVector<TrackItem> tracks;
+    QVector<TrackConnectionItem> connections;
 
     QStringList tags{svg_tag::RectTag, svg_tag::PathTag, svg_tag::LineTag, svg_tag::PolylineTag};
     auto walker = walkElements(tags);
@@ -121,83 +122,11 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
     {
         QDomElement e = walker.element();
 
-        QString labelName = e.attribute(svg_attr::LabelName);
-        if(!labelName.isEmpty())
-        {
-            labelName = labelName.simplified();
-            if(labelName.isEmpty() || labelName.front() < 'A' || labelName.front() > 'Z')
-            {
-                e.removeAttribute(svg_attr::LabelName);
-            }
-            else
-            {
-                QChar gateLetter = labelName.front();
+        parseLabel(e, labels);
 
-                int i = 0;
-                for(; i < labels.size(); i++)
-                {
-                    if(labels.at(i).gateLetter == gateLetter)
-                        break;
-                }
-                if(i >= labels.size())
-                {
-                    LabelItem newItem;
-                    newItem.gateLetter = gateLetter;
-                    newItem.visible = false;
-                    labels.append(newItem);
-                    i = labels.size() - 1;
-                }
+        parsePlatform(e, tracks);
 
-                QPainterPath path;
-                path.addRect(mSvg->boundsOnElement(e.attribute(svg_attr::ID)));
-
-                LabelItem &item = labels[i];
-                item.elements.append({e, path});
-            }
-
-            continue;
-        }
-
-        QString trackPosStr = e.attribute(svg_attr::TrackPos);
-        if(!trackPosStr.isEmpty())
-        {
-            bool ok = false;
-            int trackPos = trackPosStr.toInt(&ok);
-
-            QPainterPath path;
-            if(ok)
-            {
-                ok = utils::convertElementToPath(e, path);
-            }
-
-            if(!ok)
-            {
-                e.removeAttribute(svg_attr::TrackPos);
-            }
-            else
-            {
-                int i = 0;
-                for(; i < tracks.size(); i++)
-                {
-                    if(tracks.at(i).trackPos == trackPos)
-                        break;
-                }
-                if(i >= tracks.size())
-                {
-                    TrackItem newItem;
-                    newItem.trackName = QString::number(trackPos); //TODO: real name from database
-                    newItem.trackPos = trackPos;
-                    newItem.visible = false;
-                    tracks.append(newItem);
-                    i = tracks.size() - 1;
-                }
-
-                TrackItem &item = tracks[i];
-                item.elements.append({e, path});
-            }
-
-            continue;
-        }
+        parseTrackConnection(e, connections);
     }
 
     labelsModel->setItems(labels);
@@ -568,6 +497,140 @@ void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement 
         if(cur.hasAttribute(attr))
             top.setAttribute(attr, cur.attribute(attr));
     }
+}
+
+bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labels)
+{
+    QString labelName = e.attribute(svg_attr::LabelName);
+    if(labelName.isEmpty())
+        return false;
+
+    labelName = labelName.simplified();
+    if(labelName.isEmpty() || labelName.front() < 'A' || labelName.front() > 'Z')
+    {
+        e.removeAttribute(svg_attr::LabelName);
+        return false;
+    }
+
+    QChar gateLetter = labelName.front();
+
+    int i = 0;
+    for(; i < labels.size(); i++)
+    {
+        if(labels.at(i).gateLetter == gateLetter)
+            break; //Label already exists, add the new element
+    }
+    if(i >= labels.size())
+    {
+        //Create new label
+        LabelItem newItem;
+        newItem.gateLetter = gateLetter;
+        newItem.visible = false;
+        labels.append(newItem);
+        i = labels.size() - 1;
+    }
+
+    //Add element to label
+    QPainterPath path;
+    path.addRect(mSvg->boundsOnElement(e.attribute(svg_attr::ID)));
+
+    LabelItem &item = labels[i];
+    item.elements.append({e, path});
+
+    return true;
+}
+
+bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &platforms)
+{
+    QString trackPosStr = e.attribute(svg_attr::TrackPos);
+    if(trackPosStr.isEmpty())
+        return false;
+
+    bool ok = false;
+    int trackPos = trackPosStr.toInt(&ok);
+
+    QPainterPath path;
+    if(ok)
+    {
+        ok = utils::convertElementToPath(e, path);
+    }
+
+    if(!ok)
+    {
+        //Cannot parse attribute or element path, remove it
+        e.removeAttribute(svg_attr::TrackPos);
+        return false;
+    }
+
+    int i = 0;
+    for(; i < platforms.size(); i++)
+    {
+        if(platforms.at(i).trackPos == trackPos)
+            break; //Platform exists
+    }
+    if(i >= platforms.size())
+    {
+        //Create new platform
+        TrackItem newItem;
+        newItem.trackName = QString::number(trackPos); //TODO: real name from database
+        newItem.trackPos = trackPos;
+        newItem.visible = false;
+        platforms.append(newItem);
+        i = platforms.size() - 1;
+    }
+
+    TrackItem &item = platforms[i];
+    item.elements.append({e, path});
+
+    return true;
+}
+
+bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackConnectionItem> &connections)
+{
+    QString trackConnStr = e.attribute(svg_attr::TrackConnections);
+    if(trackConnStr.isEmpty())
+        return false;
+
+    QVector<TrackConnectionInfo> infoVec;
+    bool ok = utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
+
+    QPainterPath path;
+    if(ok)
+    {
+        ok = utils::convertElementToPath(e, path);
+    }
+
+    if(!ok)
+    {
+        //Cannot parse attribute or element path, remove it
+        e.removeAttribute(svg_attr::TrackConnections);
+        return false;
+    }
+
+    for(const TrackConnectionInfo& info : qAsConst(infoVec))
+    {
+        //Find track connection
+        int i = 0;
+        for(; i < connections.size(); i++)
+        {
+            if(connections.at(i).info == info)
+                break; //Connection exists
+        }
+        if(i >= connections.size())
+        {
+            //Create new platform
+            TrackConnectionItem newItem;
+            newItem.info = info;
+            newItem.visible = false;
+            connections.append(newItem);
+            i = connections.size() - 1;
+        }
+
+        TrackConnectionItem &item = connections[i];
+        item.elements.append({e, path});
+    }
+
+    return true;
 }
 
 int NodeFinderSVGConverter::getCurItemSubElemIdx() const

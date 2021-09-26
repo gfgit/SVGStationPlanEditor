@@ -4,6 +4,8 @@
 #include <QDomElement>
 #include <QPainterPath>
 
+#include "nodefinderutils.h"
+
 namespace utils
 {
 
@@ -12,6 +14,10 @@ bool parseNumberAndAdvance(double &outVal, QStringRef &str);
 bool parsePointAndAdvance(QPointF &outPoint, QStringRef &str);
 
 bool convertElementToPath(const QDomElement& e, QPainterPath& path);
+
+bool parseTrackConnectionAttribute(const QString& value, QVector<TrackConnectionInfo>& outVec);
+
+QString trackConnInfoToString(const QVector<TrackConnectionInfo>& vec);
 
 } // namespace utils
 
