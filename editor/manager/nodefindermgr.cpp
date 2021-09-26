@@ -7,7 +7,7 @@
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
-#include "svgutils.h"
+#include "utils/svgutils.h"
 
 #include <QMessageBox>
 

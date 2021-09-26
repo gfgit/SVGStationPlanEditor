@@ -1,32 +1,32 @@
-#ifndef NODEFINDERSTATIONTRACKSMODEL_H
-#define NODEFINDERSTATIONTRACKSMODEL_H
+#ifndef NODEFINDERLABELMODEL_H
+#define NODEFINDERLABELMODEL_H
 
-#include <QAbstractItemModel>
+#include <QAbstractTableModel>
 
 #include <QVector>
 
-#include "nodefinderutils.h"
+#include "utils/nodefinderutils.h"
 
 class NodeFinderMgr;
 
-class NodeFinderStationTracksModel : public QAbstractTableModel
+class NodeFinderLabelModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
+
     enum Columns
     {
-        TrackNameCol = 0,
+        LabelNameCol = 0,
         NCols
     };
 
-    explicit NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
+    explicit NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
-
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -35,22 +35,16 @@ public:
     bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
-    void setItems(const QVector<TrackItem>& vec);
-
+    void setItems(const QVector<LabelItem>& vec);
     void clear();
 
-    int getTrackPos(const ItemBase *ptr) const;
-
-    void clearElement(ElementPath &elemPath);
-
-    void addItem();
-    void removeItem(int row);
-    void editItemAt(int row);
+    QChar getLabelLetter(const ItemBase *ptr) const;
 
 private:
     friend class NodeFinderSVGWidget;
+
     NodeFinderMgr *nodeMgr;
-    QVector<TrackItem> items;
+    QVector<LabelItem> items;
 };
 
-#endif // NODEFINDERSTATIONTRACKSMODEL_H
+#endif // NODEFINDERLABELMODEL_H

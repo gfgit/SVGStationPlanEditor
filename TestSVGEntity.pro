@@ -18,44 +18,17 @@ LIBS += C:/PROGRA~1/PostgreSQL/13/lib/libpq.dll
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+include(database/database.pri)
+include(editor/editor.pri)
+include(utils/utils.pri)
+include(viewer/viewer.pri)
+
 SOURCES += \
-    connectionmanager.cpp \
-    customsvgnodefinder.cpp \
-    customsvgwidget.cpp \
-    elementclass.cpp \
     main.cpp \
-    mainwindow.cpp \
-    nodefinderdockwidget.cpp \
-    nodefinderelementclass.cpp \
-    nodefinderelementwalker.cpp \
-    nodefinderlabelmodel.cpp \
-    nodefindermgr.cpp \
-    nodefinderstationtracksmodel.cpp \
-    nodefinderstatuswidget.cpp \
-    nodefindersvgconverter.cpp \
-    nodefindersvgwidget.cpp \
-    svgtinyconverter.cpp \
-    svgutils.cpp
+    mainwindow.cpp
 
 HEADERS += \
-    connectionmanager.h \
-    customsvgnodefinder.h \
-    customsvgwidget.h \
-    elementclass.h \
-    mainwindow.h \
-    nodefindeditingmodes.h \
-    nodefinderdockwidget.h \
-    nodefinderelementclass.h \
-    nodefinderelementwalker.h \
-    nodefinderlabelmodel.h \
-    nodefindermgr.h \
-    nodefinderstationtracksmodel.h \
-    nodefinderstatuswidget.h \
-    nodefindersvgconverter.h \
-    nodefindersvgwidget.h \
-    nodefinderutils.h \
-    svgtinyconverter.h \
-    svgutils.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui

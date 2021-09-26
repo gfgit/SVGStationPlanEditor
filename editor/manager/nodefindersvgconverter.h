@@ -9,7 +9,7 @@
 #include "nodefinderelementclass.h"
 #include "nodefinderelementwalker.h"
 
-#include "nodefinderutils.h"
+#include "utils/nodefinderutils.h"
 
 class NodeFinderMgr;
 class NodeFinderLabelModel;

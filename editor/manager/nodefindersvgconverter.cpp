@@ -5,7 +5,7 @@
 #include "nodefinderlabelmodel.h"
 #include "nodefinderstationtracksmodel.h"
 
-#include "svgutils.h"
+#include "utils/svgutils.h"
 
 #include <QSvgRenderer>
 

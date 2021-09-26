@@ -3,7 +3,7 @@
 #include <QApplication>
 
 #include <pqxx/pqxx>
-#include "connectionmanager.h"
+#include "database/connectionmanager.h"
 
 #include <QThreadPool>
 
