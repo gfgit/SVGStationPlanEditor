@@ -140,6 +140,7 @@ void SVGTinyConverter::processDefs(QDomElement& g)
             }
             else if(e.tagName() == fontTag)
             {
+                //NOTE: some <font> elements produced by SVG Optimizers do not have ID attribute, Qt SVG complains.
                 //Add ID if missing
                 if(!e.hasAttribute(idAttr))
                 {

@@ -11,8 +11,6 @@
 
 class QIODevice;
 
-//TODO: some <font> elements produced by SVG Optimizers do not have ID attribute, Qt SVG complains, add attribute
-
 class SVGTinyConverter
 {
 public:
