@@ -132,9 +132,6 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
     QVector<LabelItem> labels;
     QVector<TrackItem> tracks;
 
-    const QString labelAttr = QLatin1String("labelname");
-    const QString trackAttr = QLatin1String("trackpos");
-
     QStringList tags{"rect", "path", "line", "polyline"};
     auto walker = walkElements(tags);
 
@@ -142,13 +139,13 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
     {
         QDomElement e = walker.element();
 
-        QString labelName = e.attribute(labelAttr);
+        QString labelName = e.attribute(svg_attr::LabelName);
         if(!labelName.isEmpty())
         {
             labelName = labelName.simplified();
             if(labelName.isEmpty() || labelName.front() < 'A' || labelName.front() > 'Z')
             {
-                e.removeAttribute(labelAttr);
+                e.removeAttribute(svg_attr::LabelName);
             }
             else
             {
@@ -179,7 +176,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
             continue;
         }
 
-        QString trackPosStr = e.attribute(trackAttr);
+        QString trackPosStr = e.attribute(svg_attr::TrackPos);
         if(!trackPosStr.isEmpty())
         {
             bool ok = false;
@@ -193,7 +190,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
 
             if(!ok)
             {
-                e.removeAttribute(trackAttr);
+                e.removeAttribute(svg_attr::TrackPos);
             }
             else
             {
@@ -286,12 +283,10 @@ void NodeFinderSVGConverter::removeCurrentSubElementFromItem()
     ElementPath path = curItem->elements.takeAt(curItemSubElemIdx);
     curItemSubElemIdx = -1; //Reset sub element selection
 
-    const QString labelAttr = QLatin1String("labelname");
-
     //TODO: properly update models
     if(nodeMgr->mode() == EditingModes::LabelEditing)
     {
-        path.elem.removeAttribute(labelAttr);
+        path.elem.removeAttribute(svg_attr::LabelName);
         QModelIndex idx;
         emit labelsModel->dataChanged(idx, idx);
     }
@@ -313,10 +308,6 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
     if(!utils::convertElementToPath(path.elem, path.path))
         return false;
 
-    //TODO: make these attr names global
-    const QString labelAttr = QLatin1String("labelname");
-    const QString trackAttr = QLatin1String("trackpos");
-
     //TODO: properly update models
     if(nodeMgr->mode() == EditingModes::LabelEditing)
     {
@@ -324,7 +315,7 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
         if(gateLetter.isNull())
             return false;
 
-        path.elem.setAttribute(labelAttr, gateLetter);
+        path.elem.setAttribute(svg_attr::LabelName, gateLetter);
         curItem->elements.append(path);
 
         QModelIndex idx;
@@ -336,7 +327,7 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
         if(trackPos < 0)
             return false;
 
-        path.elem.setAttribute(trackAttr, QString::number(trackPos));
+        path.elem.setAttribute(svg_attr::TrackPos, QString::number(trackPos));
         curItem->elements.append(path);
 
         QModelIndex idx;

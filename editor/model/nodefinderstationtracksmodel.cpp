@@ -179,9 +179,7 @@ void NodeFinderStationTracksModel::addItem()
 
 void NodeFinderStationTracksModel::clearElement(ElementPath &elemPath)
 {
-    //FIXME: make attr name global
-    const QString trackAttr = QLatin1String("trackpos");
-    elemPath.elem.removeAttribute(trackAttr);
+    elemPath.elem.removeAttribute(svg_attr::TrackPos);
 }
 
 void NodeFinderStationTracksModel::removeItem(int row)

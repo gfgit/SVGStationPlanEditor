@@ -28,5 +28,12 @@ typedef struct TrackItem : ItemBase
     int trackPos;
 } TrackItem;
 
+//SVG attribute names
+namespace svg_attr {
+
+const QString LabelName = QLatin1String("labelname");
+const QString TrackPos = QLatin1String("trackpos");
+
+}
 
 #endif // NODEFINDERUTILS_H
