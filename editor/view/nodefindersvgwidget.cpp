@@ -111,7 +111,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
             }
         }
 
-        IObjectModel *conns = conv->getModel(EditingModes::StationTrackEditing);
+        IObjectModel *conns = conv->getModel(EditingModes::TrackPathEditing);
         if(conns)
         {
             const int count = conns->getItemCount();
