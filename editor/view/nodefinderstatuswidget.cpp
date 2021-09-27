@@ -79,27 +79,7 @@ void NodeFinderStatusWidget::updateMode()
     const EditingModes mode = nodeMgr->mode();
     const EditingSubModes subMode = nodeMgr->getSubMode();
 
-    QString modeName;
-    switch (mode)
-    {
-    case EditingModes::NoSVGLoaded:
-        modeName = tr("No SVG");
-        break;
-    case EditingModes::NoEditing:
-        modeName = tr("No Editing");
-        break;
-    case EditingModes::LabelEditing:
-        modeName = tr("Label Editing");
-        break;
-    case EditingModes::StationTrackEditing:
-        modeName = tr("Station Track Editing");
-        break;
-    case EditingModes::TrackPathEditing:
-        modeName = tr("Track Path Editing");
-        break;
-    case EditingModes::NModes:
-        modeName = tr("Unknown mode");
-    }
+    QString modeName = nodeMgr->getModeName(mode);
 
     switch (nodeMgr->getSubMode())
     {

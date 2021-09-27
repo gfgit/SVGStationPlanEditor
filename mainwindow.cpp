@@ -52,10 +52,17 @@ MainWindow::MainWindow(QWidget *parent) :
     viewMenu->addAction(tr("Zoom Out"), this, [this](){ setZoom(zoom - zoom%25 - 25); });
     ui->menubar->addMenu(viewMenu);
 
-    QDockWidget *dockWidget = new QDockWidget(tr("Items"));
-    dockWidget->setWidget(nodeMgr->getDockWidget(this));
-    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-    viewMenu->addAction(dockWidget->toggleViewAction());
+    auto addDockMode = [this, viewMenu](EditingModes mode)
+    {
+        QWidget *w = nodeMgr->getDockWidget(mode);
+        QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
+        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+        viewMenu->addAction(dockWidget->toggleViewAction());
+    };
+
+    addDockMode(EditingModes::LabelEditing);
+    addDockMode(EditingModes::StationTrackEditing);
+    addDockMode(EditingModes::TrackPathEditing);
 }
 
 MainWindow::~MainWindow()

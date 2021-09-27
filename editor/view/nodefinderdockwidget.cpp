@@ -2,91 +2,77 @@
 
 #include <QToolButton>
 #include <QTableView>
-#include <QScrollArea>
 
 #include <QBoxLayout>
 
-#include "editor/model/nodefinderstationtracksmodel.h"
+#include "editor/model/iobjectmodel.h"
 
 NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
     nodeMgr(mgr)
 {
-    QWidget *scrollAreaContents = new QWidget;
-    QVBoxLayout *scrollLay = new QVBoxLayout(scrollAreaContents);
+    QVBoxLayout *lay = new QVBoxLayout(this);
 
-    //Labels
-    labelsView = new QTableView;
-    scrollLay->addWidget(labelsView);
-
-    //Station Tracks
+    //Toolbar
     QHBoxLayout *trackButLay = new QHBoxLayout;
 
-    addTrackBut = new QToolButton;
-    addTrackBut->setText(tr("Add Track"));
-    trackButLay->addWidget(addTrackBut);
+    addBut = new QToolButton;
+    addBut->setText(tr("Add"));
+    trackButLay->addWidget(addBut);
 
-    editTrackBut = new QToolButton;
-    editTrackBut->setText(tr("Edit Track"));
-    trackButLay->addWidget(editTrackBut);
+    editBut = new QToolButton;
+    editBut->setText(tr("Edit"));
+    trackButLay->addWidget(editBut);
 
-    remTrackBut = new QToolButton;
-    remTrackBut->setText(tr("Remove Track"));
-    trackButLay->addWidget(remTrackBut);
+    remBut = new QToolButton;
+    remBut->setText(tr("Remove"));
+    trackButLay->addWidget(remBut);
 
     trackButLay->addStretch();
-    scrollLay->addLayout(trackButLay);
+    lay->addLayout(trackButLay);
 
-    tracksView = new QTableView;
-    scrollLay->addWidget(tracksView);
+    view = new QTableView;
+    lay->addWidget(view);
 
-    QVBoxLayout *mainLay = new QVBoxLayout(this);
-    QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setWidget(scrollAreaContents);
-    scrollArea->setWidgetResizable(true);
-    mainLay->addWidget(scrollArea);
-
-    connect(addTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onAddTrack);
-    connect(editTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onEditTrack);
-    connect(remTrackBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onRemoveTrack);
+    connect(addBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onAddItem);
+    connect(editBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onEditItem);
+    connect(remBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onRemoveItem);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 }
 
-void NodeFinderDockWidget::setModels(QAbstractItemModel *labels, QAbstractItemModel *tracks)
+void NodeFinderDockWidget::setModel(IObjectModel *m, const QString &text)
 {
-    labelsView->setModel(labels);
-    tracksView->setModel(tracks);
+    model = m;
+    view->setModel(model);
+    setWindowTitle(text);
 }
 
-void NodeFinderDockWidget::onAddTrack()
+void NodeFinderDockWidget::onAddItem()
 {
-    //FIXME: bad code
-    static_cast<NodeFinderStationTracksModel *>(tracksView->model())->addItem();
+    model->addItem();
 }
 
-void NodeFinderDockWidget::onEditTrack()
+void NodeFinderDockWidget::onEditItem()
 {
-    if(!tracksView->selectionModel()->hasSelection())
+    if(!view->selectionModel()->hasSelection())
         return;
 
-    QModelIndex idx = tracksView->currentIndex();
+    QModelIndex idx = view->currentIndex();
     if(!idx.isValid())
         return;
 
-    //FIXME: bad code
-    static_cast<NodeFinderStationTracksModel *>(tracksView->model())->editItemAt(idx.row());
+    model->editItem(idx.row());
 }
 
-void NodeFinderDockWidget::onRemoveTrack()
+void NodeFinderDockWidget::onRemoveItem()
 {
-    if(!tracksView->selectionModel()->hasSelection())
+    if(!view->selectionModel()->hasSelection())
         return;
 
-    QModelIndex idx = tracksView->currentIndex();
+    QModelIndex idx = view->currentIndex();
     if(!idx.isValid())
         return;
 
-    //FIXME: bad code
-    static_cast<NodeFinderStationTracksModel *>(tracksView->model())->removeItem(idx.row());
+    model->removeItem(idx.row());
 }

@@ -49,6 +49,33 @@ EditingSubModes NodeFinderMgr::getSubMode() const
     return m_subMode;
 }
 
+QString NodeFinderMgr::getModeName(EditingModes mode) const
+{
+    QString modeName;
+    switch (mode)
+    {
+    case EditingModes::NoSVGLoaded:
+        modeName = tr("No SVG");
+        break;
+    case EditingModes::NoEditing:
+        modeName = tr("No Editing");
+        break;
+    case EditingModes::LabelEditing:
+        modeName = tr("Label Editing");
+        break;
+    case EditingModes::StationTrackEditing:
+        modeName = tr("Station Track Editing");
+        break;
+    case EditingModes::TrackPathEditing:
+        modeName = tr("Track Path Editing");
+        break;
+    case EditingModes::NModes:
+        modeName = tr("Unknown mode");
+    }
+
+    return modeName;
+}
+
 QWidget *NodeFinderMgr::getStatusWidget(QWidget *parent)
 {
     if(statusWidget && statusWidget->parent() == parent)
@@ -73,17 +100,13 @@ QWidget *NodeFinderMgr::getCentralWidget(QWidget *parent)
     return centralWidget;
 }
 
-QWidget *NodeFinderMgr::getDockWidget(QWidget *parent)
+QWidget *NodeFinderMgr::getDockWidget(EditingModes mode)
 {
-    if(dockWidget && dockWidget->parent() == parent)
-        return dockWidget;
-
     //Create a new one
-    NodeFinderDockWidget *w = new NodeFinderDockWidget(this, parent);
-    w->setModels(converter->getLabelsModel(), converter->getTracksModel());
+    NodeFinderDockWidget *w = new NodeFinderDockWidget(this);
+    w->setModel(converter->getModel(mode), getModeName(mode));
 
-    dockWidget = w;
-    return dockWidget;
+    return w;
 }
 
 bool NodeFinderMgr::loadSVG(QIODevice *dev)

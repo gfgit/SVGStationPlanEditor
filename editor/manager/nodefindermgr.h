@@ -25,11 +25,12 @@ public:
     //Editing mode
     EditingModes mode() const;
     EditingSubModes getSubMode() const;
+    QString getModeName(EditingModes mode) const;
 
     //Widgets
     QWidget *getStatusWidget(QWidget *parent);
     QWidget *getCentralWidget(QWidget *parent);
-    QWidget *getDockWidget(QWidget *parent);
+    QWidget *getDockWidget(EditingModes mode);
 
     //Loading/Saving
     bool loadSVG(QIODevice *dev);
@@ -79,7 +80,6 @@ private:
 
     QPointer<QWidget> statusWidget;
     QPointer<QWidget> centralWidget;
-    QPointer<QWidget> dockWidget;
 
     NodeFinderSVGConverter *converter;
 

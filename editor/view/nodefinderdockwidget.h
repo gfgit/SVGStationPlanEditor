@@ -3,11 +3,13 @@
 
 #include <QWidget>
 
+#include "utils/nodefindereditingmodes.h"
+
 class NodeFinderMgr;
 
 class QToolButton;
 class QTableView;
-class QAbstractItemModel;
+class IObjectModel;
 
 class NodeFinderDockWidget : public QWidget
 {
@@ -15,22 +17,22 @@ class NodeFinderDockWidget : public QWidget
 public:
     explicit NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
-    void setModels(QAbstractItemModel *labels, QAbstractItemModel *tracks);
+    void setModel(IObjectModel *m, const QString& text);
 
 private slots:
-    void onAddTrack();
-    void onEditTrack();
-    void onRemoveTrack();
+    void onAddItem();
+    void onEditItem();
+    void onRemoveItem();
 
 private:
     NodeFinderMgr *nodeMgr;
 
-    QTableView *labelsView;
+    QTableView *view;
+    IObjectModel *model;
 
-    QTableView *tracksView;
-    QToolButton *addTrackBut;
-    QToolButton *editTrackBut;
-    QToolButton *remTrackBut;
+    QToolButton *addBut;
+    QToolButton *editBut;
+    QToolButton *remBut;
 };
 
 #endif // NODEFINDERDOCKWIDGET_H
