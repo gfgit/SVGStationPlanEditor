@@ -38,7 +38,7 @@ NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) 
     connect(editBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onEditItem);
     connect(remBut, &QToolButton::clicked, this, &NodeFinderDockWidget::onRemoveItem);
 
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    setMinimumSize(100, 100);
 }
 
 void NodeFinderDockWidget::setModel(IObjectModel *m, const QString &text)

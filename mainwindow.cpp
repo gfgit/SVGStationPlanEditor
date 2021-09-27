@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         QWidget *w = nodeMgr->getDockWidget(mode);
         QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
+        dockWidget->setWidget(w);
         addDockWidget(Qt::RightDockWidgetArea, dockWidget);
         viewMenu->addAction(dockWidget->toggleViewAction());
     };
