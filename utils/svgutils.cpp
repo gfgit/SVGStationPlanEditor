@@ -2,15 +2,24 @@
 
 #include "nodefinderutils.h"
 
-bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
+#include <QTextStream>
+
+int parseNumber(double &outVal, const QStringView &str)
 {
     //Calc number length
     int i = 0;
+    bool isExponential = false;
     const QChar *c = str.data();
     for(; c && !c->isNull(); i++, c++)
     {
         if(c->isDigit() || *c == '.' || *c == '-')
             continue; //Still number
+
+        if(c->toLower() == 'e')
+        {
+            isExponential = true;
+            continue;
+        }
 
         if(c->isSpace() || *c == ',')
             break; //Separator
@@ -22,13 +31,31 @@ bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
         return false;
 
     bool ok = false;
-    outVal = str.left(i).toDouble(&ok);
-    if(ok)
+    if(isExponential)
     {
-        str = str.mid(i).trimmed();
-        return true;
+        //Parse exponential notation 1.5e-1 -> 0.15
+        QString tmp = str.left(i).toString();
+        QTextStream stream(&tmp);
+        stream >> outVal;
+        ok = stream.status() == QTextStream::Ok;
     }
-    return false;
+    else
+    {
+        outVal = str.left(i).toDouble(&ok);
+    }
+
+    return ok ? i : -1;
+}
+
+bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
+{
+    //Calc number length
+    int i = parseNumber(outVal, str);
+    if(i < 0)
+        return false;
+
+    str = str.mid(i).trimmed();
+    return true;
 }
 
 bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
@@ -86,29 +113,29 @@ bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
         QString str = e.attribute(QLatin1String("x1"));
         if(str.isEmpty())
             return false;
-        double x1 = str.toDouble(&ok);
-        if(!ok)
+        double x1 = 0;
+        if(!parseNumber(x1, str))
             return false;
 
         str = e.attribute(QLatin1String("y1"));
         if(str.isEmpty())
             return false;
-        double y1 = str.toDouble(&ok);
-        if(!ok)
+        double y1 = 0;
+        if(!parseNumber(y1, str))
             return false;
 
         str = e.attribute(QLatin1String("x2"));
         if(str.isEmpty())
             return false;
-        double x2 = str.toDouble(&ok);
-        if(!ok)
+        double x2 = 0;
+        if(!parseNumber(x2, str))
             return false;
 
         str = e.attribute(QLatin1String("y2"));
         if(str.isEmpty())
             return false;
-        double y2 = str.toDouble(&ok);
-        if(!ok)
+        double y2 = 0;
+        if(!parseNumber(y2, str))
             return false;
 
         path.moveTo(x1, y1);
@@ -268,7 +295,7 @@ int parseInteger(const QString& str, int &pos)
             val += str.at(pos).digitValue();
         }
 
-        if(str.at(pos) == ',')
+        if(str.at(pos) == ',' || str.at(pos) == ')')
             break;
     }
     return val;
