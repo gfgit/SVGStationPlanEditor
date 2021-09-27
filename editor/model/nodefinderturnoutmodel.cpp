@@ -284,3 +284,15 @@ bool NodeFinderTurnoutModel::editItem(int row)
     return true;
 }
 
+const ItemBase* NodeFinderTurnoutModel::getItemAt(int row)
+{
+    if(row < 0 || row >= items.size())
+        return nullptr;
+
+    return &items.at(row);
+}
+
+int NodeFinderTurnoutModel::getItemCount() const
+{
+    return items.count();
+}

@@ -239,3 +239,16 @@ bool NodeFinderStationTracksModel::editItem(int row)
 
     return true;
 }
+
+const ItemBase* NodeFinderStationTracksModel::getItemAt(int row)
+{
+    if(row < 0 || row >= items.size())
+        return nullptr;
+
+    return &items.at(row);
+}
+
+int NodeFinderStationTracksModel::getItemCount() const
+{
+    return items.count();
+}

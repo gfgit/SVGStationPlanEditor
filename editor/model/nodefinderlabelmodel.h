@@ -42,6 +42,10 @@ public:
 
     bool addElementToItem(ElementPath &p, ItemBase *item) override;
 
+    const ItemBase* getItemAt(int row) override;
+
+    int getItemCount() const override;
+
 private:
     friend class NodeFinderSVGWidget;
 

@@ -151,3 +151,16 @@ bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
 
     return true;
 }
+
+const ItemBase* NodeFinderLabelModel::getItemAt(int row)
+{
+    if(row < 0 || row >= items.size())
+        return nullptr;
+
+    return &items.at(row);
+}
+
+int NodeFinderLabelModel::getItemCount() const
+{
+    return items.size();
+}

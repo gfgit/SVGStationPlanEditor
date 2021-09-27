@@ -49,6 +49,10 @@ public:
     bool addElementToItem(ElementPath &p, ItemBase *item) override;
     bool removeElementFromItem(ItemBase *item, int pos) override;
 
+    const ItemBase *getItemAt(int row) override;
+
+    int getItemCount() const override;
+
 private:
     friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;

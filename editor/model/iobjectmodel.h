@@ -22,6 +22,9 @@ public:
     virtual bool addElementToItem(ElementPath &p, ItemBase *item);
     virtual bool removeElementFromItem(ItemBase *item, int pos);
 
+    virtual const ItemBase* getItemAt(int row);
+    virtual int getItemCount() const;
+
 signals:
     void itemRemoved(int row);
 };
