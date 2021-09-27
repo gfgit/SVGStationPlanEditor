@@ -5,7 +5,7 @@
 #include <QBrush>
 
 NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent) :
-    QAbstractTableModel(parent),
+    IObjectModel(parent),
     nodeMgr(mgr)
 {
 }
@@ -148,15 +148,41 @@ void NodeFinderStationTracksModel::clear()
     endResetModel();
 }
 
-int NodeFinderStationTracksModel::getTrackPos(const ItemBase *ptr) const
+bool NodeFinderStationTracksModel::addElementToItem(ElementPath &p, ItemBase *item)
 {
-    if(ptr < items.data() || ptr >= items.data() + items.size())
-        return -1; //Not a track item
+    if(item < items.data() || item >= items.data() + items.size())
+        return false; //Not a label item
 
-    return static_cast<const TrackItem *>(ptr)->trackPos;
+    TrackItem *ptr = static_cast<TrackItem *>(item);
+    int row = ptr - items.data(); //Pointer aritmetics
+
+    p.elem.setAttribute(svg_attr::TrackPos, QString::number(ptr->trackPos));
+    item->elements.append(p);
+
+    QModelIndex idx = index(row, 0);
+    emit dataChanged(idx, idx);
+
+    return true;
 }
 
-void NodeFinderStationTracksModel::addItem()
+bool NodeFinderStationTracksModel::removeElementFromItem(ItemBase *item, int pos)
+{
+    if(item < items.data() || item >= items.data() + items.size())
+        return false; //Not a label item
+
+    TrackItem *ptr = static_cast<TrackItem *>(item);
+    int row = ptr - items.data(); //Pointer aritmetics
+
+    clearElement(ptr->elements[pos]);
+    ptr->elements.removeAt(pos);
+
+    QModelIndex idx = index(row, 0);
+    emit dataChanged(idx, idx);
+
+    return true;
+}
+
+bool NodeFinderStationTracksModel::addItem()
 {
     nodeMgr->clearCurrentItem();
 
@@ -175,6 +201,8 @@ void NodeFinderStationTracksModel::addItem()
     beginInsertRows(QModelIndex(), items.size(), items.size());
     items.append(item);
     endInsertRows();
+
+    return true;
 }
 
 void NodeFinderStationTracksModel::clearElement(ElementPath &elemPath)
@@ -182,10 +210,10 @@ void NodeFinderStationTracksModel::clearElement(ElementPath &elemPath)
     elemPath.elem.removeAttribute(svg_attr::TrackPos);
 }
 
-void NodeFinderStationTracksModel::removeItem(int row)
+bool NodeFinderStationTracksModel::removeItem(int row)
 {
     if(row < 0 || row >= items.size())
-        return;
+        return false;
 
     nodeMgr->clearCurrentItem();
 
@@ -197,13 +225,17 @@ void NodeFinderStationTracksModel::removeItem(int row)
     beginRemoveRows(QModelIndex(), row, row);
     items.removeAt(row);
     endRemoveRows();
+
+    return true;
 }
 
-void NodeFinderStationTracksModel::editItemAt(int row)
+bool NodeFinderStationTracksModel::editItem(int row)
 {
     if(row < 0 || row >= items.size())
-        return;
+        return false;
 
     ItemBase *item = &items[row];
     nodeMgr->requestEditItem(item, EditingModes::StationTrackEditing);
+
+    return true;
 }

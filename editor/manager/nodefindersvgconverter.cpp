@@ -222,27 +222,13 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
     //TODO: properly update models
     if(nodeMgr->mode() == EditingModes::LabelEditing)
     {
-        QChar gateLetter = labelsModel->getLabelLetter(curItem);
-        if(gateLetter.isNull())
+        if(labelsModel->addElementToItem(path, curItem))
             return false;
-
-        path.elem.setAttribute(svg_attr::LabelName, gateLetter);
-        curItem->elements.append(path);
-
-        QModelIndex idx;
-        emit labelsModel->dataChanged(idx, idx);
     }
     else if(nodeMgr->mode() == EditingModes::StationTrackEditing)
     {
-        int trackPos = tracksModel->getTrackPos(curItem);
-        if(trackPos < 0)
+        if(tracksModel->addElementToItem(path, curItem))
             return false;
-
-        path.elem.setAttribute(svg_attr::TrackPos, QString::number(trackPos));
-        curItem->elements.append(path);
-
-        QModelIndex idx;
-        emit tracksModel->dataChanged(idx, idx);
     }
 
     return true;

@@ -1,7 +1,7 @@
 #ifndef NODEFINDERSTATIONTRACKSMODEL_H
 #define NODEFINDERSTATIONTRACKSMODEL_H
 
-#include <QAbstractItemModel>
+#include "iobjectmodel.h"
 
 #include <QVector>
 
@@ -9,7 +9,7 @@
 
 class NodeFinderMgr;
 
-class NodeFinderStationTracksModel : public QAbstractTableModel
+class NodeFinderStationTracksModel : public IObjectModel
 {
     Q_OBJECT
 
@@ -37,15 +37,17 @@ public:
 
     void setItems(const QVector<TrackItem>& vec);
 
-    void clear();
-
-    int getTrackPos(const ItemBase *ptr) const;
-
     void clearElement(ElementPath &elemPath);
 
-    void addItem();
-    void removeItem(int row);
-    void editItemAt(int row);
+    //IObjectModel
+    bool addItem() override;
+    bool removeItem(int row) override;
+    bool editItem(int row) override;
+
+    void clear() override;
+
+    bool addElementToItem(ElementPath &p, ItemBase *item) override;
+    bool removeElementFromItem(ItemBase *item, int pos) override;
 
 private:
     friend class NodeFinderSVGWidget;

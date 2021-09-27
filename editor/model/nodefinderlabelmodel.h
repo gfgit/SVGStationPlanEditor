@@ -1,7 +1,7 @@
 #ifndef NODEFINDERLABELMODEL_H
 #define NODEFINDERLABELMODEL_H
 
-#include <QAbstractTableModel>
+#include "iobjectmodel.h"
 
 #include <QVector>
 
@@ -9,7 +9,7 @@
 
 class NodeFinderMgr;
 
-class NodeFinderLabelModel : public QAbstractTableModel
+class NodeFinderLabelModel : public IObjectModel
 {
     Q_OBJECT
 
@@ -36,9 +36,11 @@ public:
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
     void setItems(const QVector<LabelItem>& vec);
-    void clear();
 
-    QChar getLabelLetter(const ItemBase *ptr) const;
+    //IObjectModel
+    void clear() override;
+
+    bool addElementToItem(ElementPath &p, ItemBase *item) override;
 
 private:
     friend class NodeFinderSVGWidget;

@@ -3,7 +3,7 @@
 #include "editor/manager/nodefindermgr.h"
 
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
-    QAbstractTableModel(parent),
+    IObjectModel(parent),
     nodeMgr(mgr)
 {
 }
@@ -135,10 +135,19 @@ void NodeFinderLabelModel::clear()
     endResetModel();
 }
 
-QChar NodeFinderLabelModel::getLabelLetter(const ItemBase *ptr) const
+bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
 {
-    if(ptr < items.data() || ptr >= items.data() + items.size())
-        return QChar(); //Not a label item
+    if(item < items.data() || item >= items.data() + items.size())
+        return false; //Not a label item
 
-    return static_cast<const LabelItem *>(ptr)->gateLetter;
+    LabelItem *ptr = static_cast<LabelItem *>(item);
+    int row = ptr - items.data(); //Pointer aritmetics
+
+    p.elem.setAttribute(svg_attr::LabelName, ptr->gateLetter);
+    item->elements.append(p);
+
+    QModelIndex idx = index(row, 0);
+    emit dataChanged(idx, idx);
+
+    return true;
 }
