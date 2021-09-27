@@ -2,6 +2,7 @@
 
 #include "editor/manager/nodefindermgr.h"
 #include "editor/manager/nodefindersvgconverter.h"
+
 #include "editor/model/nodefinderlabelmodel.h"
 #include "editor/model/nodefinderstationtracksmodel.h"
 
@@ -60,23 +61,31 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         QFont f;
         const QString fmt = QLatin1String("Label %1");
 
-        for(const LabelItem& item : qAsConst(conv->labelsModel->items))
+        IObjectModel *labels = conv->getModel(EditingModes::LabelEditing);
+        if(labels)
         {
-            if(!item.visible || item.elements.isEmpty())
-                continue; //Skip it
-
-            for(const auto& elem : qAsConst(item.elements))
+            const int count = labels->getItemCount();
+            for(int i = 0; i < count; i++)
             {
-                //Do not draw path for labels
+                const ItemBase *item = labels->getItemAt(i);
+                if(!item->visible || item->elements.isEmpty())
+                    continue; //Skip it
 
-                const QRectF r = elem.path.boundingRect();
-                const QString text = fmt.arg(item.gateLetter);
+                for(const auto& elem : qAsConst(item->elements))
+                {
+                    //Do not draw path for labels
 
-                f.setPixelSize(r.height() * 0.85);
-                p.setFont(f);
-                p.drawText(r, text, QTextOption(Qt::AlignCenter));
+                    const QRectF r = elem.path.boundingRect();
+
+                    //FIXME: bad code, use name getter func
+                    const QString text = fmt.arg(static_cast<const LabelItem *>(item)->gateLetter);
+
+                    f.setPixelSize(r.height() * 0.85);
+                    p.setFont(f);
+                    p.drawText(r, text, QTextOption(Qt::AlignCenter));
+                }
+
             }
-
         }
     }
 
@@ -86,18 +95,41 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         NodeFinderSVGConverter *conv = nodeMgr->getConverter();
         p.setPen(trackPen);
 
-        for(const TrackItem& item : qAsConst(conv->tracksModel->items))
+        IObjectModel *tracks = conv->getModel(EditingModes::StationTrackEditing);
+        if(tracks)
         {
-            if(!item.visible || item.elements.isEmpty())
-                continue; //Skip it
+            const int count = tracks->getItemCount();
 
-            for(const auto& elem : qAsConst(item.elements))
-                p.drawPath(elem.path);
+            for(int i = 0; i < count; i++)
+            {
+                const ItemBase *item = tracks->getItemAt(i);
+                if(!item->visible || item->elements.isEmpty())
+                    continue; //Skip it
+
+                for(const auto& elem : qAsConst(item->elements))
+                    p.drawPath(elem.path);
+            }
+        }
+
+        IObjectModel *conns = conv->getModel(EditingModes::StationTrackEditing);
+        if(conns)
+        {
+            const int count = conns->getItemCount();
+
+            for(int i = 0; i < count; i++)
+            {
+                const ItemBase *item = conns->getItemAt(i);
+                if(!item->visible || item->elements.isEmpty())
+                    continue; //Skip it
+
+                for(const auto& elem : qAsConst(item->elements))
+                    p.drawPath(elem.path);
+            }
         }
     }
 
     //Draw selected item
-    ElementPath curPath = nodeMgr->getConverter()->curElementPath;
+    ElementPath curPath = nodeMgr->getConverter()->getCurElementPath();
     if(nodeMgr->getConverter()->getCurItem() || !curPath.path.isEmpty())
     {
         ItemBase *item = nodeMgr->getConverter()->getCurItem();

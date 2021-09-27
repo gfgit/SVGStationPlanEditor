@@ -10,11 +10,15 @@
 #include "nodefinderelementwalker.h"
 
 #include "utils/nodefinderutils.h"
+#include "utils/nodefindereditingmodes.h"
 
 class NodeFinderMgr;
+
 class NodeFinderLabelModel;
 class NodeFinderStationTracksModel;
-class QAbstractItemModel;
+class NodeFinderTurnoutModel;
+
+class IObjectModel;
 
 class QSvgRenderer;
 class QIODevice;
@@ -44,8 +48,7 @@ public:
     void removeFakeIDs();
     void restoreFakeIDs();
 
-    QAbstractItemModel *getLabelsModel() const;
-    QAbstractItemModel *getTracksModel() const;
+    IObjectModel *getModel(EditingModes mode) const;
 
     inline NodeFinderElementWalker walkElements(const QStringList& tagOrder)
     {
@@ -60,6 +63,8 @@ public:
 
     int getCurItemSubElemIdx() const;
     void setCurItemSubElemIdx(int value);
+
+    inline ElementPath getCurElementPath() const { return curElementPath; }
 
 private:
     QString getFreeId_internal(const QString& base, int &counter);
@@ -87,7 +92,6 @@ private:
 
 private:
     friend class NodeFinderElementClass;
-    friend class NodeFinderSVGWidget;
     friend class NodeFinderMgr;
 
     NodeFinderMgr *nodeMgr;
@@ -103,6 +107,7 @@ private:
 
     NodeFinderLabelModel *labelsModel;
     NodeFinderStationTracksModel *tracksModel;
+    NodeFinderTurnoutModel *turnoutModel;
 
     //Current selection
     NodeFinderElementWalker currentWalker;

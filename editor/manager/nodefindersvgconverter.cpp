@@ -4,6 +4,7 @@
 
 #include "editor/model/nodefinderlabelmodel.h"
 #include "editor/model/nodefinderstationtracksmodel.h"
+#include "editor/model/nodefinderturnoutmodel.h"
 
 #include "utils/svgutils.h"
 
@@ -28,6 +29,7 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
 
     labelsModel = new NodeFinderLabelModel(nodeMgr, this);
     tracksModel = new NodeFinderStationTracksModel(nodeMgr, this);
+    turnoutModel = new NodeFinderTurnoutModel(nodeMgr, this);
 }
 
 QSvgRenderer *NodeFinderSVGConverter::renderer() const
@@ -48,6 +50,7 @@ void NodeFinderSVGConverter::clear()
 
     labelsModel->clear();
     tracksModel->clear();
+    turnoutModel->clear();
 
     currentWalker = NodeFinderElementWalker();
     curItem = nullptr;
@@ -131,6 +134,7 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
 
     labelsModel->setItems(labels);
     tracksModel->setItems(tracks);
+    turnoutModel->setItems(connections);
 }
 
 void NodeFinderSVGConverter::processElements()
@@ -176,14 +180,21 @@ void NodeFinderSVGConverter::restoreFakeIDs()
     }
 }
 
-QAbstractItemModel *NodeFinderSVGConverter::getLabelsModel() const
+IObjectModel *NodeFinderSVGConverter::getModel(EditingModes mode) const
 {
-    return labelsModel;
-}
+    switch (mode)
+    {
+    case EditingModes::LabelEditing:
+        return labelsModel;
+    case EditingModes::StationTrackEditing:
+        return tracksModel;
+    case EditingModes::TrackPathEditing:
+        return turnoutModel;
+    default:
+        break;
+    }
 
-QAbstractItemModel *NodeFinderSVGConverter::getTracksModel() const
-{
-    return tracksModel;
+    return nullptr;
 }
 
 void NodeFinderSVGConverter::removeCurrentSubElementFromItem()
@@ -191,22 +202,12 @@ void NodeFinderSVGConverter::removeCurrentSubElementFromItem()
     if(!curItem || curItemSubElemIdx < 0 || curItemSubElemIdx >= curItem->elements.size())
         return;
 
-    ElementPath path = curItem->elements.takeAt(curItemSubElemIdx);
-    curItemSubElemIdx = -1; //Reset sub element selection
+    IObjectModel *model = getModel(nodeMgr->mode());
+    if(!model)
+        return;
 
-    //TODO: properly update models
-    if(nodeMgr->mode() == EditingModes::LabelEditing)
-    {
-        path.elem.removeAttribute(svg_attr::LabelName);
-        QModelIndex idx;
-        emit labelsModel->dataChanged(idx, idx);
-    }
-    else if(nodeMgr->mode() == EditingModes::StationTrackEditing)
-    {
-        tracksModel->clearElement(path);
-        QModelIndex idx;
-        emit tracksModel->dataChanged(idx, idx);
-    }
+    model->removeElementFromItem(curItem, curItemSubElemIdx);
+    curItemSubElemIdx = -1; //Reset sub element selection
 }
 
 bool NodeFinderSVGConverter::addCurrentElementToItem()
@@ -214,24 +215,16 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
     if(!currentWalker.isValid() || !curItem)
         return false;
 
+    IObjectModel *model = getModel(nodeMgr->mode());
+    if(!model)
+        return false;
+
     ElementPath path;
     path.elem = currentWalker.element();
     if(!utils::convertElementToPath(path.elem, path.path))
         return false;
 
-    //TODO: properly update models
-    if(nodeMgr->mode() == EditingModes::LabelEditing)
-    {
-        if(labelsModel->addElementToItem(path, curItem))
-            return false;
-    }
-    else if(nodeMgr->mode() == EditingModes::StationTrackEditing)
-    {
-        if(tracksModel->addElementToItem(path, curItem))
-            return false;
-    }
-
-    return true;
+    return model->addElementToItem(path, curItem);
 }
 
 QString NodeFinderSVGConverter::getFreeId_internal(const QString &base, int &counter)
