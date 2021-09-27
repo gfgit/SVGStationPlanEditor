@@ -53,6 +53,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     p.setTransform(transform);
 
     QPen trackPen(Qt::darkGreen, nodeMgr->getTrackPenWidth());
+    trackPen.setCapStyle(Qt::RoundCap);
 
     //Draw labels
     if(nodeMgr->shouldDrawLabels())
