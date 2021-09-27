@@ -92,7 +92,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
     switch (role)
     {
-    case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {

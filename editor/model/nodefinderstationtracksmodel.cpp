@@ -86,7 +86,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
 
     switch (role)
     {
-    case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {

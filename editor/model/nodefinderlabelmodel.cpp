@@ -73,7 +73,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
 
     switch (role)
     {
-    case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {
