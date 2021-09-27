@@ -97,6 +97,11 @@ inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo
     return left.stationTrackPos < right.stationTrackPos;
 }
 
+inline bool operator<(const TrackConnectionItem& left, const TrackConnectionItem& right)
+{
+    return left.info < right.info;
+}
+
 inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
 {
     return left.stationTrackPos == right.stationTrackPos &&
