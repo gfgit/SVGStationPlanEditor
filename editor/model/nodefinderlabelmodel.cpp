@@ -155,6 +155,23 @@ bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
     return true;
 }
 
+bool NodeFinderLabelModel::removeElementFromItem(ItemBase *item, int pos)
+{
+    if(item < items.data() || item >= items.data() + items.size())
+        return false; //Not a label item
+
+    LabelItem *ptr = static_cast<LabelItem *>(item);
+    int row = ptr - items.data(); //Pointer aritmetics
+
+    ptr->elements[pos].elem.removeAttribute(svg_attr::LabelName);
+    ptr->elements.removeAt(pos);
+
+    QModelIndex idx = index(row, 0);
+    emit dataChanged(idx, idx);
+
+    return true;
+}
+
 const ItemBase* NodeFinderLabelModel::getItemAt(int row)
 {
     if(row < 0 || row >= items.size())

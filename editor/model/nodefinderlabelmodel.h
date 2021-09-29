@@ -38,17 +38,18 @@ public:
     void setItems(const QVector<LabelItem>& vec);
 
     //IObjectModel
+    bool addItem() override;
+    bool editItem(int row) override;
+    bool removeItem(int row) override;
+
     void clear() override;
 
     bool addElementToItem(ElementPath &p, ItemBase *item) override;
+    bool removeElementFromItem(ItemBase *item, int pos) override;
 
     const ItemBase* getItemAt(int row) override;
 
     int getItemCount() const override;
-
-    bool addItem() override;
-    bool editItem(int row) override;
-    bool removeItem(int row) override;
 
 private:
     friend class NodeFinderSVGWidget;
