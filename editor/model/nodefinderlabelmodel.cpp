@@ -42,6 +42,7 @@ QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {
@@ -100,6 +101,8 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
         break;
     }
     }
+
+    std::sort(items.begin(), items.end());
 
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();

@@ -51,6 +51,7 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {
