@@ -551,7 +551,7 @@ bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &p
     {
         //Create new platform
         TrackItem newItem;
-        newItem.trackName = QString::number(trackPos); //TODO: real name from database
+        //newItem.trackName = ...; //TODO: real name from database
         newItem.trackPos = trackPos;
         newItem.visible = false;
         platforms.append(newItem);

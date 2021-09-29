@@ -44,11 +44,12 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
     switch (role)
     {
     case Qt::DisplayRole:
+    case Qt::EditRole:
     {
         switch (idx.column())
         {
         case TrackNameCol:
-            return item.trackName;
+            return item.trackPos;
         }
         break;
     }
@@ -91,12 +92,16 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
         switch (idx.column())
         {
         case TrackNameCol:
-            const QString name = value.toString().simplified();
-            if(name.isEmpty())
+        {
+            bool ok = false;
+            int trk = value.toInt(&ok);
+            if(!ok || trk < 0)
                 return false;
 
             //Set name
-            item.trackName = name;
+            item.trackPos = trk;
+            break;
+        }
         }
         break;
     }
@@ -113,6 +118,8 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
         break;
     }
     }
+
+    std::sort(items.begin(), items.end());
 
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
@@ -195,7 +202,6 @@ bool NodeFinderStationTracksModel::addItem()
 
     TrackItem item;
     item.trackPos = maxTrackPos + 1;
-    item.trackName = QString::number(item.trackPos);
     item.visible = false;
 
     beginInsertRows(QModelIndex(), items.size(), items.size());
