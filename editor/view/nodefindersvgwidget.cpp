@@ -33,6 +33,8 @@ void NodeFinderSVGWidget::setRenderer(QSvgRenderer *svg)
 
 void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 {
+    static constexpr double PenWidthFactor = 1.5;
+
     QRectF target = rect();
     QRectF source = mSvg->viewBoxF();
 
@@ -115,7 +117,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     if(elem.strokeWidth == 0)
                         trackPen.setWidthF(nodeMgr->getTrackPenWidth());
                     else
-                        trackPen.setWidthF(elem.strokeWidth);
+                        trackPen.setWidthF(elem.strokeWidth * PenWidthFactor);
                     p.setPen(trackPen);
 
                     p.drawPath(elem.path);
@@ -139,7 +141,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     if(elem.strokeWidth == 0)
                         trackPen.setWidthF(nodeMgr->getTrackPenWidth());
                     else
-                        trackPen.setWidthF(elem.strokeWidth);
+                        trackPen.setWidthF(elem.strokeWidth * PenWidthFactor);
                     p.setPen(trackPen);
 
                     p.drawPath(elem.path);
@@ -192,6 +194,13 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
             p.drawPath(curPath.path);
         }
     }
+
+    p.resetTransform();
+
+    mSvg->render(&p, "text_layer", target);
+    mSvg->render(&p, "arrows_layer", target);
+
+    p.setTransform(transform);
 
     //Draw selection rect
     QColor col(nodeMgr->isSelecting() ? Qt::red : Qt::green);
