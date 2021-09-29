@@ -98,7 +98,6 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     if(nodeMgr->shouldDrawStationTracks())
     {
         NodeFinderSVGConverter *conv = nodeMgr->getConverter();
-        p.setPen(trackPen);
 
         IObjectModel *tracks = conv->getModel(EditingModes::StationTrackEditing);
         if(tracks)
@@ -112,7 +111,15 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     continue; //Skip it
 
                 for(const auto& elem : qAsConst(item->elements))
+                {
+                    if(elem.strokeWidth == 0)
+                        trackPen.setWidthF(nodeMgr->getTrackPenWidth());
+                    else
+                        trackPen.setWidthF(elem.strokeWidth);
+                    p.setPen(trackPen);
+
                     p.drawPath(elem.path);
+                }
             }
         }
 
@@ -128,7 +135,15 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     continue; //Skip it
 
                 for(const auto& elem : qAsConst(item->elements))
+                {
+                    if(elem.strokeWidth == 0)
+                        trackPen.setWidthF(nodeMgr->getTrackPenWidth());
+                    else
+                        trackPen.setWidthF(elem.strokeWidth);
+                    p.setPen(trackPen);
+
                     p.drawPath(elem.path);
+                }
             }
         }
     }

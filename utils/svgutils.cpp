@@ -469,11 +469,11 @@ bool utils::parseStrokeWidth(const ElementPath &e, double &outVal)
             return false;
 
         const int end = style.indexOf(';', start);
-        int length = end - start;
+        int length = end - start - 1;
         if(length < 0)
             length = -1; //Take all string
 
-        strokeWidth = style.mid(start, length);
+        strokeWidth = style.mid(start + 1, length);
     }
     else
     {
