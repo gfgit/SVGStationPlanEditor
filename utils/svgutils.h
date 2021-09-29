@@ -17,9 +17,9 @@ bool convertElementToPath(const QDomElement& e, QPainterPath& path);
 
 bool parseTrackConnectionAttribute(const QString& value, QVector<TrackConnectionInfo>& outVec);
 
-bool parseStrokeWidth(const ElementPath &e, double& outVal);
-
 QString trackConnInfoToString(const QVector<TrackConnectionInfo>& vec);
+
+bool parseStrokeWidth(const ElementPath &e, double& outVal);
 
 } // namespace utils
 

@@ -224,6 +224,10 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
     if(!utils::convertElementToPath(path.elem, path.path))
         return false;
 
+    path.strokeWidth = 0;
+    if(!utils::parseStrokeWidth(path, path.strokeWidth))
+        path.strokeWidth = 0;
+
     return model->addElementToItem(path, curItem);
 }
 
@@ -492,10 +496,12 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
         ok = false;
     }
 
-    QPainterPath path;
+    ElementPath elemPath;
+    elemPath.elem = e;
+
     if(ok)
     {
-        ok = utils::convertElementToPath(e, path);
+        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
@@ -523,9 +529,13 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
         i = labels.size() - 1;
     }
 
+    elemPath.strokeWidth = 0;
+    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+        elemPath.strokeWidth = 0;
+
     //Add element to label
     LabelItem &item = labels[i];
-    item.elements.append({e, path});
+    item.elements.append(elemPath);
 
     return true;
 }
@@ -539,10 +549,12 @@ bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &p
     bool ok = false;
     int trackPos = trackPosStr.toInt(&ok);
 
-    QPainterPath path;
+    ElementPath elemPath;
+    elemPath.elem = e;
+
     if(ok)
     {
-        ok = utils::convertElementToPath(e, path);
+        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
@@ -569,8 +581,13 @@ bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &p
         i = platforms.size() - 1;
     }
 
+    elemPath.strokeWidth = 0;
+    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+        elemPath.strokeWidth = 0;
+
+    //Add element to platform
     TrackItem &item = platforms[i];
-    item.elements.append({e, path});
+    item.elements.append(elemPath);
 
     return true;
 }
@@ -584,10 +601,12 @@ bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackC
     QVector<TrackConnectionInfo> infoVec;
     bool ok = utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
 
-    QPainterPath path;
+    ElementPath elemPath;
+    elemPath.elem = e;
+
     if(ok)
     {
-        ok = utils::convertElementToPath(e, path);
+        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
@@ -596,6 +615,10 @@ bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackC
         e.removeAttribute(svg_attr::TrackConnections);
         return false;
     }
+
+    elemPath.strokeWidth = 0;
+    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+        elemPath.strokeWidth = 0;
 
     for(const TrackConnectionInfo& info : qAsConst(infoVec))
     {
@@ -617,7 +640,7 @@ bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackC
         }
 
         TrackConnectionItem &item = connections[i];
-        item.elements.append({e, path});
+        item.elements.append(elemPath);
     }
 
     return true;

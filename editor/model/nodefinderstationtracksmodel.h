@@ -53,8 +53,6 @@ public:
 
     int getItemCount() const override;
 
-    bool parseItemStrokeWidth(const ItemBase *item, double &outVal);
-
 private:
     friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;

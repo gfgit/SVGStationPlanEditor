@@ -9,6 +9,7 @@ struct ElementPath
 {
     QDomElement elem;
     QPainterPath path;
+    double strokeWidth;
 };
 
 typedef struct ItemBase
