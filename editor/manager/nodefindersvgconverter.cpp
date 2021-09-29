@@ -132,6 +132,11 @@ void NodeFinderSVGConverter::loadLabelsAndTracks()
         parseTrackConnection(e, connections);
     }
 
+    //Sort models
+    std::sort(labels.begin(), labels.end());
+    std::sort(tracks.begin(), tracks.end());
+    std::sort(connections.begin(), connections.end());
+
     labelsModel->setItems(labels);
     tracksModel->setItems(tracks);
     turnoutModel->setItems(connections);

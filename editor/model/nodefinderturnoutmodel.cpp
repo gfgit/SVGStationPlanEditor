@@ -200,6 +200,7 @@ bool NodeFinderTurnoutModel::addElementToItem(ElementPath &p, ItemBase *item)
     QVector<TrackConnectionInfo> infoVec;
     utils::parseTrackConnectionAttribute(p.elem.attribute(svg_attr::TrackConnections), infoVec);
     infoVec.append(ptr->info);
+    std::sort(infoVec.begin(), infoVec.end());
     p.elem.setAttribute(svg_attr::TrackConnections, utils::trackConnInfoToString(infoVec));
 
     item->elements.append(p);
