@@ -105,179 +105,224 @@ bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRel
     return true;
 }
 
+bool convertLine(const QDomElement &e, QPainterPath &path)
+{
+    QString str = e.attribute(QLatin1String("x1"));
+    if(str.isEmpty())
+        return false;
+    double x1 = 0;
+    if(!parseNumber(x1, str))
+        return false;
+
+    str = e.attribute(QLatin1String("y1"));
+    if(str.isEmpty())
+        return false;
+    double y1 = 0;
+    if(!parseNumber(y1, str))
+        return false;
+
+    str = e.attribute(QLatin1String("x2"));
+    if(str.isEmpty())
+        return false;
+    double x2 = 0;
+    if(!parseNumber(x2, str))
+        return false;
+
+    str = e.attribute(QLatin1String("y2"));
+    if(str.isEmpty())
+        return false;
+    double y2 = 0;
+    if(!parseNumber(y2, str))
+        return false;
+
+    path.moveTo(x1, y1);
+    path.lineTo(x2, y2);
+    return true;
+}
+
+bool convertPolyline(const QDomElement &e, QPainterPath &path)
+{
+    QString str = e.attribute(QLatin1String("points"));
+    if(str.isEmpty())
+        return false;
+
+    QStringRef strRef(&str);
+    strRef = strRef.trimmed();
+    QPointF pt;
+
+    //Origin
+    if(!utils::parsePointAndAdvance(pt, strRef))
+        return false;
+    path.moveTo(pt);
+
+    //First line
+    if(!utils::parsePointAndAdvance(pt, strRef))
+        return false;
+    path.lineTo(pt);
+
+    while (utils::parsePointAndAdvance(pt, strRef))
+    {
+        path.lineTo(pt);
+    }
+
+    return true;
+}
+
+bool convertPath(const QDomElement &e, QPainterPath &path)
+{
+    QString str = e.attribute(QLatin1String("d"));
+    if(str.isEmpty())
+        return false;
+
+    QStringRef strRef(&str);
+
+    //Skip leading spaces
+    strRef = strRef.trimmed();
+
+    bool defaultRelative = false;
+    QChar startLetter = strRef.at(0);
+    if(startLetter == 'M')
+        defaultRelative = false;
+    else if(startLetter == 'm')
+        defaultRelative = true;
+    else
+        return false; //Must start with M or m
+
+    //Eat letter and spaces
+    strRef = strRef.mid(1).trimmed();
+
+    QPointF pt;
+
+    //Origin
+    if(!utils::parsePointAndAdvance(pt, strRef))
+        return false;
+    path.moveTo(pt);
+
+    QPointF prevPt = pt;
+
+    int i = 0;
+    while (i < 1000)
+    {
+        if(strRef.isEmpty())
+            break; //End cicle
+
+        QChar op = strRef.at(0);
+        if(!op.isLetter())
+        {
+            //Default to line to
+            if(defaultRelative)
+                op = 'l';
+            else
+                op = 'L';
+        }
+        else
+        {
+            //Eat letter
+            strRef = strRef.mid(1);
+        }
+
+        //Eat spaces
+        strRef = strRef.trimmed();
+
+        const bool isRelative = op.isLower();
+
+        //Switch on upper case, we already set correct point
+        switch (op.toUpper().toLatin1())
+        {
+        case 'M':
+        {
+            if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
+                return false;
+            path.moveTo(pt);
+            break;
+        }
+        case 'L':
+        {
+            if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
+                return false;
+            path.lineTo(pt);
+            break;
+        }
+        case 'H':
+        {
+            double newX = 0;
+            if(!parseNumberAndAdvanceRelative(newX, strRef, isRelative, prevPt.x()))
+                return false;
+            pt.setX(newX);
+            path.lineTo(pt);
+            break;
+        }
+        case 'V':
+        {
+            double newY = 0;
+            if(!parseNumberAndAdvanceRelative(newY, strRef, isRelative, prevPt.y()))
+                return false;
+            pt.setY(newY);
+            path.lineTo(pt);
+            break;
+        }
+        default:
+        {
+            if(i == 0) //At least 1 line
+                return false;
+            return true; //Ignore unsupported op
+        }
+        }
+
+        prevPt = pt;
+
+        i++;
+    }
+
+    if(i == 0) //At least 1 line
+        return false;
+    return true;
+}
+
+bool convertRect(const QDomElement &e, QPainterPath &path)
+{
+    //height="27.528757" x="7.7508163" y="71.160507" width="57.195679"
+
+    double x = 0, y = 0, w = 0, h = 0;
+
+    QString str = e.attribute(QLatin1String("x"));
+    if(str.isEmpty() || !parseNumber(x, str))
+        return false;
+
+    str = e.attribute(QLatin1String("y"));
+    if(str.isEmpty() || !parseNumber(y, str))
+        return false;
+
+    str = e.attribute(QLatin1String("width"));
+    if(str.isEmpty() || !parseNumber(w, str))
+        return false;
+
+    str = e.attribute(QLatin1String("height"));
+    if(str.isEmpty() || !parseNumber(h, str))
+        return false;
+
+    path.addRect(x, y, w, h);
+
+    return true;
+}
+
 bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
 {
     if(e.tagName() == svg_tag::LineTag)
     {
-        bool ok = false;
-        QString str = e.attribute(QLatin1String("x1"));
-        if(str.isEmpty())
-            return false;
-        double x1 = 0;
-        if(!parseNumber(x1, str))
-            return false;
-
-        str = e.attribute(QLatin1String("y1"));
-        if(str.isEmpty())
-            return false;
-        double y1 = 0;
-        if(!parseNumber(y1, str))
-            return false;
-
-        str = e.attribute(QLatin1String("x2"));
-        if(str.isEmpty())
-            return false;
-        double x2 = 0;
-        if(!parseNumber(x2, str))
-            return false;
-
-        str = e.attribute(QLatin1String("y2"));
-        if(str.isEmpty())
-            return false;
-        double y2 = 0;
-        if(!parseNumber(y2, str))
-            return false;
-
-        path.moveTo(x1, y1);
-        path.lineTo(x2, y2);
-        return true;
+        return convertLine(e, path);
     }
     if(e.tagName() == svg_tag::PolylineTag)
     {
-        QString str = e.attribute(QLatin1String("points"));
-        if(str.isEmpty())
-            return false;
-
-        QStringRef strRef(&str);
-        strRef = strRef.trimmed();
-        QPointF pt;
-
-        //Origin
-        if(!parsePointAndAdvance(pt, strRef))
-            return false;
-        path.moveTo(pt);
-
-        //First line
-        if(!parsePointAndAdvance(pt, strRef))
-            return false;
-        path.lineTo(pt);
-
-        while (parsePointAndAdvance(pt, strRef))
-        {
-            path.lineTo(pt);
-        }
-
-        return true;
+        return convertPolyline(e, path);
     }
     if(e.tagName() == svg_tag::PathTag)
     {
-        QString str = e.attribute(QLatin1String("d"));
-        if(str.isEmpty())
-            return false;
-
-        QStringRef strRef(&str);
-
-        //Skip leading spaces
-        strRef = strRef.trimmed();
-
-        bool defaultRelative = false;
-        QChar startLetter = strRef.at(0);
-        if(startLetter == 'M')
-            defaultRelative = false;
-        else if(startLetter == 'm')
-            defaultRelative = true;
-        else
-            return false; //Must start with M or m
-
-        //Eat letter and spaces
-        strRef = strRef.mid(1).trimmed();
-
-        QPointF pt;
-
-        //Origin
-        if(!parsePointAndAdvance(pt, strRef))
-            return false;
-        path.moveTo(pt);
-
-        QPointF prevPt = pt;
-
-        int i = 0;
-        while (i < 1000)
-        {
-            if(strRef.isEmpty())
-                break; //End cicle
-
-            QChar op = strRef.at(0);
-            if(!op.isLetter())
-            {
-                //Default to line to
-                if(defaultRelative)
-                    op = 'l';
-                else
-                    op = 'L';
-            }
-            else
-            {
-                //Eat letter
-                strRef = strRef.mid(1);
-            }
-
-            //Eat spaces
-            strRef = strRef.trimmed();
-
-            const bool isRelative = op.isLower();
-
-            //Switch on upper case, we already set correct point
-            switch (op.toUpper().toLatin1())
-            {
-            case 'M':
-            {
-                if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
-                    return false;
-                path.moveTo(pt);
-                break;
-            }
-            case 'L':
-            {
-                if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
-                    return false;
-                path.lineTo(pt);
-                break;
-            }
-            case 'H':
-            {
-                double newX = 0;
-                if(!parseNumberAndAdvanceRelative(newX, strRef, isRelative, prevPt.x()))
-                    return false;
-                pt.setX(newX);
-                path.lineTo(pt);
-                break;
-            }
-            case 'V':
-            {
-                double newY = 0;
-                if(!parseNumberAndAdvanceRelative(newY, strRef, isRelative, prevPt.y()))
-                    return false;
-                pt.setY(newY);
-                path.lineTo(pt);
-                break;
-            }
-            default:
-            {
-                if(i == 0) //At least 1 line
-                    return false;
-                return true; //Ignore unsupported op
-            }
-            }
-
-            prevPt = pt;
-
-            i++;
-        }
-
-        if(i == 0) //At least 1 line
-            return false;
-        return true;
+        return convertPath(e, path);
+    }
+    if(e.tagName() == svg_tag::RectTag)
+    {
+        return convertRect(e, path);
     }
 
     //Unsupported element
