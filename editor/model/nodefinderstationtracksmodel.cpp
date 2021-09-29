@@ -150,7 +150,7 @@ void NodeFinderStationTracksModel::clear()
 
 bool NodeFinderStationTracksModel::addElementToItem(ElementPath &p, ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
     TrackItem *ptr = static_cast<TrackItem *>(item);

@@ -74,6 +74,11 @@ static const QString PolylineTag = QLatin1String("polyline");
 
 //Operators
 
+inline bool operator==(const ElementPath& left, const ElementPath& right)
+{
+    return left.elem == right.elem;
+}
+
 inline bool operator<(const LabelItem& left, const LabelItem& right)
 {
     return left.gateLetter < right.gateLetter;

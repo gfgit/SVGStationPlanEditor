@@ -46,6 +46,10 @@ public:
 
     int getItemCount() const override;
 
+    bool addItem() override;
+    bool editItem(int row) override;
+    bool removeItem(int row) override;
+
 private:
     friend class NodeFinderSVGWidget;
 

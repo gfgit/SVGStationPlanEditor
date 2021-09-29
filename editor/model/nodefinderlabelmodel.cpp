@@ -137,7 +137,7 @@ void NodeFinderLabelModel::clear()
 
 bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
     LabelItem *ptr = static_cast<LabelItem *>(item);
@@ -163,4 +163,51 @@ const ItemBase* NodeFinderLabelModel::getItemAt(int row)
 int NodeFinderLabelModel::getItemCount() const
 {
     return items.size();
+}
+
+bool NodeFinderLabelModel::addItem()
+{
+    nodeMgr->clearCurrentItem();
+
+    LabelItem item;
+    item.gateLetter = '-';
+    item.visible = false;
+
+    beginInsertRows(QModelIndex(), items.size(), items.size());
+    items.append(item);
+    endInsertRows();
+
+    return true;
+}
+
+bool NodeFinderLabelModel::removeItem(int row)
+{
+    if(row < 0 || row >= items.size())
+        return false;
+
+    nodeMgr->clearCurrentItem();
+
+    ItemBase& item = items[row];
+
+    for(ElementPath& elemPath : item.elements)
+    {
+        elemPath.elem.removeAttribute(svg_attr::LabelName);
+    }
+
+    beginRemoveRows(QModelIndex(), row, row);
+    items.removeAt(row);
+    endRemoveRows();
+
+    return true;
+}
+
+bool NodeFinderLabelModel::editItem(int row)
+{
+    if(row < 0 || row >= items.size())
+        return false;
+
+    ItemBase *item = &items[row];
+    nodeMgr->requestEditItem(item, EditingModes::LabelEditing);
+
+    return true;
 }

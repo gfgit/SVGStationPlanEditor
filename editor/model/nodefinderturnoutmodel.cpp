@@ -189,7 +189,7 @@ void NodeFinderTurnoutModel::clear()
 
 bool NodeFinderTurnoutModel::addElementToItem(ElementPath &p, ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
     TrackConnectionItem *ptr = static_cast<TrackConnectionItem *>(item);
