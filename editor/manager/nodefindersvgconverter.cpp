@@ -484,9 +484,23 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
     if(labelName.isEmpty())
         return false;
 
+    bool ok = true;
     labelName = labelName.simplified();
+
     if(labelName.isEmpty() || labelName.front() < 'A' || labelName.front() > 'Z')
     {
+        ok = false;
+    }
+
+    QPainterPath path;
+    if(ok)
+    {
+        ok = utils::convertElementToPath(e, path);
+    }
+
+    if(!ok)
+    {
+        //Cannot parse attribute or element path, remove it
         e.removeAttribute(svg_attr::LabelName);
         return false;
     }
@@ -510,9 +524,6 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
     }
 
     //Add element to label
-    QPainterPath path;
-    path.addRect(mSvg->boundsOnElement(e.attribute(svg_attr::ID)));
-
     LabelItem &item = labels[i];
     item.elements.append({e, path});
 

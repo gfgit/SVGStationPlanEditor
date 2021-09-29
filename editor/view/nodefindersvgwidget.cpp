@@ -81,7 +81,11 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     //FIXME: bad code, use name getter func
                     const QString text = fmt.arg(static_cast<const LabelItem *>(item)->gateLetter);
 
-                    f.setPixelSize(r.height() * 0.85);
+                    int sizeH = r.height() * 0.85;
+                    int sizeW = r.width() * 0.3;
+                    const int minPixelSize = 10;
+
+                    f.setPixelSize(qMax(minPixelSize, qMin(sizeH, sizeW)));
                     p.setFont(f);
                     p.drawText(r, text, QTextOption(Qt::AlignCenter));
                 }
