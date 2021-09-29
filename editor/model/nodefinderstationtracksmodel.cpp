@@ -2,6 +2,8 @@
 
 #include "editor/manager/nodefindermgr.h"
 
+#include "utils/svgutils.h"
+
 #include <QBrush>
 
 NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent) :
@@ -257,4 +259,29 @@ const ItemBase* NodeFinderStationTracksModel::getItemAt(int row)
 int NodeFinderStationTracksModel::getItemCount() const
 {
     return items.count();
+}
+
+bool NodeFinderStationTracksModel::parseItemStrokeWidth(const ItemBase *item, double &outVal)
+{
+    double tot = 0;
+    int count = 0;
+
+    for(const ElementPath& p : item->elements)
+    {
+        double val = 0;
+        if(utils::parseStrokeWidth(p, val))
+        {
+            tot += val;
+            count++;
+        }
+    }
+
+    if(count > 0)
+    {
+        //Calculate average
+        outVal = tot / double(count);
+        return true;
+    }
+
+    return false;
 }
