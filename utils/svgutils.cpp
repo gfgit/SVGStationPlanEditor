@@ -446,3 +446,52 @@ QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
 
     return value;
 }
+
+bool utils::parseStrokeWidth(const ElementPath &e, double &outVal)
+{
+    QString strokeWidth;
+    if(e.elem.hasAttribute("stroke-width"))
+    {
+        //Parse SVG attribute
+        strokeWidth = e.elem.attribute("stroke-width").simplified();
+    }
+    else if(e.elem.hasAttribute("style"))
+    {
+        //Parse CSS style
+        QString style = e.elem.attribute("style");
+
+        const int idx = style.indexOf("stroke-width");
+        if(idx < 0)
+            return false;
+
+        const int start = style.indexOf(':', idx + 12);
+        if(start < 0)
+            return false;
+
+        const int end = style.indexOf(';', start);
+        int length = end - start;
+        if(length < 0)
+            length = -1; //Take all string
+
+        strokeWidth = style.mid(start, length);
+    }
+    else
+    {
+        //No way of getting stroke width
+        return false;
+    }
+
+    QStringRef ref(&strokeWidth);
+    if(!parseNumberAndAdvance(outVal, ref))
+        return false;
+
+    if(ref.contains('%'))
+    {
+        //Width relative to element size
+        QSizeF sz = e.path.boundingRect().size();
+        double averageSize = (sz.width() + sz.height()) / 2.0;
+        outVal = outVal / 100 * averageSize;
+    }
+
+    return true;
+}
