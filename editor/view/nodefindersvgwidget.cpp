@@ -165,6 +165,8 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         {
             pen = trackPen;
             pen.setColor(color);
+            if(curPath.strokeWidth > 0)
+                pen.setWidthF(curPath.strokeWidth * PenWidthFactor);
         }else{
             pen.setWidth(trackPen.width() / 2);
             p.setBrush(color);
@@ -252,18 +254,23 @@ void NodeFinderSVGWidget::keyPressEvent(QKeyEvent *e)
 {
     switch (e->key())
     {
+    case Qt::Key_Escape:
+    {
+        nodeMgr->clearCurrentItem();
+        break;
+    }
     case Qt::Key_Return:
     case Qt::Key_Enter:
     {
         nodeMgr->selectCurrentElem();
         break;
     }
-    case Qt::Key_Right:
+    case Qt::Key_D:
     {
         nodeMgr->goToNextElem();
         break;
     }
-    case Qt::Key_Left:
+    case Qt::Key_A:
     {
         nodeMgr->goToPrevElem();
         break;
