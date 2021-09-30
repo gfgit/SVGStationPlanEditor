@@ -491,6 +491,9 @@ bool utils::parseStrokeWidth(const ElementPath &e, double &outVal)
         QSizeF sz = e.path.boundingRect().size();
         double averageSize = (sz.width() + sz.height()) / 2.0;
         outVal = outVal / 100 * averageSize;
+
+        if(outVal < 0 || qFuzzyIsNull(outVal))
+            return false;
     }
 
     return true;
