@@ -38,14 +38,17 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     prevElemBut = new QToolButton;
     prevElemBut->setText(tr("Prev"));
     prevElemBut->setToolTip(tr("Go to prev element"));
+    prevElemBut->setShortcut(Qt::Key_A);
     lay->addWidget(prevElemBut);
 
     selectElemBut = new QToolButton;
+    selectElemBut->setShortcut(Qt::Key_S);
     lay->addWidget(selectElemBut);
 
     nextElemBut = new QToolButton;
     nextElemBut->setText(tr("Next"));
     nextElemBut->setToolTip(tr("Go to next element"));
+    nextElemBut->setShortcut(Qt::Key_D);
     lay->addWidget(nextElemBut);
 
     endEditBut = new QToolButton;
