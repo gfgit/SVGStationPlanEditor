@@ -16,7 +16,8 @@ NodeFinderMgr::NodeFinderMgr(QObject *parent) :
     drawLabels(true),
     drawStationTracks(true),
     trackPenWidth(10),
-    m_isSelecting(false)
+    m_isSelecting(false),
+    m_isSinglePoint(false)
 {
     converter = new NodeFinderSVGConverter(this);
 
@@ -42,6 +43,45 @@ void NodeFinderMgr::setMode(EditingModes m, EditingSubModes sub)
 
     emit modeChanged();
     emit repaintSVG();
+}
+
+bool NodeFinderMgr::validateCurrentElement()
+{
+    ElementPath elemPath;
+    elemPath.elem = converter->currentWalker.element();
+    if(!utils::convertElementToPath(elemPath.elem, elemPath.path))
+        return false; //Canmot be converted to path, skip it.
+
+    elemPath.strokeWidth = 0;
+    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+        elemPath.strokeWidth = 0;
+
+    const QRectF bounds = elemPath.path.boundingRect();
+    bool isElementValid = false;
+
+    if(m_isSinglePoint)
+    {
+        //Single point, element contains point
+        double width = elemPath.strokeWidth;
+        if(width < 5)
+            width = 5;
+
+        const QPointF offset(width, width);
+        QRectF targetRect(selectionStart - offset, selectionStart + offset);
+
+        isElementValid = elemPath.path.intersects(targetRect);
+    }
+    else
+    {
+        //Rect, selection contains element
+        isElementValid = getSelectionRect().contains(bounds);
+    }
+
+    if(!isElementValid)
+        return false; //Go to next element
+
+    converter->curElementPath = elemPath;
+    return true; //Use element
 }
 
 EditingSubModes NodeFinderMgr::getSubMode() const
@@ -215,17 +255,8 @@ void NodeFinderMgr::goToPrevElem()
                 break;
             }
 
-            QDomElement elem = converter->currentWalker.element();
-            QString id = elem.attribute(svg_attr::ID);
-            const QRectF bounds = converter->renderer()->boundsOnElement(id);
-            if(getSelectionRect().contains(bounds))
-            {
-                //It's in selection
-                converter->curElementPath.elem = elem;
-                converter->curElementPath.path.clear();
-                if(utils::convertElementToPath(elem, converter->curElementPath.path))
-                    break; //Can be converted to path so use it.
-            }
+            if(validateCurrentElement())
+                break; //Use element
         }
     }
     else if(m_subMode == EditingSubModes::RemovingSubElement)
@@ -285,17 +316,8 @@ void NodeFinderMgr::goToNextElem()
                 break;
             }
 
-            QDomElement elem = converter->currentWalker.element();
-            QString id = elem.attribute(svg_attr::ID);
-            const QRectF bounds = converter->renderer()->boundsOnElement(id);
-            if(getSelectionRect().contains(bounds))
-            {
-                //It's in selection
-                converter->curElementPath.elem = elem;
-                converter->curElementPath.path.clear();
-                if(utils::convertElementToPath(elem, converter->curElementPath.path))
-                    break; //Can be converted to path so use it.
-            }
+            if(validateCurrentElement())
+                break; //Use element
         }
     }
     else if(m_subMode == EditingSubModes::RemovingSubElement)
@@ -379,6 +401,7 @@ void NodeFinderMgr::startSelection(const QPointF &p)
 {
     clearSelection();
     m_isSelecting = true;
+    m_isSinglePoint = true;
     selectionStart = selectionEnd = p;
     emit repaintSVG();
 }
@@ -401,7 +424,16 @@ void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
                 tags.prepend(svg_tag::RectTag);
             converter->currentWalker = converter->walkElements(tags);
             converter->curElementPath = ElementPath(); //Reset
+
+            if(m_isSinglePoint)
+            {
+                //Try to select first available element
+                goToNextElem();
+            }
         }
+    }else{
+        //Mouse has moved so it's not a single point
+        m_isSinglePoint = false;
     }
 
     emit repaintSVG();
@@ -410,6 +442,7 @@ void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
 void NodeFinderMgr::clearSelection()
 {
     m_isSelecting = false;
+    m_isSinglePoint = false;
     selectionStart = selectionEnd = QPointF();
     converter->currentWalker = NodeFinderElementWalker(); //Reset
     converter->curElementPath = ElementPath();

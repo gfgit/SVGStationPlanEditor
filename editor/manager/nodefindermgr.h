@@ -73,6 +73,7 @@ public slots:
 
 private:
     void setMode(EditingModes m, EditingSubModes sub = EditingSubModes::NotEditingCurrentItem);
+    bool validateCurrentElement();
 
 private:
     EditingModes m_mode;
@@ -90,6 +91,7 @@ private:
     QPointF selectionStart;
     QPointF selectionEnd;
     bool m_isSelecting;
+    bool m_isSinglePoint;
 };
 
 #endif // NODEFINDERMGR_H
