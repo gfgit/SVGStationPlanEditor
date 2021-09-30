@@ -247,3 +247,33 @@ void NodeFinderSVGWidget::mouseReleaseEvent(QMouseEvent *e)
 
     nodeMgr->endOrMoveSelection(pos, true);
 }
+
+void NodeFinderSVGWidget::keyPressEvent(QKeyEvent *e)
+{
+    switch (e->key())
+    {
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+    {
+        nodeMgr->selectCurrentElem();
+        break;
+    }
+    case Qt::Key_Right:
+    {
+        nodeMgr->goToNextElem();
+        break;
+    }
+    case Qt::Key_Left:
+    {
+        nodeMgr->goToPrevElem();
+        break;
+    }
+    default:
+    {
+        e->ignore();
+        return;
+    }
+    }
+
+    e->accept();
+}
