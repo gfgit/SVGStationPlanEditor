@@ -203,7 +203,8 @@ void NodeFinderMgr::selectCurrentElem()
             }
         }
 
-        requestEndEditItem();
+        if(!m_isSinglePoint)
+            requestEndEditItem();
     }
     else if(m_subMode == EditingSubModes::RemovingSubElement)
     {
@@ -243,6 +244,7 @@ void NodeFinderMgr::goToPrevElem()
         //Walk elements
         while (true)
         {
+            bool wasValid = converter->currentWalker.isValid();
             if(!converter->currentWalker.prev())
             {
                 if(centralWidget)
@@ -251,7 +253,16 @@ void NodeFinderMgr::goToPrevElem()
                                          tr("There aren't previous elements in current selection.\n"
                                             "Go forward with 'Next' to select one."));
                 }
-                converter->curElementPath = ElementPath(); //Reset
+
+                if(m_isSinglePoint && wasValid)
+                {
+                    //Keep last item selected
+                    converter->currentWalker.next();
+                }
+                else
+                {
+                    converter->curElementPath = ElementPath(); //Reset
+                }
                 break;
             }
 
@@ -304,6 +315,7 @@ void NodeFinderMgr::goToNextElem()
         //Walk elements
         while (true)
         {
+            bool wasValid = converter->currentWalker.isValid();
             if(!converter->currentWalker.next())
             {
                 if(centralWidget)
@@ -312,7 +324,16 @@ void NodeFinderMgr::goToNextElem()
                                          tr("There aren't other elements in current selection.\n"
                                             "Go back with 'Prev' to select one."));
                 }
-                converter->curElementPath = ElementPath(); //Reset
+
+                if(m_isSinglePoint && wasValid)
+                {
+                    //Keep last item selected
+                    converter->currentWalker.prev();
+                }
+                else
+                {
+                    converter->curElementPath = ElementPath(); //Reset
+                }
                 break;
             }
 
