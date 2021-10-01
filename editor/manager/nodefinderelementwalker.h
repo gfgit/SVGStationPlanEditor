@@ -11,7 +11,7 @@ private:
     NodeFinderElementWalker(const QStringList& orderedTags, const QHash<QString, NodeFinderElementClass>& elementClasses);
 
 public:
-    inline NodeFinderElementWalker() : m_currentMap(nullptr), m_tagIdx(-1) {}
+    inline NodeFinderElementWalker() = default;
 
     bool next();
     bool prev();
@@ -19,12 +19,20 @@ public:
 
     QDomElement element();
 
+    typedef struct Status
+    {
+        NodeFinderElementClass::ElementMap *currentMap = nullptr;
+        NodeFinderElementClass::ElementMap::iterator iter;
+        int tagIdx = -1;
+    } Status;
+
+    inline Status getStatus() const { return m_status; }
+    inline void restoreStatus(const Status& s) { m_status = s; }
+
 private:
     QStringList m_orderedTags;
     QHash<QString, NodeFinderElementClass> m_elementClasses;
-    NodeFinderElementClass::ElementMap *m_currentMap;
-    NodeFinderElementClass::ElementMap::iterator m_iter;
-    int m_tagIdx;
+    Status m_status;
 };
 
 #endif // NODEFINDERELEMENTWALKER_H

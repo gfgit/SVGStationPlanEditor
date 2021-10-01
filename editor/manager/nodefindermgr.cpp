@@ -245,6 +245,7 @@ void NodeFinderMgr::goToPrevElem()
         while (true)
         {
             bool wasValid = converter->currentWalker.isValid();
+            const NodeFinderElementWalker::Status status = converter->currentWalker.getStatus();
             if(!converter->currentWalker.prev())
             {
                 if(centralWidget)
@@ -257,7 +258,7 @@ void NodeFinderMgr::goToPrevElem()
                 if(m_isSinglePoint && wasValid)
                 {
                     //Keep last item selected
-                    converter->currentWalker.next();
+                    converter->currentWalker.restoreStatus(status);
                 }
                 else
                 {
@@ -316,6 +317,7 @@ void NodeFinderMgr::goToNextElem()
         while (true)
         {
             bool wasValid = converter->currentWalker.isValid();
+            const NodeFinderElementWalker::Status status = converter->currentWalker.getStatus();
             if(!converter->currentWalker.next())
             {
                 if(centralWidget)
@@ -328,7 +330,7 @@ void NodeFinderMgr::goToNextElem()
                 if(m_isSinglePoint && wasValid)
                 {
                     //Keep last item selected
-                    converter->currentWalker.prev();
+                    converter->currentWalker.restoreStatus(status);
                 }
                 else
                 {
