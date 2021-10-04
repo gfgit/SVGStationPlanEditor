@@ -1,5 +1,5 @@
-#ifndef NODEFINDERUTILS_H
-#define NODEFINDERUTILS_H
+#ifndef NODEFINDERTYPES_H
+#define NODEFINDERTYPES_H
 
 #include <QString>
 #include <QDomElement>
@@ -115,4 +115,4 @@ inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInf
            left.gateLetter == right.gateLetter;
 }
 
-#endif // NODEFINDERUTILS_H
+#endif // NODEFINDERTYPES_H
