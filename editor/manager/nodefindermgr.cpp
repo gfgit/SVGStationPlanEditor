@@ -511,8 +511,19 @@ void NodeFinderMgr::startElementSplitProcess()
 
 void NodeFinderMgr::triggerElementSplit(const QPointF& pos)
 {
-    ElementSplitterHelper helper(this, converter->currentWalker.element());
-    helper.splitAt(pos);
+    int ret = QMessageBox::question(centralWidget, tr("Split Item?"),
+                                    tr("Split current element at clicked point X coordinate?"));
+    if(ret != QMessageBox::Yes)
+        return; //Abort
+
+    ElementSplitterHelper helper(this, converter->currentWalker.element(), trackPenWidth);
+    if(!helper.splitAt(pos))
+    {
+        QMessageBox::warning(centralWidget, tr("No split"),
+                             tr("Cannot calculate split point, did you click outside of path bounds?"
+                                "By adjusting track pen width you can make bouns larger."));
+        return;
+    }
 
     //Current element might be removed so reset walker
     clearCurrentItem();

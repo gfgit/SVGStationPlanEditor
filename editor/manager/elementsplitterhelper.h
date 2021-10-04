@@ -9,13 +9,14 @@ class NodeFinderMgr;
 class ElementSplitterHelper
 {
 public:
-    ElementSplitterHelper(NodeFinderMgr *mgr, QDomElement e);
+    ElementSplitterHelper(NodeFinderMgr *mgr, QDomElement e, double threshold);
 
     bool splitAt(const QPointF& pos);
 
 private:
     NodeFinderMgr *nodeMgr;
     QDomElement origElem;
+    double m_threshold;
 };
 
 #endif // ELEMENTSPLITTERHELPER_H

@@ -6,9 +6,10 @@
 #include "nodefindermgr.h"
 #include "nodefindersvgconverter.h"
 
-ElementSplitterHelper::ElementSplitterHelper(NodeFinderMgr *mgr, QDomElement e) :
+ElementSplitterHelper::ElementSplitterHelper(NodeFinderMgr *mgr, QDomElement e, double threshold) :
     nodeMgr(mgr),
-    origElem(e)
+    origElem(e),
+    m_threshold(threshold)
 {
 
 }
@@ -22,7 +23,7 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     if(!utils::convertElementToPath(origElem, path))
         return false;
 
-    if(!cutPathAtPoint(pos, path, dest, rest))
+    if(!cutPathAtPoint(pos, m_threshold, path, dest, rest))
         return false;
 
     QString destVal;
