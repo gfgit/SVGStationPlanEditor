@@ -1,8 +1,10 @@
 #include "svgutils.h"
 
-#include "nodefinderutils.h"
+#include "nodefindertypes.h"
 
 #include <QTextStream>
+
+#include <QDebug>
 
 int parseNumber(double &outVal, const QStringView &str)
 {
@@ -497,4 +499,68 @@ bool utils::parseStrokeWidth(const ElementPath &e, double &outVal)
     }
 
     return true;
+}
+
+bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
+{
+    QTextStream stream(&outD);
+
+    const int count = path.elementCount();
+
+    enum PointType
+    {
+        NormalPoint,
+        CubicControl_2,
+        CubicEndPoint
+    };
+
+    PointType nextType = NormalPoint;
+
+    for(int i = 0; i < count; i++)
+    {
+        QPainterPath::Element e = path.elementAt(i);
+        switch (e.type)
+        {
+        case QPainterPath::MoveToElement:
+        {
+            stream << "M " << e.x << ' ' << e.y << ' ';
+            nextType = NormalPoint;
+            break;
+        }
+        case QPainterPath::LineToElement:
+        {
+            stream << "L " << e.x << ' ' << e.y << ' ';
+            nextType = NormalPoint;
+            break;
+        }
+        case QPainterPath::CurveToElement:
+        {
+            if(nextType != NormalPoint)
+                qWarning() << "Cubic INSIDE Cubic";
+            nextType = CubicControl_2;
+            break;
+        }
+        case QPainterPath::CurveToDataElement:
+        {
+            switch (nextType)
+            {
+            case NormalPoint:
+                break;
+            case CubicControl_2:
+                nextType = CubicEndPoint;
+                break;
+            case CubicEndPoint:
+            {
+                //Fake cubic to line from start to end
+                stream << "L " << e.x << ' ' << e.y << ' ';
+
+                nextType = NormalPoint;
+            }
+            }
+            break;
+        }
+        }
+    }
+
+    return stream.status() == QTextStream::Ok;
 }

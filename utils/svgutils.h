@@ -4,7 +4,7 @@
 #include <QDomElement>
 #include <QPainterPath>
 
-#include "nodefinderutils.h"
+#include "nodefindertypes.h"
 
 namespace utils
 {
@@ -20,6 +20,8 @@ bool parseTrackConnectionAttribute(const QString& value, QVector<TrackConnection
 QString trackConnInfoToString(const QVector<TrackConnectionInfo>& vec);
 
 bool parseStrokeWidth(const ElementPath &e, double& outVal);
+
+bool convertPathToSVG(const QPainterPath& path, QString& outD);
 
 } // namespace utils
 
