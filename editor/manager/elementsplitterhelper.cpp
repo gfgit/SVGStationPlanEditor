@@ -36,7 +36,14 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     if(origElem.tagName() != svg_tag::PathTag)
     {
         //Remove from original class
-        nodeMgr->getConverter()->removeElement(origElem);
+        bool isFakeId = false;
+        nodeMgr->getConverter()->removeElement(origElem, &isFakeId);
+
+        if(isFakeId)
+        {
+            //Clear ID to trigger generation of new one.
+            nodeMgr->getConverter()->renameElement(origElem, QString());
+        }
 
         //Convert to path
         origElem.setTagName(svg_tag::PathTag);
@@ -57,6 +64,7 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
 
     //Copy
     QDomElement newElem = origElem.cloneNode().toElement();
+    origElem.parentNode().insertAfter(newElem, origElem);
 
     origElem.setAttribute("d", destVal);
     newElem.setAttribute("d", restVal);
