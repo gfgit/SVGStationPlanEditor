@@ -15,7 +15,7 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     QHBoxLayout *lay = new QHBoxLayout(this);
 
     trackPenWidthSlider = new QSlider(Qt::Horizontal, this);
-    trackPenWidthSlider->setRange(5, 200);
+    trackPenWidthSlider->setRange(5, 400);
     trackPenWidthSlider->setToolTip(tr("Track Pen Width"));
     trackPenWidthSlider->setValue(nodeMgr->getTrackPenWidth());
     lay->addWidget(trackPenWidthSlider);
