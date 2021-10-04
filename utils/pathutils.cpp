@@ -55,9 +55,9 @@ bool cutPathAtPoint(const QPointF &p, const QPainterPath &src, QPainterPath &des
 
             lastPoint = e;
             if(pastCutPoint)
-                rest.moveTo(lastPoint);
+                rest.lineTo(lastPoint);
             else
-                dest.moveTo(lastPoint);
+                dest.lineTo(lastPoint);
             break;
         }
         case QPainterPath::CurveToElement:
