@@ -149,7 +149,14 @@ void NodeFinderStatusWidget::updateMode()
         {
             selectElemBut->setText(tr("Select"));
             selectElemBut->setToolTip(tr("Add element to current item"));
-        }else{
+        }
+        else if(subMode == EditingSubModes::DoSplitItem)
+        {
+            selectElemBut->setText(tr("Select"));
+            selectElemBut->setToolTip(tr("Select element to be split"));
+        }
+        else if(subMode == EditingSubModes::RemovingSubElement)
+        {
             selectElemBut->setText(tr("Remove"));
             selectElemBut->setToolTip(tr("Remove sub element"));
         }
