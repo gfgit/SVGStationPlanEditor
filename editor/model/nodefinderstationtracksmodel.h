@@ -5,7 +5,7 @@
 
 #include <QVector>
 
-#include "utils/nodefinderutils.h"
+#include "utils/nodefindertypes.h"
 
 class NodeFinderMgr;
 
