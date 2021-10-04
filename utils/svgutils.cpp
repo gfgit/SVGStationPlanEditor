@@ -27,10 +27,10 @@ int parseNumber(double &outVal, const QStringView &str)
             break; //Separator
 
         //Unexpected char
-        return false;
+        return -1;
     }
     if(i == 0)
-        return false;
+        return -1;
 
     bool ok = false;
     if(isExponential)
