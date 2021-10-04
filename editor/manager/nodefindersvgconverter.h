@@ -73,7 +73,7 @@ private:
 
     void storeElement(QDomElement e);
 
-    void removeElement(QDomElement e);
+    void removeElement(QDomElement e, bool *isFakeId = nullptr);
 
     inline void registerClass(const QString& tagName)
     {

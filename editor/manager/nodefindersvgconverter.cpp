@@ -270,13 +270,21 @@ void NodeFinderSVGConverter::storeElement(QDomElement e)
     }
 }
 
-void NodeFinderSVGConverter::removeElement(QDomElement e)
+void NodeFinderSVGConverter::removeElement(QDomElement e, bool *isFakeId)
 {
     for(NodeFinderElementClass &c : elementClasses)
     {
         if(c.getTagName() == e.tagName())
         {
             c.removeElement(e);
+
+            const QString oldId = e.attribute(svg_attr::ID);
+            if(fakeIds.contains(oldId))
+            {
+                if(isFakeId)
+                    *isFakeId = true;
+            }
+
             return;
         }
     }
