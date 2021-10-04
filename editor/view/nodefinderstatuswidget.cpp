@@ -68,7 +68,11 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     connect(nodeMgr, &NodeFinderMgr::modeChanged, this, &NodeFinderStatusWidget::updateMode);
 
     connect(trackPenWidthSlider, &QSlider::valueChanged, nodeMgr, &NodeFinderMgr::setTrackPenWidth);
-    connect(nodeMgr, &NodeFinderMgr::trackPenWidthChanged, trackPenWidthSlider, &QSlider::setValue);
+    connect(nodeMgr, &NodeFinderMgr::trackPenWidthChanged, trackPenWidthSlider, [this](int val)
+            {
+                trackPenWidthSlider->setToolTip(tr("Track Pen Width - %1").arg(val));
+                trackPenWidthSlider->setValue(val);
+            });
 
     connect(splitElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::startElementSplitProcess);
     connect(addSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestAddSubElement);
