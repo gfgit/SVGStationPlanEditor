@@ -51,6 +51,9 @@ public:
     inline bool isSelecting() const { return m_isSelecting; }
     inline QRectF getSelectionRect() const { return QRectF(selectionStart, selectionEnd).normalized(); }
 
+    void startElementSplitProcess();
+    void triggerElementSplit(const QPointF &pos);
+
 signals:
     void modeChanged();
     void trackPenWidthChanged(int width);

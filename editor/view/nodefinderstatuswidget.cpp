@@ -20,6 +20,11 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     trackPenWidthSlider->setValue(nodeMgr->getTrackPenWidth());
     lay->addWidget(trackPenWidthSlider);
 
+    splitElemBut = new QToolButton;
+    splitElemBut->setText(tr("Split"));
+    splitElemBut->setToolTip(tr("Start element selection and then split selected element at mouse click"));
+    lay->addWidget(splitElemBut);
+
     addSubElemBut = new QToolButton;
     addSubElemBut->setText(tr("Add"));
     addSubElemBut->setToolTip(tr("Start element selection to add new sub element to current item"));
@@ -65,6 +70,7 @@ NodeFinderStatusWidget::NodeFinderStatusWidget(NodeFinderMgr *mgr, QWidget *pare
     connect(trackPenWidthSlider, &QSlider::valueChanged, nodeMgr, &NodeFinderMgr::setTrackPenWidth);
     connect(nodeMgr, &NodeFinderMgr::trackPenWidthChanged, trackPenWidthSlider, &QSlider::setValue);
 
+    connect(splitElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::startElementSplitProcess);
     connect(addSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestAddSubElement);
     connect(remSubElemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::requestRemoveSubElement);
     connect(clearItemBut, &QToolButton::clicked, nodeMgr, &NodeFinderMgr::clearCurrentItem);
@@ -93,6 +99,9 @@ void NodeFinderStatusWidget::updateMode()
     case EditingSubModes::RemovingSubElement:
         modeName.append(tr(", REM"));
         break;
+    case EditingSubModes::DoSplitItem:
+        modeName.append(tr(", CUT"));
+        break;
     case EditingSubModes::NotEditingCurrentItem:
     case EditingSubModes::NSubModes:
         break;
@@ -104,6 +113,7 @@ void NodeFinderStatusWidget::updateMode()
 
     if(!isEditing)
     {
+        splitElemBut->show();
         addSubElemBut->show();
         remSubElemBut->show();
         clearItemBut->show();
@@ -125,6 +135,7 @@ void NodeFinderStatusWidget::updateMode()
 
         const bool showEditControls = subMode != EditingSubModes::NotEditingCurrentItem;
 
+        splitElemBut->setVisible(!showEditControls);
         addSubElemBut->setVisible(!showEditControls);
         remSubElemBut->setVisible(!showEditControls);
         clearItemBut->setVisible(!showEditControls);

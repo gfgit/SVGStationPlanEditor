@@ -24,6 +24,8 @@ private:
 
     QLabel *modeLabel;
 
+    QToolButton *splitElemBut;
+
     QToolButton *addSubElemBut;
     QToolButton *remSubElemBut;
     QToolButton *clearItemBut;

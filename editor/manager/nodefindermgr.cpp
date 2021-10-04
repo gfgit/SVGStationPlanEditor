@@ -9,6 +9,8 @@
 #include <QSvgRenderer>
 #include "utils/svgutils.h"
 
+#include "elementsplitterhelper.h"
+
 #include <QMessageBox>
 
 NodeFinderMgr::NodeFinderMgr(QObject *parent) :
@@ -36,6 +38,15 @@ void NodeFinderMgr::setMode(EditingModes m, EditingSubModes sub)
     const bool isEditing = m_mode > EditingModes::NoEditing && m_mode < EditingModes::NModes;
     if(!isEditing)
         sub = EditingSubModes::NotEditingCurrentItem;
+
+    if(sub == EditingSubModes::DoSplitItem && m_mode != EditingModes::SplitElement)
+        sub = EditingSubModes::NotEditingCurrentItem;
+
+    if(m_mode == EditingModes::SplitElement && sub != EditingSubModes::DoSplitItem)
+    {
+        sub = EditingSubModes::AddingSubElement;
+    }
+
     m_subMode = sub;
 
     //Draw only when not editing
@@ -194,6 +205,12 @@ void NodeFinderMgr::selectCurrentElem()
                                      tr("There is no element selected.\n"
                                         "Use 'Prev' and 'Next' to select one."));
             }
+            return;
+        }
+
+        if(m_mode == EditingModes::SplitElement)
+        {
+            setMode(m_mode, EditingSubModes::DoSplitItem);
             return;
         }
 
@@ -395,7 +412,11 @@ void NodeFinderMgr::requestRemoveSubElement()
 
 void NodeFinderMgr::requestEndEditItem()
 {
-    setMode(m_mode, EditingSubModes::NotEditingCurrentItem);
+    EditingModes m = m_mode;
+    if(m == EditingModes::SplitElement)
+        m = EditingModes::NoEditing; //Close element splitting
+
+    setMode(m, EditingSubModes::NotEditingCurrentItem);
     clearSelection();
 }
 
@@ -425,6 +446,13 @@ void NodeFinderMgr::setTrackPenWidth(int value)
 
 void NodeFinderMgr::startSelection(const QPointF &p)
 {
+    if(m_subMode == EditingSubModes::DoSplitItem)
+    {
+        //Use as split
+        triggerElementSplit(p);
+        return;
+    }
+
     clearSelection();
     m_isSelecting = true;
     m_isSinglePoint = true;
@@ -472,5 +500,25 @@ void NodeFinderMgr::clearSelection()
     selectionStart = selectionEnd = QPointF();
     converter->currentWalker = NodeFinderElementWalker(); //Reset
     converter->curElementPath = ElementPath();
+    emit repaintSVG();
+}
+
+void NodeFinderMgr::startElementSplitProcess()
+{
+    clearCurrentItem();
+    setMode(EditingModes::SplitElement, EditingSubModes::AddingSubElement);
+}
+
+void NodeFinderMgr::triggerElementSplit(const QPointF& pos)
+{
+    ElementSplitterHelper helper(this, converter->currentWalker.element());
+
+    helper.splitAt(pos);
+
+    //Current element might be removed so reset walker
+    converter->currentWalker.restoreStatus(NodeFinderElementWalker::Status());
+
+    //Restore previous mode
+    setMode(m_mode, EditingSubModes::AddingSubElement);
     emit repaintSVG();
 }
