@@ -1,7 +1,7 @@
 #include "pathutils.h"
 
 
-bool cutPathAtPoint(const QPointF &p, const QPainterPath &src, QPainterPath &dest, QPainterPath &rest)
+bool cutPathAtPoint(const QPointF &p, const double threshold, const QPainterPath &src, QPainterPath &dest, QPainterPath &rest)
 {
     QPointF lastPoint;
     bool fakeLine = false;
@@ -35,6 +35,13 @@ bool cutPathAtPoint(const QPointF &p, const QPainterPath &src, QPainterPath &des
             QLineF line(lastPoint, e);
 
             QRectF rect(line.p1(), line.p2());
+            rect = rect.normalized();
+
+            double adjX = rect.width() < threshold ? (threshold - rect.width()) / 2 : 0;
+            double adjY = rect.height() < threshold ? (threshold - rect.height()) / 2 : 0;
+
+            rect.adjust(-adjX, -adjY, adjX, adjY);
+
             if(!pastCutPoint && rect.contains(p))
             {
                 //Cut
@@ -43,8 +50,21 @@ bool cutPathAtPoint(const QPointF &p, const QPainterPath &src, QPainterPath &des
                 //FIXME: we only consider X coord for cut
                 //consider intersection of perpendicular from p to line
 
-                double factor = (p.x() - line.x1()) / line.dx();
-                QPointF end(p.x(), line.y1() + line.dy() * factor);
+                double factor = 1;
+                QPointF end = p;
+
+                if(qAbs(line.dx()) < qAbs(line.dy()))
+                {
+                    //More than 45 degrees, use cursor Y, calculate new X
+                    factor = (p.y() - line.y1()) / line.dy();
+                    end.setX(line.x1() + line.dx() * factor);
+                }
+                else
+                {
+                    //Less than 45 degrees, use cursor X
+                    factor = (p.x() - line.x1()) / line.dx();
+                    end.setY(line.y1() + line.dy() * factor);
+                }
 
                 //End destination path
                 dest.lineTo(end);
@@ -74,5 +94,5 @@ bool cutPathAtPoint(const QPointF &p, const QPainterPath &src, QPainterPath &des
         }
     }
 
-    return true;
+    return pastCutPoint;
 }
