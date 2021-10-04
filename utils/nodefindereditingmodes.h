@@ -9,6 +9,7 @@ enum class EditingModes
     LabelEditing,
     StationTrackEditing,
     TrackPathEditing,
+    SplitElement,
     NModes
 };
 

@@ -109,6 +109,9 @@ QString NodeFinderMgr::getModeName(EditingModes mode) const
     case EditingModes::TrackPathEditing:
         modeName = tr("Track Path Editing");
         break;
+    case EditingModes::SplitElement:
+        modeName = tr("Split Element");
+        break;
     case EditingModes::NModes:
         modeName = tr("Unknown mode");
     }
