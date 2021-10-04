@@ -18,6 +18,7 @@ enum class EditingSubModes
     NotEditingCurrentItem = 0,
     RemovingSubElement,
     AddingSubElement,
+    DoSplitItem,
     NSubModes
 };
 
