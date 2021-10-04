@@ -512,13 +512,8 @@ void NodeFinderMgr::startElementSplitProcess()
 void NodeFinderMgr::triggerElementSplit(const QPointF& pos)
 {
     ElementSplitterHelper helper(this, converter->currentWalker.element());
-
     helper.splitAt(pos);
 
     //Current element might be removed so reset walker
-    converter->currentWalker.restoreStatus(NodeFinderElementWalker::Status());
-
-    //Restore previous mode
-    setMode(m_mode, EditingSubModes::AddingSubElement);
-    emit repaintSVG();
+    clearCurrentItem();
 }
