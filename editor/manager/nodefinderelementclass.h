@@ -32,6 +32,8 @@ public:
 
     void renameElement(QDomElement &e, const QString &newId, NodeFinderSVGConverter *conv);
 
+    void removeElement(QDomElement &e);
+
 private:
     QString tagName;
     QString m_baseId;

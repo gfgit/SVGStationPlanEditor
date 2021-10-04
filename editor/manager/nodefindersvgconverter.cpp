@@ -255,6 +255,7 @@ void NodeFinderSVGConverter::renameElement(QDomElement &e, const QString &newId)
         if(c.getTagName() == e.tagName())
         {
             c.renameElement(e, newId, this);
+            return;
         }
     }
     qWarning() << "Renaming unregistered element";
@@ -266,6 +267,18 @@ void NodeFinderSVGConverter::storeElement(QDomElement e)
     {
         if(c.preocessElement(e, this))
             break; //Registered
+    }
+}
+
+void NodeFinderSVGConverter::removeElement(QDomElement e)
+{
+    for(NodeFinderElementClass &c : elementClasses)
+    {
+        if(c.getTagName() == e.tagName())
+        {
+            c.removeElement(e);
+            return;
+        }
     }
 }
 

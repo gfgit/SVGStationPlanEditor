@@ -73,6 +73,8 @@ private:
 
     void storeElement(QDomElement e);
 
+    void removeElement(QDomElement e);
+
     inline void registerClass(const QString& tagName)
     {
         NodeFinderElementClass c(tagName, tagName + '_');
@@ -93,6 +95,7 @@ private:
 private:
     friend class NodeFinderElementClass;
     friend class NodeFinderMgr;
+    friend class ElementSplitterHelper;
 
     NodeFinderMgr *nodeMgr;
 

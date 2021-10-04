@@ -72,3 +72,9 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
         conv->namedElements.insert(newId, e);
     }
 }
+
+void NodeFinderElementClass::removeElement(QDomElement &e)
+{
+    const QString oldId = e.attribute(svg_attr::ID);
+    elements.remove(oldId);
+}
