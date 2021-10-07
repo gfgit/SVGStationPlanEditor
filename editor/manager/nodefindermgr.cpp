@@ -85,7 +85,8 @@ bool NodeFinderMgr::validateCurrentElement()
     else
     {
         //Rect, selection contains element
-        isElementValid = getSelectionRect().contains(bounds);
+        const QRectF selection = getSelectionRect();
+        isElementValid = selection.contains(bounds);
     }
 
     if(!isElementValid)
