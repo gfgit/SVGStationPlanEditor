@@ -28,6 +28,7 @@ typedef struct ItemBase
 typedef struct LabelItem : ItemBase
 {
     QChar gateLetter;
+    QString labelText;
 } LabelItem;
 
 typedef struct TrackItem : ItemBase
