@@ -16,14 +16,17 @@ class XmlElement
 public:
     XmlElement();
     XmlElement(const QString& tag, const QXmlStreamAttributes& attrs);
+    XmlElement(const QStringRef& tag, const QXmlStreamAttributes& attrs);
 
 #ifdef SSPLIB_ENABLE_EDITING
-    XmlElement(const QDomElement& e);
+    XmlElement(QDomElement& e);
 #endif
 
     bool hasAttribute(const QString& name) const;
     QString attribute(const QString& name) const;
     QString tagName() const;
+
+    void removeAttribute(const QString& name);
 
 private:
     struct StreamElement
@@ -32,14 +35,12 @@ private:
         QString tag;
     };
 
-#ifdef SSPLIB_ENABLE_EDITING
-    union {
-        StreamElement streamElem;
-        QDomElement domElem;
-    };
-    bool isDom;
-#else
     StreamElement streamElem;
+
+#ifdef SSPLIB_ENABLE_EDITING
+    //FIXME: use union but be careful with constructors and destructors
+    QDomElement domElem;
+    bool isDom;
 #endif
 
 };
