@@ -1,12 +1,10 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef ITEMTYPES_H
+#define ITEMTYPES_H
 
 #include <QString>
 #include <QPainterPath>
 
 namespace ssplib {
-
-namespace utils {
 
 //Common Types
 
@@ -93,8 +91,6 @@ inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInf
            left.gateLetter == right.gateLetter;
 }
 
-} // namespace utils
-
 } // namespace ssplib
 
-#endif // TYPES_H
+#endif // ITEMTYPES_H

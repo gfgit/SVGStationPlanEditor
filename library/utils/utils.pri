@@ -3,7 +3,6 @@
 HEADERS += \
     $$PWD/svg_constants.h \
     $$PWD/svg_path_utils.h \
-    $$PWD/types.h \
     $$PWD/xmlelement.h
 
 SOURCES += \

@@ -1,7 +1,7 @@
 #ifndef SVG_PATH_UTILS_H
 #define SVG_PATH_UTILS_H
 
-#include "types.h"
+#include "../itemtypes.h"
 #include "xmlelement.h"
 #include <QPointF>
 
