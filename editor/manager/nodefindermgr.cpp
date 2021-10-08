@@ -58,6 +58,8 @@ void NodeFinderMgr::setMode(EditingModes m, EditingSubModes sub)
 
 bool NodeFinderMgr::validateCurrentElement()
 {
+    constexpr const qreal MinStrokeWidth = 5;
+
     ElementPath elemPath;
     elemPath.elem = converter->currentWalker.element();
     if(!utils::convertElementToPath(elemPath.elem, elemPath.path))
@@ -67,15 +69,21 @@ bool NodeFinderMgr::validateCurrentElement()
     if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
-    const QRectF bounds = elemPath.path.boundingRect();
+    //Null rect breaks QRectF::contains() which returns always false
+    QRectF bounds = elemPath.path.boundingRect();
+    if(bounds.width() == 0)
+        bounds.setWidth(1);
+    if(bounds.height() == 0)
+        bounds.setHeight(1);
+
     bool isElementValid = false;
 
     if(m_isSinglePoint)
     {
         //Single point, element contains point
         double width = elemPath.strokeWidth;
-        if(width < 5)
-            width = 5;
+        if(width < MinStrokeWidth)
+            width = MinStrokeWidth;
 
         const QPointF offset(width, width);
         QRectF targetRect(selectionStart - offset, selectionStart + offset);
