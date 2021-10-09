@@ -40,7 +40,7 @@ private:
 #ifdef SSPLIB_ENABLE_EDITING
     //FIXME: use union but be careful with constructors and destructors
     QDomElement domElem;
-    bool isDom;
+    bool isDom = false;
 #endif
 
 };

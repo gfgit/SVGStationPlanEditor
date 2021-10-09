@@ -2,14 +2,13 @@
 
 using namespace ssplib::utils;
 
-XmlElement::XmlElement() :
-    isDom(false)
+XmlElement::XmlElement()
 {
 
 }
 
 XmlElement::XmlElement(const QString &tag, const QXmlStreamAttributes &attrs) :
-    streamElem{attrs, tag}, isDom(false)
+    streamElem{attrs, tag}
 {
 
 }
@@ -20,11 +19,13 @@ XmlElement::XmlElement(const QStringRef &tag, const QXmlStreamAttributes &attrs)
 
 }
 
+#ifdef SSPLIB_ENABLE_EDITING
 XmlElement::XmlElement(QDomElement &e) :
     domElem(e), isDom(true)
-{
+    {
 
-}
+    }
+#endif
 
 bool XmlElement::hasAttribute(const QString &name) const
 {
@@ -69,5 +70,7 @@ void XmlElement::removeAttribute(const QString &name)
     {
         domElem.removeAttribute(name);
     }
+#else
+    Q_UNUSED(name)
 #endif
 }
