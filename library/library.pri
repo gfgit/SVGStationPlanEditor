@@ -8,7 +8,8 @@ include(utils/utils.pri)
 
 HEADERS += \
     $$PWD/itemtypes.h \
-    $$PWD/stationplan.h
+    $$PWD/stationplan.h \
+    $$PWD/svgstationplanlib.h
 
 SOURCES += \
     $$PWD/stationplan.cpp
