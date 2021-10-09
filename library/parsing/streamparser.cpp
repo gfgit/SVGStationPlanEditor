@@ -12,8 +12,9 @@ static const QStringList supportedElements
      svg_tags::LineTag,
      svg_tags::PolylineTag};
 
-StreamParser::StreamParser(QIODevice *dev) :
-    xml(dev)
+StreamParser::StreamParser(StationPlan *ptr, QIODevice *dev) :
+    xml(dev),
+    plan(ptr)
 {
 
 }
@@ -52,8 +53,8 @@ void StreamParser::parseGroup()
 
         utils::XmlElement e(xml.name(), xml.attributes());
 
-        parsing::parseLabel(e, plan.labels);
-        parsing::parsePlatform(e, plan.platforms);
-        parsing::parseTrackConnection(e, plan.trackConnections);
+        parsing::parseLabel(e, plan->labels);
+        parsing::parsePlatform(e, plan->platforms);
+        parsing::parseTrackConnection(e, plan->trackConnections);
     }
 }

@@ -10,7 +10,7 @@ namespace ssplib {
 class StreamParser
 {
 public:
-    StreamParser(QIODevice *dev);
+    StreamParser(StationPlan *ptr, QIODevice *dev);
 
     bool parse();
 
@@ -19,7 +19,7 @@ private:
 
 private:
     QXmlStreamReader xml;
-    StationPlan plan;
+    StationPlan *plan;
 };
 
 } // namespace ssplib
