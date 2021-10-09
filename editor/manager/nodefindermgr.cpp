@@ -7,7 +7,7 @@
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
-#include "utils/svgutils.h"
+#include "editor/utils/svgutils.h"
 
 #include "elementsplitterhelper.h"
 

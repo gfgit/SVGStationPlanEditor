@@ -6,7 +6,7 @@
 #include "editor/model/nodefinderstationtracksmodel.h"
 #include "editor/model/nodefinderturnoutmodel.h"
 
-#include "utils/svgutils.h"
+#include "editor/utils/svgutils.h"
 
 #include <QSvgRenderer>
 

@@ -8,7 +8,7 @@
 #include <QPointF>
 #include <QRectF>
 
-#include "utils/nodefindereditingmodes.h"
+#include "editor/utils/nodefindereditingmodes.h"
 
 class QIODevice;
 class QWidget;

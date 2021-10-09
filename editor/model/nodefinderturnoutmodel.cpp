@@ -2,7 +2,7 @@
 
 #include "editor/manager/nodefindermgr.h"
 
-#include "utils/svgutils.h"
+#include "editor/utils/svgutils.h"
 
 #include <QBrush>
 

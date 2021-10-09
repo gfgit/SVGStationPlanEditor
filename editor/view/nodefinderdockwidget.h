@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "utils/nodefindereditingmodes.h"
+#include "editor/utils/nodefindereditingmodes.h"
 
 class NodeFinderMgr;
 
