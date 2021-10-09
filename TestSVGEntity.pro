@@ -21,7 +21,6 @@ LIBS += C:/PROGRA~1/PostgreSQL/13/lib/libpq.dll
 include(database/database.pri)
 include(editor/editor.pri)
 include(library/library.pri)
-include(utils/utils.pri)
 include(viewer/viewer.pri)
 
 SOURCES += \
