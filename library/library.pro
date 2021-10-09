@@ -1,5 +1,13 @@
 # Library subdirectory
 
+QT += core gui widgets svg
+
+TEMPLATE = lib
+TARGET = SVGStationPlan
+
+CONFIG = staticlib
+
+
 DEFINES += SSPLIB_ENABLE_EDITING
 
 include(parsing/parsing.pri)
