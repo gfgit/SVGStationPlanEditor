@@ -9,7 +9,7 @@
 #include <QFileDialog>
 #include <QFile>
 
-#include "editor/manager/nodefindermgr.h"
+#include "manager/nodefindermgr.h"
 
 #include <QDebug>
 

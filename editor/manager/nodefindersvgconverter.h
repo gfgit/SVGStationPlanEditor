@@ -9,8 +9,8 @@
 #include "nodefinderelementclass.h"
 #include "nodefinderelementwalker.h"
 
-#include "editor/utils/nodefindertypes.h"
-#include "editor/utils/nodefindereditingmodes.h"
+#include "utils/nodefindertypes.h"
+#include "utils/nodefindereditingmodes.h"
 
 class NodeFinderMgr;
 
