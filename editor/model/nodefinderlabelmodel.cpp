@@ -1,6 +1,6 @@
 #include "nodefinderlabelmodel.h"
 
-#include "editor/manager/nodefindermgr.h"
+#include "manager/nodefindermgr.h"
 
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),

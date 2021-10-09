@@ -1,7 +1,7 @@
 #include "elementsplitterhelper.h"
 
-#include "editor/utils/svgutils.h"
-#include "editor/utils/pathutils.h"
+#include "utils/svgutils.h"
+#include "utils/pathutils.h"
 
 #include "nodefindermgr.h"
 #include "nodefindersvgconverter.h"

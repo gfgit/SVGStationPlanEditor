@@ -1,8 +1,8 @@
 #include "nodefinderstationtracksmodel.h"
 
-#include "editor/manager/nodefindermgr.h"
+#include "manager/nodefindermgr.h"
 
-#include "editor/utils/svgutils.h"
+#include "utils/svgutils.h"
 
 #include <QBrush>
 

@@ -1,6 +1,6 @@
 #include "nodefinderstatuswidget.h"
 
-#include "editor/manager/nodefindermgr.h"
+#include "manager/nodefindermgr.h"
 
 #include <QHBoxLayout>
 

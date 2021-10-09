@@ -5,7 +5,7 @@
 
 #include <QBoxLayout>
 
-#include "editor/model/iobjectmodel.h"
+#include "model/iobjectmodel.h"
 
 NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),

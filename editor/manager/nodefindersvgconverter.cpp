@@ -2,11 +2,11 @@
 
 #include "nodefindermgr.h"
 
-#include "editor/model/nodefinderlabelmodel.h"
-#include "editor/model/nodefinderstationtracksmodel.h"
-#include "editor/model/nodefinderturnoutmodel.h"
+#include "model/nodefinderlabelmodel.h"
+#include "model/nodefinderstationtracksmodel.h"
+#include "model/nodefinderturnoutmodel.h"
 
-#include "editor/utils/svgutils.h"
+#include "utils/svgutils.h"
 
 #include <QSvgRenderer>
 

@@ -1,13 +1,13 @@
 #include "nodefindermgr.h"
 
-#include "editor/view/nodefinderstatuswidget.h"
-#include "editor/view/nodefindersvgwidget.h"
-#include "editor/view/nodefinderdockwidget.h"
+#include "view/nodefinderstatuswidget.h"
+#include "view/nodefindersvgwidget.h"
+#include "view/nodefinderdockwidget.h"
 
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
-#include "editor/utils/svgutils.h"
+#include "utils/svgutils.h"
 
 #include "elementsplitterhelper.h"
 
