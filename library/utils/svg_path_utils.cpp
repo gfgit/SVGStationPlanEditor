@@ -8,7 +8,7 @@
 
 using namespace ssplib;
 
-int parseNumber(double &outVal, const QStringView &str)
+static int parseNumber(double &outVal, const QStringView &str)
 {
     //Calc number length
     int i = 0;
@@ -51,18 +51,7 @@ int parseNumber(double &outVal, const QStringView &str)
     return ok ? i : -1;
 }
 
-bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
-{
-    //Calc number length
-    int i = parseNumber(outVal, str);
-    if(i < 0)
-        return false;
-
-    str = str.mid(i).trimmed();
-    return true;
-}
-
-bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
+static bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
 {
     if(!utils::parseNumberAndAdvance(outNum, str))
         return false;
@@ -75,28 +64,7 @@ bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelat
     return true;
 }
 
-bool utils::parsePointAndAdvance(QPointF &outPoint, QStringRef &str)
-{
-    //Points are separated by spaces
-    //Coordinates are separated by spaces or comma or both
-
-    // X
-    if(!parseNumberAndAdvance(outPoint.rx(), str))
-        return false;
-
-    if(str.at(0) == ',')
-        str = str.mid(1); //Eat comma
-
-    str = str.trimmed();
-
-    // Y
-    if(!parseNumberAndAdvance(outPoint.ry(), str))
-        return false;
-
-    return true;
-}
-
-bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRelative, const QPointF& prev)
+static bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRelative, const QPointF& prev)
 {
     if(!utils::parsePointAndAdvance(outPoint, str))
         return false;
@@ -109,7 +77,24 @@ bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRel
     return true;
 }
 
-bool convertLine(const utils::XmlElement &e, QPainterPath &path)
+static int parseInteger(const QString& str, int &pos)
+{
+    int val = 0;
+    for(; pos < str.size(); pos++)
+    {
+        if(str.at(pos).isDigit())
+        {
+            val *= 10;
+            val += str.at(pos).digitValue();
+        }
+
+        if(str.at(pos) == ',' || str.at(pos) == ')')
+            break;
+    }
+    return val;
+}
+
+static bool convertLine(const utils::XmlElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("x1"));
     if(str.isEmpty())
@@ -144,7 +129,7 @@ bool convertLine(const utils::XmlElement &e, QPainterPath &path)
     return true;
 }
 
-bool convertPolyline(const utils::XmlElement &e, QPainterPath &path)
+static bool convertPolyline(const utils::XmlElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("points"));
     if(str.isEmpty())
@@ -172,7 +157,7 @@ bool convertPolyline(const utils::XmlElement &e, QPainterPath &path)
     return true;
 }
 
-bool convertPath(const utils::XmlElement &e, QPainterPath &path)
+static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("d"));
     if(str.isEmpty())
@@ -283,7 +268,7 @@ bool convertPath(const utils::XmlElement &e, QPainterPath &path)
     return true;
 }
 
-bool convertRect(const utils::XmlElement &e, QPainterPath &path)
+static bool convertRect(const utils::XmlElement &e, QPainterPath &path)
 {
     //height="27.528757" x="7.7508163" y="71.160507" width="57.195679"
 
@@ -310,6 +295,38 @@ bool convertRect(const utils::XmlElement &e, QPainterPath &path)
     return true;
 }
 
+bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
+{
+    //Calc number length
+    int i = parseNumber(outVal, str);
+    if(i < 0)
+        return false;
+
+    str = str.mid(i).trimmed();
+    return true;
+}
+
+bool utils::parsePointAndAdvance(QPointF &outPoint, QStringRef &str)
+{
+    //Points are separated by spaces
+    //Coordinates are separated by spaces or comma or both
+
+    // X
+    if(!parseNumberAndAdvance(outPoint.rx(), str))
+        return false;
+
+    if(str.at(0) == ',')
+        str = str.mid(1); //Eat comma
+
+    str = str.trimmed();
+
+    // Y
+    if(!parseNumberAndAdvance(outPoint.ry(), str))
+        return false;
+
+    return true;
+}
+
 bool utils::convertElementToPath(const utils::XmlElement &e, QPainterPath &path)
 {
     if(e.tagName() == svg_tags::LineTag)
@@ -331,23 +348,6 @@ bool utils::convertElementToPath(const utils::XmlElement &e, QPainterPath &path)
 
     //Unsupported element
     return false;
-}
-
-int parseInteger(const QString& str, int &pos)
-{
-    int val = 0;
-    for(; pos < str.size(); pos++)
-    {
-        if(str.at(pos).isDigit())
-        {
-            val *= 10;
-            val += str.at(pos).digitValue();
-        }
-
-        if(str.at(pos) == ',' || str.at(pos) == ')')
-            break;
-    }
-    return val;
 }
 
 bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackConnectionInfo> &outVec)

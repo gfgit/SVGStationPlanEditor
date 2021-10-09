@@ -6,7 +6,7 @@
 
 #include <QDebug>
 
-int parseNumber(double &outVal, const QStringView &str)
+static int parseNumber(double &outVal, const QStringView &str)
 {
     //Calc number length
     int i = 0;
@@ -60,7 +60,7 @@ bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
     return true;
 }
 
-bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
+static bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
 {
     if(!utils::parseNumberAndAdvance(outNum, str))
         return false;
@@ -94,7 +94,7 @@ bool utils::parsePointAndAdvance(QPointF &outPoint, QStringRef &str)
     return true;
 }
 
-bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRelative, const QPointF& prev)
+static bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRelative, const QPointF& prev)
 {
     if(!utils::parsePointAndAdvance(outPoint, str))
         return false;
@@ -107,7 +107,7 @@ bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRel
     return true;
 }
 
-bool convertLine(const QDomElement &e, QPainterPath &path)
+static bool convertLine(const QDomElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("x1"));
     if(str.isEmpty())
@@ -142,7 +142,7 @@ bool convertLine(const QDomElement &e, QPainterPath &path)
     return true;
 }
 
-bool convertPolyline(const QDomElement &e, QPainterPath &path)
+static bool convertPolyline(const QDomElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("points"));
     if(str.isEmpty())
@@ -170,7 +170,7 @@ bool convertPolyline(const QDomElement &e, QPainterPath &path)
     return true;
 }
 
-bool convertPath(const QDomElement &e, QPainterPath &path)
+static bool convertPath(const QDomElement &e, QPainterPath &path)
 {
     QString str = e.attribute(QLatin1String("d"));
     if(str.isEmpty())
@@ -331,7 +331,7 @@ bool utils::convertElementToPath(const QDomElement &e, QPainterPath &path)
     return false;
 }
 
-int parseInteger(const QString& str, int &pos)
+static int parseInteger(const QString& str, int &pos)
 {
     int val = 0;
     for(; pos < str.size(); pos++)
