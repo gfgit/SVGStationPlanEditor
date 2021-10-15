@@ -37,6 +37,8 @@ void EditingInfo::clear()
 {
     resetIdGenerator();
 
+    namedElements.clear();
+
     labels.clear();
     labels.squeeze();
 
