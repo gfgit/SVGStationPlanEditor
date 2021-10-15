@@ -22,8 +22,13 @@ public:
 
     void setPlan(StationPlan *newPlan);
 
+signals:
+    void labelClicked(qint64 labelId, QChar letter, const QString& text);
+
 protected:
     void paintEvent(QPaintEvent *) override;
+
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
 
 protected:
     StationPlan *m_plan;
