@@ -42,7 +42,7 @@ target_include_directories(
     ${SSP_VIEWER_TARGET}
     PRIVATE
     ${CMAKE_BINARY_DIR}/include #For template files
-    ${SSP_LIBRARY_HEADERS}
+    ${CMAKE_SOURCE_DIR}/library
     )
 
 # Set link libraries
