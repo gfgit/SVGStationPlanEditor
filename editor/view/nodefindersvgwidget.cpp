@@ -54,7 +54,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
             const int count = labels->getItemCount();
             for(int i = 0; i < count; i++)
             {
-                const ItemBase *item = labels->getItemAt(i);
+                const ssplib::ItemBase *item = labels->getItemAt(i);
                 if(!item->visible || item->elements.isEmpty())
                     continue; //Skip it
 
@@ -65,7 +65,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
                     const QRectF r = elem.path.boundingRect();
 
                     //FIXME: bad code, use name getter func
-                    const QString text = fmt.arg(static_cast<const LabelItem *>(item)->gateLetter);
+                    const QString text = fmt.arg(static_cast<const ssplib::LabelItem *>(item)->gateLetter);
 
                     int sizeH = r.height() * 0.85;
                     int sizeW = r.width() * 0.3;
@@ -92,7 +92,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 
             for(int i = 0; i < count; i++)
             {
-                const ItemBase *item = tracks->getItemAt(i);
+                const ssplib::ItemBase *item = tracks->getItemAt(i);
                 if(!item->visible || item->elements.isEmpty())
                     continue; //Skip it
 
@@ -116,7 +116,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 
             for(int i = 0; i < count; i++)
             {
-                const ItemBase *item = conns->getItemAt(i);
+                const ssplib::ItemBase *item = conns->getItemAt(i);
                 if(!item->visible || item->elements.isEmpty())
                     continue; //Skip it
 
@@ -135,10 +135,10 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     }
 
     //Draw selected item
-    ElementPath curPath = nodeMgr->getConverter()->getCurElementPath();
+    ssplib::ElementPath curPath = nodeMgr->getConverter()->getCurElementPath();
     if(nodeMgr->getConverter()->getCurItem() || !curPath.path.isEmpty())
     {
-        ItemBase *item = nodeMgr->getConverter()->getCurItem();
+        ssplib::ItemBase *item = nodeMgr->getConverter()->getCurItem();
         const int itemSubIdx = nodeMgr->getConverter()->getCurItemSubElemIdx();
 
         //Draw selected item in blue or current element in red
