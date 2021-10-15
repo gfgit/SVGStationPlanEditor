@@ -27,9 +27,6 @@ set(SSP_EDITOR_UI_FILES
     mainwindow.ui
     )
 
-# Create main targets
-set(SSP_EDITOR_TARGET "sspeditor")
-
 # Add executable
 add_executable(${SSP_EDITOR_TARGET} WIN32
     ${SSP_EDITOR_SOURCES}
@@ -50,6 +47,7 @@ target_include_directories(
     ${SSP_EDITOR_TARGET}
     PRIVATE
     ${CMAKE_BINARY_DIR}/include #For template files
+    ${SSP_LIBRARY_HEADERS}
     )
 
 # Set link libraries
@@ -61,6 +59,12 @@ target_link_libraries(
     Qt5::Widgets
     Qt5::Svg
     Qt5::Xml
+    )
+
+target_link_libraries(
+    ${SSP_EDITOR_TARGET}
+    PRIVATE
+    ${SSP_LIBRARY_EDIT_TARGET}
     )
 
 # Set compiler definitions

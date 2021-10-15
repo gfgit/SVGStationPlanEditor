@@ -8,10 +8,6 @@
 #        )
 #endif()
 
-#add_subdirectory(parsing)
-#add_subdirectory(rendering)
-#add_subdirectory(utils)
-
 # Set SSPLibrary info template file
 set(SSP_VIEWER_SOURCES
     ${SSP_VIEWER_SOURCES}
@@ -25,9 +21,6 @@ set(SSP_VIEWER_UI_FILES
     ${SSP_VIEWER_UI_FILES}
     mainwindow.ui
     )
-
-# Create main targets
-set(SSP_VIEWER_TARGET "sspviewer")
 
 # Add executable
 add_executable(${SSP_VIEWER_TARGET} WIN32
@@ -49,6 +42,7 @@ target_include_directories(
     ${SSP_VIEWER_TARGET}
     PRIVATE
     ${CMAKE_BINARY_DIR}/include #For template files
+    ${SSP_LIBRARY_HEADERS}
     )
 
 # Set link libraries
@@ -59,6 +53,12 @@ target_link_libraries(
     Qt5::Gui
     Qt5::Widgets
     Qt5::Svg
+    )
+
+target_link_libraries(
+    ${SSP_VIEWER_TARGET}
+    PRIVATE
+    ${SSP_LIBRARY_TARGET}
     )
 
 # Set compiler definitions

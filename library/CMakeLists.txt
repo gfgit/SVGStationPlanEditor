@@ -13,27 +13,29 @@ add_subdirectory(rendering)
 add_subdirectory(utils)
 
 # Set SSPLibrary info template file
-set(SSP_LIBRARY_SOURCES
-    ${SSP_LIBRARY_SOURCES}
+
+set(SSP_LIBRARY_HEADERS
+    ${SSP_LIBRARY_HEADERS}
     itemtypes.h
     stationplan.h
     svgstationplanlib.h
-
-    stationplan.cpp
     )
 
-# Create main library targets
-set(SSP_LIBRARY_TARGET "ssplib")
-set(SSP_LIBRARY_EDIT_TARGET "sspeditlib")
+set(SSP_LIBRARY_SOURCES
+    ${SSP_LIBRARY_SOURCES}
+    stationplan.cpp
+    )
 
 # Add library
 add_library(${SSP_LIBRARY_TARGET} STATIC
     ${SSP_LIBRARY_SOURCES}
+    ${SSP_LIBRARY_HEADERS}
     #${SSP_LIBRARY_RESOURCES}
     )
 
 add_library(${SSP_LIBRARY_EDIT_TARGET} STATIC
     ${SSP_LIBRARY_SOURCES}
+    ${SSP_LIBRARY_HEADERS}
     #${SSP_LIBRARY_RESOURCES}
     )
 
