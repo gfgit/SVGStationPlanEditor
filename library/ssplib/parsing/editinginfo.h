@@ -12,12 +12,6 @@ namespace ssplib {
 
 typedef QMap<QString, QDomElement> ElementMap;
 
-class ItemEditBase
-{
-public:
-    QVector<QDomElement> elements;
-};
-
 class EditingInfo
 {
 public:
@@ -29,11 +23,6 @@ public:
 
     void resetIdGenerator();
     QString getFreeId_internal(const QString &base, int &counter);
-
-public:
-    QVector<ItemEditBase> labels;
-    QVector<ItemEditBase> platforms;
-    QVector<ItemEditBase> trackConnections;
 
 public:
     ElementMap namedElements;
