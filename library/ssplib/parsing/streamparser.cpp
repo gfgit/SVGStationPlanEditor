@@ -6,11 +6,21 @@
 
 using namespace ssplib;
 
-static const QStringList supportedElements
+static const QString supportedElements[] =
     {svg_tags::RectTag,
      svg_tags::PathTag,
      svg_tags::LineTag,
      svg_tags::PolylineTag};
+
+static bool isElementSupported(const QStringRef& tag)
+{
+    for(const QString& val : supportedElements)
+    {
+        if(val == tag)
+            return true;
+    }
+    return false;
+}
 
 StreamParser::StreamParser(StationPlan *ptr, QIODevice *dev) :
     xml(dev),
@@ -45,7 +55,7 @@ void StreamParser::parseGroup()
         if (xml.name() == svg_tags::GroupTag)
             parseGroup();
 
-        if(!supportedElements.contains(xml.name()))
+        if(!isElementSupported(xml.name()))
         {
             xml.skipCurrentElement();
             continue;
