@@ -7,8 +7,5 @@ set(SSP_EDITOR_SOURCES
   utils/pathutils.cpp
   utils/pathutils.h
 
-  utils/svgutils.cpp
-  utils/svgutils.h
-
   PARENT_SCOPE
 )
