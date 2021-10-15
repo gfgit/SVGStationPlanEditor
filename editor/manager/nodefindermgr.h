@@ -36,6 +36,9 @@ public:
     QWidget *getCentralWidget(QWidget *parent);
     QWidget *getDockWidget(EditingModes mode);
 
+    //Track Pen Width
+    int getTrackPenWidth() const;
+
     //Loading/Saving
     bool loadSVG(QIODevice *dev);
     bool saveSVG(QIODevice *dev);
@@ -44,9 +47,6 @@ public:
     inline NodeFinderSVGConverter *getConverter() const { return converter; }
     ssplib::StationPlan *getStationPlan() const;
     ssplib::EditingInfo *getEditingInfo() const;
-
-    //Track Pen
-    inline int getTrackPenWidth() const { return trackPenWidth; }
 
     //Selection
     void startSelection(const QPointF& p);

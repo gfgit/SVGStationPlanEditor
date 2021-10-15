@@ -171,6 +171,11 @@ QWidget *NodeFinderMgr::getDockWidget(EditingModes mode)
     return w;
 }
 
+int NodeFinderMgr::getTrackPenWidth() const
+{
+    return getStationPlan()->platformPenWidth;
+}
+
 bool NodeFinderMgr::loadSVG(QIODevice *dev)
 {
     clearCurrentItem();
@@ -454,10 +459,11 @@ void NodeFinderMgr::requestEditItem(ssplib::ItemBase *item, EditingModes m)
 
 void NodeFinderMgr::setTrackPenWidth(int value)
 {
-    if(trackPenWidth == value)
+    auto plan = getStationPlan();
+    if(plan->platformPenWidth == value)
         return;
-    trackPenWidth = value;
-    emit trackPenWidthChanged(trackPenWidth);
+    plan->platformPenWidth = value;
+    emit trackPenWidthChanged(plan->platformPenWidth);
     emit repaintSVG();
 }
 
@@ -533,7 +539,8 @@ void NodeFinderMgr::triggerElementSplit(const QPointF& pos)
     if(ret != QMessageBox::Yes)
         return; //Abort
 
-    ElementSplitterHelper helper(this, converter->currentWalker.element(), trackPenWidth);
+    const auto plan = getStationPlan();
+    ElementSplitterHelper helper(this, converter->currentWalker.element(), plan->platformPenWidth);
     if(!helper.splitAt(pos))
     {
         QMessageBox::warning(centralWidget, tr("No split"),
