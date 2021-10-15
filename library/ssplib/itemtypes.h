@@ -4,6 +4,10 @@
 #include <QString>
 #include <QPainterPath>
 
+#ifdef SSPLIB_ENABLE_EDITING
+#include <QDomElement>
+#endif
+
 namespace ssplib {
 
 //Common Types
@@ -12,6 +16,9 @@ typedef qint64 db_id;
 
 struct ElementPath
 {
+#ifdef SSPLIB_ENABLE_EDITING
+    QDomElement elem;
+#endif
     QPainterPath path;
     double strokeWidth = 0;
 };
