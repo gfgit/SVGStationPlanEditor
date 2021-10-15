@@ -19,7 +19,7 @@ SSPViewer::SSPViewer(StationPlan *mgr, QWidget *parent) :
 
 QSize SSPViewer::sizeHint() const
 {
-    if(mSvg->isValid())
+    if(mSvg && mSvg->isValid())
         return mSvg->defaultSize();
     return QSize(128, 64);
 }
