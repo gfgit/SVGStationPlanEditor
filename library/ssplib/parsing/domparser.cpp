@@ -54,6 +54,10 @@ void DOMParser::processGroup(QDomElement &g)
             {
                 processDefs(e);
             }
+            else if(parsing::isElementSupported(e.tagName()))
+            {
+                processItemElement(e);
+            }
         }
         n = n.nextSibling();
     }
@@ -223,6 +227,45 @@ void DOMParser::processInternalTspan(QDomElement &top, QDomElement &cur, QString
     {
         if(cur.hasAttribute(attr))
             top.setAttribute(attr, cur.attribute(attr));
+    }
+}
+
+static void addElement(QDomElement& e, QVector<ItemEditBase>& vec, int i)
+{
+    if(i >= vec.size())
+    {
+        ItemEditBase item;
+        vec.append(item);
+        i = vec.size() - 1;
+    }
+
+    ItemEditBase& item = vec[i];
+    item.elements.append(e);
+}
+
+void DOMParser::processItemElement(QDomElement &elem)
+{
+    utils::XmlElement e(elem);
+
+    int labelIdx = parsing::parseLabel(e, plan->labels);
+    if(labelIdx >= 0)
+    {
+        addElement(elem, m_info->labels, labelIdx);
+    }
+
+    int trackIdx = parsing::parsePlatform(e, plan->platforms);
+    if(trackIdx >= 0)
+    {
+        addElement(elem, m_info->platforms, trackIdx);
+    }
+
+    QVector<int> indexes;
+    if(parsing::parseTrackConnection(e, plan->trackConnections, &indexes))
+    {
+        for(int idx : qAsConst(indexes))
+        {
+            addElement(elem, m_info->trackConnections, idx);
+        }
     }
 }
 
