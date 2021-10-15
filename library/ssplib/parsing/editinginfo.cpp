@@ -38,15 +38,6 @@ void EditingInfo::clear()
     resetIdGenerator();
 
     namedElements.clear();
-
-    labels.clear();
-    labels.squeeze();
-
-    platforms.clear();
-    platforms.squeeze();
-
-    trackConnections.clear();
-    trackConnections.squeeze();
 }
 
 void EditingInfo::resetIdGenerator()
