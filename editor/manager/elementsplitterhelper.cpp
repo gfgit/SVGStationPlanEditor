@@ -1,6 +1,6 @@
 #include "elementsplitterhelper.h"
 
-#include "utils/svgutils.h"
+#include "ssplib/utils/svg_path_utils.h"
 #include "utils/pathutils.h"
 
 #include "nodefindermgr.h"
@@ -20,18 +20,18 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     QPainterPath dest;
     QPainterPath rest;
 
-    if(!utils::convertElementToPath(origElem, path))
+    if(!ssplib::utils::convertElementToPath(origElem, path))
         return false;
 
     if(!cutPathAtPoint(pos, m_threshold, path, dest, rest))
         return false;
 
     QString destVal;
-    if(!utils::convertPathToSVG(dest, destVal))
+    if(!ssplib::utils::convertPathToSVG(dest, destVal))
         return false;
 
     QString restVal;
-    if(!utils::convertPathToSVG(rest, restVal))
+    if(!ssplib::utils::convertPathToSVG(rest, restVal))
         return false;
 
     if(origElem.tagName() != svg_tag::PathTag)
