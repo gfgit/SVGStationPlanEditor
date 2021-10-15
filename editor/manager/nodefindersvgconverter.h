@@ -68,8 +68,6 @@ public:
     inline ssplib::ElementPath getCurElementPath() const { return curElementPath; }
 
 private:
-    QString getFreeId_internal(const QString& base, int &counter);
-
     void renameElement(QDomElement &e, const QString &newId);
 
     void storeElement(QDomElement e);
@@ -97,7 +95,6 @@ private:
 
     QHash<QString, NodeFinderElementClass> elementClasses;
 
-    NodeFinderElementClass::ElementHash namedElements;
     NodeFinderElementClass::ElementHash fakeIds;
 
     NodeFinderLabelModel *labelsModel;

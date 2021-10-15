@@ -4,9 +4,6 @@
 #include "manager/nodefindermgr.h"
 #include "manager/nodefindersvgconverter.h"
 
-#include "model/nodefinderlabelmodel.h"
-#include "model/nodefinderstationtracksmodel.h"
-
 #include <QSvgRenderer>
 
 #include <QPainter>

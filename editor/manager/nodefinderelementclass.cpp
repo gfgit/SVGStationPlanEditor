@@ -29,7 +29,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
         //element's bounds from Qt SVG renderer.
         //When saving this ID will be removed.
 
-        id = conv->getFreeId_internal(m_baseId, serial);
+        id = conv->m_info.getFreeId_internal(m_baseId, serial);
 
         if(!id.isEmpty())
         {
@@ -59,7 +59,7 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
 
     //Remove from fake and do not insert back, because now it is used
     conv->fakeIds.remove(oldId);
-    conv->namedElements.remove(oldId);
+    conv->m_info.namedElements.remove(oldId);
     elements.remove(oldId);
 
     if(newId.isEmpty())
@@ -71,7 +71,7 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
     {
         e.setAttribute(ssplib::svg_attr::ID, newId);
         elements.insert(newId, e);
-        conv->namedElements.insert(newId, e);
+        conv->m_info.namedElements.insert(newId, e);
     }
 }
 

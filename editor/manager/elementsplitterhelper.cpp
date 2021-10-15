@@ -74,7 +74,7 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     //Generate new ID
     int counter = 0;
     const QString base = origElem.attribute(ssplib::svg_attr::ID);
-    QString id = nodeMgr->getConverter()->getFreeId_internal(base, counter);
+    QString id = nodeMgr->getConverter()->m_info.getFreeId_internal(base, counter);
 
     newElem.setAttribute(ssplib::svg_attr::ID, id);
 

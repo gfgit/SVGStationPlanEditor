@@ -48,9 +48,6 @@ void NodeFinderSVGConverter::clear()
     fakeIds.clear();
     fakeIds.squeeze();
 
-    namedElements.clear();
-    namedElements.squeeze();
-
     m_plan.clear();
     m_info.clear();
 
@@ -122,13 +119,13 @@ void NodeFinderSVGConverter::processElements()
 
 QDomElement NodeFinderSVGConverter::elementById(const QString &id)
 {
-    auto it = namedElements.constFind(id);
-    if(it != namedElements.constEnd())
+    auto it = m_info.namedElements.constFind(id);
+    if(it != m_info.namedElements.constEnd())
         return it.value();
 
-    it = fakeIds.constFind(id);
-    if(it != fakeIds.constEnd())
-        return it.value();
+    auto it2 = fakeIds.constFind(id);
+    if(it2 != fakeIds.constEnd())
+        return it2.value();
 
     //Not found
     return QDomElement();
@@ -202,18 +199,6 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
         path.strokeWidth = 0;
 
     return model->addElementToItem(path, curItem);
-}
-
-QString NodeFinderSVGConverter::getFreeId_internal(const QString &base, int &counter)
-{
-    QString fmt = base + QLatin1String("%1");
-    for(int i = 0; i < 2000; i++)
-    {
-        const QString id = fmt.arg(counter++);
-        if(elementById(id).isNull())
-            return id;
-    }
-    return QString();
 }
 
 void NodeFinderSVGConverter::renameElement(QDomElement &e, const QString &newId)
