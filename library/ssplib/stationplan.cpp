@@ -11,3 +11,15 @@ StationPlan::StationPlan() :
 {
 
 }
+
+void StationPlan::clear()
+{
+    labels.clear();
+    labels.squeeze();
+
+    platforms.clear();
+    platforms.squeeze();
+
+    trackConnections.clear();
+    trackConnections.squeeze();
+}

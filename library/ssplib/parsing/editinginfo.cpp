@@ -33,6 +33,20 @@ void EditingInfo::storeElement(QDomElement &e)
     //TODO: store
 }
 
+void EditingInfo::clear()
+{
+    resetIdGenerator();
+
+    labels.clear();
+    labels.squeeze();
+
+    platforms.clear();
+    platforms.squeeze();
+
+    trackConnections.clear();
+    trackConnections.squeeze();
+}
+
 void EditingInfo::resetIdGenerator()
 {
     generatedIdSerial = 0;

@@ -12,6 +12,8 @@ class StationPlan
 public:
     StationPlan();
 
+    void clear();
+
 public:
     QVector<LabelItem> labels;
     QVector<TrackItem> platforms;

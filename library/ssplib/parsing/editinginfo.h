@@ -25,6 +25,8 @@ public:
 
     void storeElement(QDomElement &e);
 
+    void clear();
+
     void resetIdGenerator();
     QString getFreeId_internal(const QString &base, int &counter);
 
