@@ -12,6 +12,8 @@
 
 namespace ssplib {
 class ItemBase;
+class StationPlan;
+class EditingInfo;
 } // namespace ssplib
 
 class QIODevice;
@@ -40,8 +42,8 @@ public:
 
     //For NodeFinderSVGWidget
     inline NodeFinderSVGConverter *getConverter() const { return converter; }
-    inline bool shouldDrawLabels() const { return drawLabels; }
-    inline bool shouldDrawStationTracks() const { return drawStationTracks; }
+    ssplib::StationPlan *getStationPlan() const;
+    ssplib::EditingInfo *getEditingInfo() const;
 
     //Track Pen
     inline int getTrackPenWidth() const { return trackPenWidth; }
@@ -88,10 +90,6 @@ private:
     QPointer<QWidget> centralWidget;
 
     NodeFinderSVGConverter *converter;
-
-    bool drawLabels;
-    bool drawStationTracks;
-    int trackPenWidth;
 
     QPointF selectionStart;
     QPointF selectionEnd;

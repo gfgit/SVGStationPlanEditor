@@ -16,9 +16,6 @@
 
 NodeFinderMgr::NodeFinderMgr(QObject *parent) :
     QObject(parent),
-    drawLabels(true),
-    drawStationTracks(true),
-    trackPenWidth(10),
     m_isSelecting(false),
     m_isSinglePoint(false)
 {
@@ -51,7 +48,8 @@ void NodeFinderMgr::setMode(EditingModes m, EditingSubModes sub)
     m_subMode = sub;
 
     //Draw only when not editing
-    drawLabels = drawStationTracks = m_subMode == EditingSubModes::NotEditingCurrentItem;
+    auto plan = getStationPlan();
+    plan->drawLabels = plan->drawTracks = m_subMode == EditingSubModes::NotEditingCurrentItem;
 
     emit modeChanged();
     emit repaintSVG();
@@ -199,6 +197,16 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
 bool NodeFinderMgr::saveSVG(QIODevice *dev)
 {
     return converter->save(dev);
+}
+
+ssplib::StationPlan *NodeFinderMgr::getStationPlan() const
+{
+    return &converter->m_plan;
+}
+
+ssplib::EditingInfo *NodeFinderMgr::getEditingInfo() const
+{
+    return &converter->m_info;
 }
 
 void NodeFinderMgr::selectCurrentElem()
