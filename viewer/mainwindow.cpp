@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *viewMenu = new QMenu(tr("View"), this);
     viewMenu->addAction(tr("Zoom In"), this, [this](){ setZoom(zoom - zoom%25 + 25); });
     viewMenu->addAction(tr("Zoom Out"), this, [this](){ setZoom(zoom - zoom%25 - 25); });
+    viewMenu->addAction(tr("Zoom Fit"), this, &MainWindow::zoomToFit);
     ui->menubar->addMenu(viewMenu);
 
 //    auto addDockMode = [this, viewMenu](EditingModes mode)
@@ -103,13 +104,14 @@ void MainWindow::loadSVG()
 
     f.reset();
     QXmlStreamReader xml(&f);
-    if(mSvg->load(&xml))
+    if(!mSvg->load(&xml))
     {
         qDebug() << "SVG loading error";
         return;
     }
 
     setZoom(100);
+    zoomToFit();
 }
 
 void MainWindow::setZoom(int val)
@@ -124,4 +126,16 @@ void MainWindow::setZoom(int val)
     QSize s = scrollArea->widget()->sizeHint();
     s = s * zoom / 100;
     scrollArea->widget()->resize(s);
+}
+
+void MainWindow::zoomToFit()
+{
+    const QSize available = scrollArea->size();
+    const QSize contents = scrollArea->widget()->sizeHint();
+
+    const int zoomH = 100 * available.width() / contents.width();
+    const int zoomV = 100 * available.height() / contents.height();
+
+    const int val = qMin(zoomH, zoomV);
+    setZoom(val);
 }

@@ -27,6 +27,7 @@ public:
 public slots:
     void loadSVG();
     void setZoom(int val);
+    void zoomToFit();
 
 private:
     Ui::MainWindow *ui;
