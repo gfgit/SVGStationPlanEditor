@@ -1,6 +1,7 @@
 set(SSP_LIBRARY_HEADERS
   ${SSP_LIBRARY_HEADERS}
   parsing/parsinghelpers.h
+  parsing/domparser.h
   parsing/streamparser.h
 
   PARENT_SCOPE
@@ -9,6 +10,7 @@ set(SSP_LIBRARY_HEADERS
 set(SSP_LIBRARY_SOURCES
   ${SSP_LIBRARY_SOURCES}
   parsing/parsinghelpers.cpp
+  parsing/domparser.cpp
   parsing/streamparser.cpp
 
   PARENT_SCOPE
