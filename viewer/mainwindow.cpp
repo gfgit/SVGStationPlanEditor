@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "ssplib/svgstationplanlib.h"
+#include <QSvgRenderer>
+
 #include <QScrollArea>
 #include <QSlider>
 #include <QSpinBox>
@@ -14,15 +17,22 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    stationPlan(nullptr),
     zoom(0)
 {
     ui->setupUi(this);
+
+    mSvg = new QSvgRenderer(this);
+
+    stationPlan = new ssplib::StationPlan;
+    viewer = new ssplib::SSPViewer(stationPlan);
+    viewer->setRenderer(mSvg);
 
     scrollArea = new QScrollArea(this);
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setAlignment(Qt::AlignCenter);
     setCentralWidget(scrollArea);
-    //scrollArea->setWidget(nodeMgr->getCentralWidget(this));
+    scrollArea->setWidget(viewer);
 
     zoomSlider = new QSlider(Qt::Horizontal, this);
     zoomSlider->setRange(25, 400);
@@ -40,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fileMenu = new QMenu(tr("File"), this);
     fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVG);
-    fileMenu->addAction(tr("Save SVG"), this, &MainWindow::saveConvertedSVG);
     ui->menubar->addMenu(fileMenu);
 
     QMenu *viewMenu = new QMenu(tr("View"), this);
@@ -65,6 +74,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    delete stationPlan;
+    stationPlan = nullptr;
 }
 
 void MainWindow::loadSVG()
@@ -82,26 +94,22 @@ void MainWindow::loadSVG()
         return;
     }
 
-    //nodeMgr->loadSVG(&f);
-    setZoom(100);
-}
-
-void MainWindow::saveConvertedSVG()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    QString(), QString(),
-                                                    QString("SVG (*.svg);;All Files (*)"));
-    if(fileName.isEmpty())
-        return;
-
-    QFile f(fileName);
-    if(!f.open(QFile::WriteOnly | QFile::Truncate))
+    ssplib::StreamParser parser(stationPlan, &f);
+    if(!parser.parse())
     {
-        qDebug() << f.errorString();
+        qDebug() << "Parsing error";
         return;
     }
 
-    //nodeMgr->saveSVG(&f);
+    f.reset();
+    QXmlStreamReader xml(&f);
+    if(mSvg->load(&xml))
+    {
+        qDebug() << "SVG loading error";
+        return;
+    }
+
+    setZoom(100);
 }
 
 void MainWindow::setZoom(int val)

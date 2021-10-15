@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
     QApplication::setOrganizationName(QLatin1String("Filippo"));
-    QApplication::setApplicationDisplayName(QLatin1String("SVG Station Plan Editor"));
+    QApplication::setApplicationDisplayName(QLatin1String("SVG Station Plan Viewer"));
     QApplication a(argc, argv);
 
     MainWindow w;

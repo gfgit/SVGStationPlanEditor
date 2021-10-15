@@ -8,7 +8,13 @@ namespace Ui { class MainWindow; }
 class QScrollArea;
 class QSlider;
 class QSpinBox;
+class QSvgRenderer;
 QT_END_NAMESPACE
+
+namespace ssplib {
+class SSPViewer;
+class StationPlan;
+} // namespace ssplib
 
 class MainWindow : public QMainWindow
 {
@@ -20,7 +26,6 @@ public:
 
 public slots:
     void loadSVG();
-    void saveConvertedSVG();
     void setZoom(int val);
 
 private:
@@ -28,6 +33,11 @@ private:
     QScrollArea *scrollArea;
     QSlider *zoomSlider;
     QSpinBox *zoomSpin;
+    ssplib::SSPViewer *viewer;
+
+private:
+    QSvgRenderer *mSvg;
+    ssplib::StationPlan *stationPlan;
     int zoom;
 };
 #endif // MAINWINDOW_H
