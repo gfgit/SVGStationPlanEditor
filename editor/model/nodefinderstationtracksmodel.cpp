@@ -2,7 +2,7 @@
 
 #include "manager/nodefindermgr.h"
 
-#include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/svg_constants.h"
 
 #include <QBrush>
 

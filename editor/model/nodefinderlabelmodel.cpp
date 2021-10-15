@@ -2,6 +2,8 @@
 
 #include "manager/nodefindermgr.h"
 
+#include "ssplib/utils/svg_constants.h"
+
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr)
