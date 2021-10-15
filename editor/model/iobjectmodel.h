@@ -3,9 +3,10 @@
 
 #include <QAbstractTableModel>
 
-
+namespace ssplib {
 class ItemBase;
 class ElementPath;
+} // namespace ssplib
 
 class IObjectModel : public QAbstractTableModel
 {
@@ -19,10 +20,10 @@ public:
 
     virtual void clear();
 
-    virtual bool addElementToItem(ElementPath &p, ItemBase *item);
-    virtual bool removeElementFromItem(ItemBase *item, int pos);
+    virtual bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item);
+    virtual bool removeElementFromItem(ssplib::ItemBase *item, int pos);
 
-    virtual const ItemBase* getItemAt(int row);
+    virtual const ssplib::ItemBase* getItemAt(int row);
     virtual int getItemCount() const;
 
 signals:

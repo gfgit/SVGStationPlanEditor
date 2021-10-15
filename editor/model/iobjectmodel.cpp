@@ -26,17 +26,17 @@ void IObjectModel::clear()
 
 }
 
-bool IObjectModel::addElementToItem(ElementPath &p, ItemBase *item)
+bool IObjectModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
     return false;
 }
 
-bool IObjectModel::removeElementFromItem(ItemBase *item, int pos)
+bool IObjectModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
     return false;
 }
 
-const ItemBase *IObjectModel::getItemAt(int row)
+const ssplib::ItemBase *IObjectModel::getItemAt(int row)
 {
     return nullptr;
 }

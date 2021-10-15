@@ -5,7 +5,7 @@
 
 #include <QVector>
 
-#include "utils/nodefindertypes.h"
+#include "ssplib/itemtypes.h"
 
 class NodeFinderMgr;
 
@@ -35,7 +35,7 @@ public:
     bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
-    void setItems(const QVector<LabelItem>& vec);
+    void setItems(const QVector<ssplib::LabelItem>& vec);
 
     //IObjectModel
     bool addItem() override;
@@ -44,10 +44,10 @@ public:
 
     void clear() override;
 
-    bool addElementToItem(ElementPath &p, ItemBase *item) override;
-    bool removeElementFromItem(ItemBase *item, int pos) override;
+    bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item) override;
+    bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
 
-    const ItemBase* getItemAt(int row) override;
+    const ssplib::ItemBase* getItemAt(int row) override;
 
     int getItemCount() const override;
 
@@ -55,7 +55,7 @@ private:
     friend class NodeFinderSVGWidget;
 
     NodeFinderMgr *nodeMgr;
-    QVector<LabelItem> items;
+    QVector<ssplib::LabelItem> items;
 };
 
 #endif // NODEFINDERLABELMODEL_H

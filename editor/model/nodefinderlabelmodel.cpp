@@ -37,7 +37,7 @@ QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid())
         return QVariant();
 
-    const LabelItem& item = items.at(idx.row());
+    const ssplib::LabelItem& item = items.at(idx.row());
 
     switch (role)
     {
@@ -70,7 +70,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     if (!idx.isValid())
         return false;
 
-    LabelItem& item = items[idx.row()];
+    ssplib::LabelItem& item = items[idx.row()];
 
     switch (role)
     {
@@ -123,7 +123,7 @@ Qt::ItemFlags NodeFinderLabelModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderLabelModel::setItems(const QVector<LabelItem> &vec)
+void NodeFinderLabelModel::setItems(const QVector<ssplib::LabelItem> &vec)
 {
     beginResetModel();
     items = vec;
@@ -138,15 +138,15 @@ void NodeFinderLabelModel::clear()
     endResetModel();
 }
 
-bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
+bool NodeFinderLabelModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
     if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
-    LabelItem *ptr = static_cast<LabelItem *>(item);
+    ssplib::LabelItem *ptr = static_cast<ssplib::LabelItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
-    p.elem.setAttribute(svg_attr::LabelName, ptr->gateLetter);
+    p.elem.setAttribute(ssplib::svg_attr::LabelName, ptr->gateLetter);
     item->elements.append(p);
 
     QModelIndex idx = index(row, 0);
@@ -155,15 +155,15 @@ bool NodeFinderLabelModel::addElementToItem(ElementPath &p, ItemBase *item)
     return true;
 }
 
-bool NodeFinderLabelModel::removeElementFromItem(ItemBase *item, int pos)
+bool NodeFinderLabelModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
     if(item < items.data() || item >= items.data() + items.size())
         return false; //Not a label item
 
-    LabelItem *ptr = static_cast<LabelItem *>(item);
+    ssplib::LabelItem *ptr = static_cast<ssplib::LabelItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
-    ptr->elements[pos].elem.removeAttribute(svg_attr::LabelName);
+    ptr->elements[pos].elem.removeAttribute(ssplib::svg_attr::LabelName);
     ptr->elements.removeAt(pos);
 
     QModelIndex idx = index(row, 0);
@@ -172,7 +172,7 @@ bool NodeFinderLabelModel::removeElementFromItem(ItemBase *item, int pos)
     return true;
 }
 
-const ItemBase* NodeFinderLabelModel::getItemAt(int row)
+const ssplib::ItemBase* NodeFinderLabelModel::getItemAt(int row)
 {
     if(row < 0 || row >= items.size())
         return nullptr;
@@ -189,7 +189,7 @@ bool NodeFinderLabelModel::addItem()
 {
     nodeMgr->clearCurrentItem();
 
-    LabelItem item;
+    ssplib::LabelItem item;
     item.gateLetter = '-';
     item.visible = false;
 
@@ -207,11 +207,11 @@ bool NodeFinderLabelModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ItemBase& item = items[row];
+    ssplib::ItemBase& item = items[row];
 
-    for(ElementPath& elemPath : item.elements)
+    for(ssplib::ElementPath& elemPath : item.elements)
     {
-        elemPath.elem.removeAttribute(svg_attr::LabelName);
+        elemPath.elem.removeAttribute(ssplib::svg_attr::LabelName);
     }
 
     beginRemoveRows(QModelIndex(), row, row);
@@ -226,7 +226,7 @@ bool NodeFinderLabelModel::editItem(int row)
     if(row < 0 || row >= items.size())
         return false;
 
-    ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &items[row];
     nodeMgr->requestEditItem(item, EditingModes::LabelEditing);
 
     return true;

@@ -2,7 +2,8 @@
 
 #include "manager/nodefindermgr.h"
 
-#include "utils/svgutils.h"
+#include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/svg_constants.h"
 
 #include <QBrush>
 
@@ -46,7 +47,7 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid())
         return QVariant();
 
-    const TrackConnectionItem& item = items.at(idx.row());
+    const ssplib::TrackConnectionItem& item = items.at(idx.row());
 
     switch (role)
     {
@@ -89,7 +90,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
     if (!idx.isValid())
         return false;
 
-    TrackConnectionItem& item = items[idx.row()];
+    ssplib::TrackConnectionItem& item = items[idx.row()];
 
     switch (role)
     {
@@ -173,7 +174,7 @@ Qt::ItemFlags NodeFinderTurnoutModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderTurnoutModel::setItems(const QVector<TrackConnectionItem> &vec)
+void NodeFinderTurnoutModel::setItems(const QVector<ssplib::TrackConnectionItem> &vec)
 {
     beginResetModel();
     items = vec;
@@ -188,20 +189,20 @@ void NodeFinderTurnoutModel::clear()
     endResetModel();
 }
 
-bool NodeFinderTurnoutModel::addElementToItem(ElementPath &p, ItemBase *item)
+bool NodeFinderTurnoutModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
     if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
-    TrackConnectionItem *ptr = static_cast<TrackConnectionItem *>(item);
+    ssplib::TrackConnectionItem *ptr = static_cast<ssplib::TrackConnectionItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
     //Rebuild attribute
-    QVector<TrackConnectionInfo> infoVec;
-    utils::parseTrackConnectionAttribute(p.elem.attribute(svg_attr::TrackConnections), infoVec);
+    QVector<ssplib::TrackConnectionInfo> infoVec;
+    ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     infoVec.append(ptr->info);
     std::sort(infoVec.begin(), infoVec.end());
-    p.elem.setAttribute(svg_attr::TrackConnections, utils::trackConnInfoToString(infoVec));
+    p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
 
     item->elements.append(p);
 
@@ -211,21 +212,21 @@ bool NodeFinderTurnoutModel::addElementToItem(ElementPath &p, ItemBase *item)
     return true;
 }
 
-bool NodeFinderTurnoutModel::removeElementFromItem(ItemBase *item, int pos)
+bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
     if(item < items.data() || item >= items.data() + items.size())
         return false; //Not a label item
 
-    TrackConnectionItem *ptr = static_cast<TrackConnectionItem *>(item);
+    ssplib::TrackConnectionItem *ptr = static_cast<ssplib::TrackConnectionItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
-    ElementPath p = ptr->elements.takeAt(pos);
+    ssplib::ElementPath p = ptr->elements.takeAt(pos);
 
     //Rebuild attribute
-    QVector<TrackConnectionInfo> infoVec;
-    utils::parseTrackConnectionAttribute(p.elem.attribute(svg_attr::TrackConnections), infoVec);
+    QVector<ssplib::TrackConnectionInfo> infoVec;
+    ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     infoVec.removeAll(ptr->info);
-    p.elem.setAttribute(svg_attr::TrackConnections, utils::trackConnInfoToString(infoVec));
+    p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
 
     QModelIndex idx = index(row, 0);
     emit dataChanged(idx, idx);
@@ -237,7 +238,7 @@ bool NodeFinderTurnoutModel::addItem()
 {
     nodeMgr->clearCurrentItem();
 
-    TrackConnectionItem item;
+    ssplib::TrackConnectionItem item;
     item.info.stationTrackPos = 0;
     item.info.gateLetter = '-';
     item.info.gateTrackPos = 0;
@@ -257,15 +258,15 @@ bool NodeFinderTurnoutModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ItemBase& item = items[row];
+    ssplib::ItemBase& item = items[row];
 
-    for(ElementPath& p : item.elements)
+    for(ssplib::ElementPath& p : item.elements)
     {
         //Rebuild attribute
-        QVector<TrackConnectionInfo> infoVec;
-        utils::parseTrackConnectionAttribute(p.elem.attribute(svg_attr::TrackConnections), infoVec);
+        QVector<ssplib::TrackConnectionInfo> infoVec;
+        ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
         infoVec.removeAll(items.at(row).info);
-        p.elem.setAttribute(svg_attr::TrackConnections, utils::trackConnInfoToString(infoVec));
+        p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
     }
 
     beginRemoveRows(QModelIndex(), row, row);
@@ -280,13 +281,13 @@ bool NodeFinderTurnoutModel::editItem(int row)
     if(row < 0 || row >= items.size())
         return false;
 
-    ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &items[row];
     nodeMgr->requestEditItem(item, EditingModes::TrackPathEditing);
 
     return true;
 }
 
-const ItemBase* NodeFinderTurnoutModel::getItemAt(int row)
+const ssplib::ItemBase* NodeFinderTurnoutModel::getItemAt(int row)
 {
     if(row < 0 || row >= items.size())
         return nullptr;

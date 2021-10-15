@@ -2,7 +2,7 @@
 
 #include "manager/nodefindermgr.h"
 
-#include "utils/svgutils.h"
+#include "ssplib/utils/svg_path_utils.h"
 
 #include <QBrush>
 
@@ -41,7 +41,7 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
     if (!idx.isValid())
         return QVariant();
 
-    const TrackItem& item = items.at(idx.row());
+    const ssplib::TrackItem& item = items.at(idx.row());
 
     switch (role)
     {
@@ -85,7 +85,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     if (!idx.isValid())
         return false;
 
-    TrackItem& item = items[idx.row()];
+    ssplib::TrackItem& item = items[idx.row()];
 
     switch (role)
     {
@@ -142,7 +142,7 @@ Qt::ItemFlags NodeFinderStationTracksModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderStationTracksModel::setItems(const QVector<TrackItem> &vec)
+void NodeFinderStationTracksModel::setItems(const QVector<ssplib::TrackItem> &vec)
 {
     beginResetModel();
     items = vec;
@@ -157,15 +157,15 @@ void NodeFinderStationTracksModel::clear()
     endResetModel();
 }
 
-bool NodeFinderStationTracksModel::addElementToItem(ElementPath &p, ItemBase *item)
+bool NodeFinderStationTracksModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
     if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
         return false; //Not a label item
 
-    TrackItem *ptr = static_cast<TrackItem *>(item);
+    ssplib::TrackItem *ptr = static_cast<ssplib::TrackItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
-    p.elem.setAttribute(svg_attr::TrackPos, QString::number(ptr->trackPos));
+    p.elem.setAttribute(ssplib::svg_attr::TrackPos, QString::number(ptr->trackPos));
     item->elements.append(p);
 
     QModelIndex idx = index(row, 0);
@@ -174,12 +174,12 @@ bool NodeFinderStationTracksModel::addElementToItem(ElementPath &p, ItemBase *it
     return true;
 }
 
-bool NodeFinderStationTracksModel::removeElementFromItem(ItemBase *item, int pos)
+bool NodeFinderStationTracksModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
     if(item < items.data() || item >= items.data() + items.size())
         return false; //Not a label item
 
-    TrackItem *ptr = static_cast<TrackItem *>(item);
+    ssplib::TrackItem *ptr = static_cast<ssplib::TrackItem *>(item);
     int row = ptr - items.data(); //Pointer aritmetics
 
     clearElement(ptr->elements[pos]);
@@ -196,13 +196,13 @@ bool NodeFinderStationTracksModel::addItem()
     nodeMgr->clearCurrentItem();
 
     int maxTrackPos = -1;
-    for(const TrackItem& track : qAsConst(items))
+    for(const ssplib::TrackItem& track : qAsConst(items))
     {
         if(track.trackPos > maxTrackPos)
             maxTrackPos = track.trackPos;
     }
 
-    TrackItem item;
+    ssplib::TrackItem item;
     item.trackPos = maxTrackPos + 1;
     item.visible = false;
 
@@ -213,9 +213,9 @@ bool NodeFinderStationTracksModel::addItem()
     return true;
 }
 
-void NodeFinderStationTracksModel::clearElement(ElementPath &elemPath)
+void NodeFinderStationTracksModel::clearElement(ssplib::ElementPath &elemPath)
 {
-    elemPath.elem.removeAttribute(svg_attr::TrackPos);
+    elemPath.elem.removeAttribute(ssplib::svg_attr::TrackPos);
 }
 
 bool NodeFinderStationTracksModel::removeItem(int row)
@@ -225,9 +225,9 @@ bool NodeFinderStationTracksModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ItemBase& item = items[row];
+    ssplib::ItemBase& item = items[row];
 
-    for(ElementPath& elemPath : item.elements)
+    for(ssplib::ElementPath& elemPath : item.elements)
         clearElement(elemPath);
 
     beginRemoveRows(QModelIndex(), row, row);
@@ -242,13 +242,13 @@ bool NodeFinderStationTracksModel::editItem(int row)
     if(row < 0 || row >= items.size())
         return false;
 
-    ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &items[row];
     nodeMgr->requestEditItem(item, EditingModes::StationTrackEditing);
 
     return true;
 }
 
-const ItemBase* NodeFinderStationTracksModel::getItemAt(int row)
+const ssplib::ItemBase *NodeFinderStationTracksModel::getItemAt(int row)
 {
     if(row < 0 || row >= items.size())
         return nullptr;
