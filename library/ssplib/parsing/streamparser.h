@@ -3,9 +3,9 @@
 
 #include <QXmlStreamReader>
 
-#include "../stationplan.h"
-
 namespace ssplib {
+
+class StationPlan;
 
 class StreamParser
 {

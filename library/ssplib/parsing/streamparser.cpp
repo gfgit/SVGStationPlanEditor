@@ -2,6 +2,8 @@
 
 #include "../utils/svg_constants.h"
 
+#include "../stationplan.h"
+
 #include "parsinghelpers.h"
 
 using namespace ssplib;
