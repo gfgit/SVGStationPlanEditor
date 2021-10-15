@@ -10,6 +10,9 @@
 #include "nodefinderelementwalker.h"
 
 #include <ssplib/itemtypes.h>
+#include <ssplib/parsing/editinginfo.h>
+#include <ssplib/stationplan.h>
+
 #include "utils/nodefindereditingmodes.h"
 
 class NodeFinderMgr;
@@ -38,8 +41,6 @@ public:
     void reloadSVGRenderer();
 
     int calcDefaultTrackPenWidth();
-
-    void loadLabelsAndTracks();
 
     void processElements();
 
@@ -82,17 +83,6 @@ private:
     }
 
 private:
-    void processDefs(QDomElement &g);
-    void processGroup(QDomElement &g, int &generatedIdSerial, const QString &generatedIdBase);
-    void processText(QDomElement &text, int &generatedIdSerial, const QString &generatedIdBase);
-    void processTspan(QDomElement &tspan, QDomElement &text);
-    void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
-
-    bool parseLabel(QDomElement &e, QVector<ssplib::LabelItem>& labels);
-    bool parsePlatform(QDomElement &e, QVector<ssplib::TrackItem>& platforms);
-    bool parseTrackConnection(QDomElement &e, QVector<ssplib::TrackConnectionItem> &connections);
-
-private:
     friend class NodeFinderElementClass;
     friend class NodeFinderMgr;
     friend class ElementSplitterHelper;
@@ -102,6 +92,8 @@ private:
     QSvgRenderer *mSvg;
 
     QDomDocument mDoc;
+    ssplib::StationPlan m_plan;
+    ssplib::EditingInfo m_info;
 
     QHash<QString, NodeFinderElementClass> elementClasses;
 

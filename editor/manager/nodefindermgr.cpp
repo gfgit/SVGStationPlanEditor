@@ -186,7 +186,6 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
 
     //Convert SVG
     converter->processElements();
-    converter->loadLabelsAndTracks();
 
     //Load view
     converter->reloadSVGRenderer();
