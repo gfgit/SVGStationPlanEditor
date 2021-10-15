@@ -95,6 +95,9 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 
 void NodeFinderSVGWidget::mousePressEvent(QMouseEvent *e)
 {
+    if(!mSvg)
+        return;
+
     if(e->button() == Qt::LeftButton)
     {
         const QRectF target = rect();
@@ -113,6 +116,9 @@ void NodeFinderSVGWidget::mousePressEvent(QMouseEvent *e)
 
 void NodeFinderSVGWidget::mouseMoveEvent(QMouseEvent *e)
 {
+    if(!mSvg)
+        return;
+
     const QRectF target = rect();
     const QRectF source = mSvg->viewBoxF();
 
@@ -124,6 +130,9 @@ void NodeFinderSVGWidget::mouseMoveEvent(QMouseEvent *e)
 
 void NodeFinderSVGWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+    if(!mSvg)
+        return;
+
     const QRectF target = rect();
     const QRectF source = mSvg->viewBoxF();
 
