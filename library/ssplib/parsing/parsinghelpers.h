@@ -17,6 +17,11 @@ bool parseTrackConnection(utils::XmlElement &e,
                           QVector<TrackConnectionItem> &connections,
                           QVector<int> *indexes = nullptr);
 
+
+
+bool isElementSupported(const QStringRef& tag);
+bool isElementSupported(const QString& tag);
+
 } // namespace parsing
 
 } // namespace ssplib

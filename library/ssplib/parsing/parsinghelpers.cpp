@@ -1,5 +1,35 @@
 #include "parsinghelpers.h"
 
+namespace ssplib {
+
+static const QString supportedElements[] =
+    {svg_tags::RectTag,
+     svg_tags::PathTag,
+     svg_tags::LineTag,
+     svg_tags::PolylineTag};
+
+bool parsing::isElementSupported(const QStringRef &tag)
+{
+    for(const QString& val : supportedElements)
+    {
+        if(val == tag)
+            return true;
+    }
+    return false;
+}
+
+bool parsing::isElementSupported(const QString &tag)
+{
+    for(const QString& val : supportedElements)
+    {
+        if(val == tag)
+            return true;
+    }
+    return false;
+}
+
+} // namespace ssplib
+
 
 int ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels)
 {
