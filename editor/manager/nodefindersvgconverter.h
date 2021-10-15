@@ -9,7 +9,7 @@
 #include "nodefinderelementclass.h"
 #include "nodefinderelementwalker.h"
 
-#include "utils/nodefindertypes.h"
+#include <ssplib/itemtypes.h>
 #include "utils/nodefindereditingmodes.h"
 
 class NodeFinderMgr;
@@ -58,13 +58,13 @@ public:
     void removeCurrentSubElementFromItem();
     bool addCurrentElementToItem();
 
-    ItemBase *getCurItem() const;
-    void setCurItem(ItemBase *value);
+    ssplib::ItemBase *getCurItem() const;
+    void setCurItem(ssplib::ItemBase *value);
 
     int getCurItemSubElemIdx() const;
     void setCurItemSubElemIdx(int value);
 
-    inline ElementPath getCurElementPath() const { return curElementPath; }
+    inline ssplib::ElementPath getCurElementPath() const { return curElementPath; }
 
 private:
     QString getFreeId_internal(const QString& base, int &counter);
@@ -88,9 +88,9 @@ private:
     void processTspan(QDomElement &tspan, QDomElement &text);
     void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
 
-    bool parseLabel(QDomElement &e, QVector<LabelItem>& labels);
-    bool parsePlatform(QDomElement &e, QVector<TrackItem>& platforms);
-    bool parseTrackConnection(QDomElement &e, QVector<TrackConnectionItem>& connections);
+    bool parseLabel(QDomElement &e, QVector<ssplib::LabelItem>& labels);
+    bool parsePlatform(QDomElement &e, QVector<ssplib::TrackItem>& platforms);
+    bool parseTrackConnection(QDomElement &e, QVector<ssplib::TrackConnectionItem> &connections);
 
 private:
     friend class NodeFinderElementClass;
@@ -114,9 +114,9 @@ private:
 
     //Current selection
     NodeFinderElementWalker currentWalker;
-    ItemBase *curItem;
+    ssplib::ItemBase *curItem;
     int curItemSubElemIdx;
-    ElementPath curElementPath;
+    ssplib::ElementPath curElementPath;
 };
 
 #endif // NODEFINDERSVGCONVERTER_H

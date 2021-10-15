@@ -6,7 +6,8 @@
 #include "model/nodefinderstationtracksmodel.h"
 #include "model/nodefinderturnoutmodel.h"
 
-#include "utils/svgutils.h"
+#include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/svg_constants.h"
 
 #include <QSvgRenderer>
 
@@ -19,11 +20,11 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
     nodeMgr(parent),
     curItem(nullptr)
 {
-    registerClass(svg_tag::GroupTag); //Groups
-    registerClass(svg_tag::RectTag);
-    registerClass(svg_tag::PathTag);
-    registerClass(svg_tag::LineTag);
-    registerClass(svg_tag::PolylineTag);
+    registerClass(ssplib::svg_tags::GroupTag); //Groups
+    registerClass(ssplib::svg_tags::RectTag);
+    registerClass(ssplib::svg_tags::PathTag);
+    registerClass(ssplib::svg_tags::LineTag);
+    registerClass(ssplib::svg_tags::PolylineTag);
 
     mSvg = new QSvgRenderer(this);
 
@@ -55,7 +56,7 @@ void NodeFinderSVGConverter::clear()
     currentWalker = NodeFinderElementWalker();
     curItem = nullptr;
     curItemSubElemIdx = -1;
-    curElementPath = ElementPath();
+    curElementPath = ssplib::ElementPath();
 
     mDoc.clear();
 }
@@ -114,11 +115,15 @@ int NodeFinderSVGConverter::calcDefaultTrackPenWidth()
 
 void NodeFinderSVGConverter::loadLabelsAndTracks()
 {
-    QVector<LabelItem> labels;
-    QVector<TrackItem> tracks;
-    QVector<TrackConnectionItem> connections;
+    QVector<ssplib::LabelItem> labels;
+    QVector<ssplib::TrackItem> tracks;
+    QVector<ssplib::TrackConnectionItem> connections;
 
-    QStringList tags{svg_tag::RectTag, svg_tag::PathTag, svg_tag::LineTag, svg_tag::PolylineTag};
+    QStringList tags{ssplib::svg_tags::RectTag,
+                     ssplib::svg_tags::PathTag,
+                     ssplib::svg_tags::LineTag,
+                     ssplib::svg_tags::PolylineTag};
+
     auto walker = walkElements(tags);
 
     while (walker.next())
@@ -172,7 +177,7 @@ void NodeFinderSVGConverter::removeFakeIDs()
     //Remove unused generated IDs
     for(QDomElement& e : fakeIds)
     {
-        e.removeAttribute(svg_attr::ID);
+        e.removeAttribute(ssplib::svg_attr::ID);
     }
 }
 
@@ -181,7 +186,7 @@ void NodeFinderSVGConverter::restoreFakeIDs()
     //Restore generated IDs
     for(auto it = fakeIds.begin(); it != fakeIds.end(); it++)
     {
-        it.value().setAttribute(svg_attr::ID, it.key());
+        it.value().setAttribute(ssplib::svg_attr::ID, it.key());
     }
 }
 
@@ -224,13 +229,14 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
     if(!model)
         return false;
 
-    ElementPath path;
+    ssplib::ElementPath path;
     path.elem = currentWalker.element();
-    if(!utils::convertElementToPath(path.elem, path.path))
+    if(!ssplib::utils::convertElementToPath(path.elem, path.path))
         return false;
 
     path.strokeWidth = 0;
-    if(!utils::parseStrokeWidth(path, path.strokeWidth))
+    const QRectF bounds = path.path.boundingRect();
+    if(!ssplib::utils::parseStrokeWidth(path.elem, bounds, path.strokeWidth))
         path.strokeWidth = 0;
 
     return model->addElementToItem(path, curItem);
@@ -278,7 +284,7 @@ void NodeFinderSVGConverter::removeElement(QDomElement e, bool *isFakeId)
         {
             c.removeElement(e);
 
-            const QString oldId = e.attribute(svg_attr::ID);
+            const QString oldId = e.attribute(ssplib::svg_attr::ID);
             if(fakeIds.contains(oldId))
             {
                 if(isFakeId)
@@ -298,21 +304,21 @@ void NodeFinderSVGConverter::processDefs(QDomElement &g)
         QDomElement e = n.toElement(); // try to convert the node to an element.
         if(!e.isNull())
         {
-            if(e.tagName() == svg_tag::DefsTag)
+            if(e.tagName() == ssplib::svg_tags::DefsTag)
             {
                 processDefs(e);
             }
-            else if(e.tagName() == svg_tag::FontTag)
+            else if(e.tagName() == ssplib::svg_tags::FontTag)
             {
                 //Add ID if missing
-                if(!e.hasAttribute(svg_attr::ID))
+                if(!e.hasAttribute(ssplib::svg_attr::ID))
                 {
                     int counter = 0;
                     const QString newId = getFreeId_internal(QLatin1String("font_"), counter);
                     if(newId.isEmpty())
                         qWarning() << "EMPTY FONT ID";
                     else
-                        e.setAttribute(svg_attr::ID, newId);
+                        e.setAttribute(ssplib::svg_attr::ID, newId);
                 }
             }
         }
@@ -331,33 +337,33 @@ void NodeFinderSVGConverter::processGroup(QDomElement &g, int &generatedIdSerial
         {
             // The node really is an element.
 
-            if(e.hasAttribute(svg_attr::ID))
+            if(e.hasAttribute(ssplib::svg_attr::ID))
             {
-                QString id = e.attribute(svg_attr::ID);
+                QString id = e.attribute(ssplib::svg_attr::ID);
                 if(namedElements.contains(id))
                 {
                     //Duplicate id, rename element
                     id = getFreeId_internal(generatedIdBase, generatedIdSerial);
                     if(id.isEmpty())
-                        e.removeAttribute(svg_attr::ID);
+                        e.removeAttribute(ssplib::svg_attr::ID);
                     else
-                        e.setAttribute(svg_attr::ID, id);
+                        e.setAttribute(ssplib::svg_attr::ID, id);
                 }
                 namedElements.insert(id, e);
             }
 
             storeElement(e);
 
-            if(e.tagName() == svg_tag::GroupTag)
+            if(e.tagName() == ssplib::svg_tags::GroupTag)
             {
                 //Process also sub elements
                 processGroup(e, generatedIdSerial, generatedIdBase);
             }
-            else if(e.tagName() == svg_tag::TextTag)
+            else if(e.tagName() == ssplib::svg_tags::TextTag)
             {
                 processText(e, generatedIdSerial, generatedIdBase);
             }
-            else if(e.tagName() == svg_tag::DefsTag)
+            else if(e.tagName() == ssplib::svg_tags::DefsTag)
             {
                 processDefs(e);
             }
@@ -369,7 +375,7 @@ void NodeFinderSVGConverter::processGroup(QDomElement &g, int &generatedIdSerial
 void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSerial, const QString& generatedIdBase)
 {
     //xml:space="preserve" moves text to right, remove it
-    text.removeAttribute(svg_attr::XmlSpace);
+    text.removeAttribute(ssplib::svg_attr::XmlSpace);
 
     QDomNode n = text.firstChild();
     while(!n.isNull())
@@ -391,7 +397,7 @@ void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSeri
         }
 
         //The node really is an element.
-        if(e.tagName() == svg_tag::TextTag)
+        if(e.tagName() == ssplib::svg_tags::TextTag)
         {
             //Remove text elements inside a text element
             qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
@@ -401,19 +407,19 @@ void NodeFinderSVGConverter::processText(QDomElement &text, int &generatedIdSeri
         }
         else
         {
-            if(e.tagName() == svg_tag::TSpanTag)
+            if(e.tagName() == ssplib::svg_tags::TSpanTag)
             {
-                if(e.hasAttribute(svg_attr::ID))
+                if(e.hasAttribute(ssplib::svg_attr::ID))
                 {
-                    QString id = e.attribute(svg_attr::ID);
+                    QString id = e.attribute(ssplib::svg_attr::ID);
                     if(namedElements.contains(id))
                     {
                         //Duplicate id, rename element
                         id = getFreeId_internal(generatedIdBase, generatedIdSerial);
                         if(id.isEmpty())
-                            e.removeAttribute(svg_attr::ID);
+                            e.removeAttribute(ssplib::svg_attr::ID);
                         else
-                            e.setAttribute(svg_attr::ID, id);
+                            e.setAttribute(ssplib::svg_attr::ID, id);
                     }
                     namedElements.insert(id, e);
                 }
@@ -448,7 +454,7 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
         if(!e.isNull())
         {
             // the node really is an element.
-            if(e.tagName() == svg_tag::TSpanTag)
+            if(e.tagName() == ssplib::svg_tags::TSpanTag)
             {
                 processInternalTspan(tspan, e, value);
             }
@@ -461,7 +467,7 @@ void NodeFinderSVGConverter::processTspan(QDomElement &tspan, QDomElement &text)
         }
     }
 
-    for(const QString& attr : svg_attr::TSpanPassToTextAttrs)
+    for(const QString& attr : ssplib::svg_attr::TSpanPassToTextAttrs)
     {
         if(tspan.hasAttribute(attr))
         {
@@ -492,7 +498,7 @@ void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement 
         if(!e.isNull())
         {
             // the node really is an element.
-            if(e.tagName() == svg_tag::TSpanTag)
+            if(e.tagName() == ssplib::svg_tags::TSpanTag)
             {
                 processInternalTspan(top, e, value);
             }
@@ -501,16 +507,16 @@ void NodeFinderSVGConverter::processInternalTspan(QDomElement &top, QDomElement 
         n = n.nextSibling();
     }
 
-    for(const QString& attr : svg_attr::TSpanPassAttrs)
+    for(const QString& attr : ssplib::svg_attr::TSpanPassAttrs)
     {
         if(cur.hasAttribute(attr))
             top.setAttribute(attr, cur.attribute(attr));
     }
 }
 
-bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labels)
+bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<ssplib::LabelItem> &labels)
 {
-    QString labelName = e.attribute(svg_attr::LabelName);
+    QString labelName = e.attribute(ssplib::svg_attr::LabelName);
     if(labelName.isEmpty())
         return false;
 
@@ -522,18 +528,18 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
         ok = false;
     }
 
-    ElementPath elemPath;
+    ssplib::ElementPath elemPath;
     elemPath.elem = e;
 
     if(ok)
     {
-        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
+        ok = ssplib::utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
     {
         //Cannot parse attribute or element path, remove it
-        e.removeAttribute(svg_attr::LabelName);
+        e.removeAttribute(ssplib::svg_attr::LabelName);
         return false;
     }
 
@@ -548,7 +554,7 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
     if(i >= labels.size())
     {
         //Create new label
-        LabelItem newItem;
+        ssplib::LabelItem newItem;
         newItem.gateLetter = gateLetter;
         newItem.visible = false;
         labels.append(newItem);
@@ -556,37 +562,38 @@ bool NodeFinderSVGConverter::parseLabel(QDomElement &e, QVector<LabelItem> &labe
     }
 
     elemPath.strokeWidth = 0;
-    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+    const QRectF bounds = elemPath.path.boundingRect();
+    if(!ssplib::utils::parseStrokeWidth(elemPath.elem, bounds, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
     //Add element to label
-    LabelItem &item = labels[i];
+    ssplib::LabelItem &item = labels[i];
     item.elements.append(elemPath);
 
     return true;
 }
 
-bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &platforms)
+bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<ssplib::TrackItem> &platforms)
 {
-    QString trackPosStr = e.attribute(svg_attr::TrackPos);
+    QString trackPosStr = e.attribute(ssplib::svg_attr::TrackPos);
     if(trackPosStr.isEmpty())
         return false;
 
     bool ok = false;
     int trackPos = trackPosStr.toInt(&ok);
 
-    ElementPath elemPath;
+    ssplib::ElementPath elemPath;
     elemPath.elem = e;
 
     if(ok)
     {
-        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
+        ok = ssplib::utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
     {
         //Cannot parse attribute or element path, remove it
-        e.removeAttribute(svg_attr::TrackPos);
+        e.removeAttribute(ssplib::svg_attr::TrackPos);
         return false;
     }
 
@@ -599,7 +606,7 @@ bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &p
     if(i >= platforms.size())
     {
         //Create new platform
-        TrackItem newItem;
+        ssplib::TrackItem newItem;
         //newItem.trackName = ...; //TODO: real name from database
         newItem.trackPos = trackPos;
         newItem.visible = false;
@@ -608,45 +615,47 @@ bool NodeFinderSVGConverter::parsePlatform(QDomElement &e, QVector<TrackItem> &p
     }
 
     elemPath.strokeWidth = 0;
-    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+    const QRectF bounds = elemPath.path.boundingRect();
+    if(!ssplib::utils::parseStrokeWidth(elemPath.elem, bounds, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
     //Add element to platform
-    TrackItem &item = platforms[i];
+    ssplib::TrackItem &item = platforms[i];
     item.elements.append(elemPath);
 
     return true;
 }
 
-bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackConnectionItem> &connections)
+bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<ssplib::TrackConnectionItem> &connections)
 {
-    QString trackConnStr = e.attribute(svg_attr::TrackConnections);
+    QString trackConnStr = e.attribute(ssplib::svg_attr::TrackConnections);
     if(trackConnStr.isEmpty())
         return false;
 
-    QVector<TrackConnectionInfo> infoVec;
-    bool ok = utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
+    QVector<ssplib::TrackConnectionInfo> infoVec;
+    bool ok = ssplib::utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
 
-    ElementPath elemPath;
+    ssplib::ElementPath elemPath;
     elemPath.elem = e;
 
     if(ok)
     {
-        ok = utils::convertElementToPath(elemPath.elem, elemPath.path);
+        ok = ssplib::utils::convertElementToPath(elemPath.elem, elemPath.path);
     }
 
     if(!ok)
     {
         //Cannot parse attribute or element path, remove it
-        e.removeAttribute(svg_attr::TrackConnections);
+        e.removeAttribute(ssplib::svg_attr::TrackConnections);
         return false;
     }
 
     elemPath.strokeWidth = 0;
-    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+    const QRectF bounds = elemPath.path.boundingRect();
+    if(!ssplib::utils::parseStrokeWidth(elemPath.elem, bounds, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
-    for(const TrackConnectionInfo& info : qAsConst(infoVec))
+    for(const ssplib::TrackConnectionInfo& info : qAsConst(infoVec))
     {
         //Find track connection
         int i = 0;
@@ -658,14 +667,14 @@ bool NodeFinderSVGConverter::parseTrackConnection(QDomElement &e, QVector<TrackC
         if(i >= connections.size())
         {
             //Create new platform
-            TrackConnectionItem newItem;
+            ssplib::TrackConnectionItem newItem;
             newItem.info = info;
             newItem.visible = false;
             connections.append(newItem);
             i = connections.size() - 1;
         }
 
-        TrackConnectionItem &item = connections[i];
+        ssplib::TrackConnectionItem &item = connections[i];
         item.elements.append(elemPath);
     }
 
@@ -682,12 +691,12 @@ void NodeFinderSVGConverter::setCurItemSubElemIdx(int value)
     curItemSubElemIdx = value;
 }
 
-ItemBase *NodeFinderSVGConverter::getCurItem() const
+ssplib::ItemBase *NodeFinderSVGConverter::getCurItem() const
 {
     return curItem;
 }
 
-void NodeFinderSVGConverter::setCurItem(ItemBase *value)
+void NodeFinderSVGConverter::setCurItem(ssplib::ItemBase *value)
 {
     curItem = value;
     curItemSubElemIdx = -1;
