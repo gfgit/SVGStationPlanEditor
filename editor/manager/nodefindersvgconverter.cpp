@@ -54,10 +54,6 @@ void NodeFinderSVGConverter::clear()
     m_plan.clear();
     m_info.clear();
 
-    labelsModel->clear();
-    tracksModel->clear();
-    turnoutModel->clear();
-
     currentWalker = NodeFinderElementWalker();
     curItem = nullptr;
     curItemSubElemIdx = -1;
