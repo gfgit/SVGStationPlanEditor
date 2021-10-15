@@ -2,6 +2,8 @@
 
 #include "nodefindersvgconverter.h"
 
+#include "ssplib/utils/svg_constants.h"
+
 NodeFinderElementClass::NodeFinderElementClass(const QString &tag, const QString &baseId) :
     tagName(tag),
     m_baseId(baseId),
@@ -20,7 +22,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
     if(e.tagName() != tagName)
         return false;
 
-    QString id = e.attribute(svg_attr::ID);
+    QString id = e.attribute(ssplib::svg_attr::ID);
     if(id.isEmpty())
     {
         //Generate a fake ID so we can query
@@ -32,7 +34,7 @@ bool NodeFinderElementClass::preocessElement(QDomElement e, NodeFinderSVGConvert
         if(!id.isEmpty())
         {
             //Remember the generated ID to remove it later
-            e.setAttribute(svg_attr::ID, id);
+            e.setAttribute(ssplib::svg_attr::ID, id);
             conv->fakeIds.insert(id, e);
         }
     }
@@ -53,7 +55,7 @@ void NodeFinderElementClass::clear()
 
 void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId, NodeFinderSVGConverter *conv)
 {
-    const QString oldId = e.attribute(svg_attr::ID);
+    const QString oldId = e.attribute(ssplib::svg_attr::ID);
 
     //Remove from fake and do not insert back, because now it is used
     conv->fakeIds.remove(oldId);
@@ -63,11 +65,11 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
     if(newId.isEmpty())
     {
         //No new ID
-        e.removeAttribute(svg_attr::ID);
+        e.removeAttribute(ssplib::svg_attr::ID);
     }
     else
     {
-        e.setAttribute(svg_attr::ID, newId);
+        e.setAttribute(ssplib::svg_attr::ID, newId);
         elements.insert(newId, e);
         conv->namedElements.insert(newId, e);
     }
@@ -75,6 +77,6 @@ void NodeFinderElementClass::renameElement(QDomElement &e, const QString& newId,
 
 void NodeFinderElementClass::removeElement(QDomElement &e)
 {
-    const QString oldId = e.attribute(svg_attr::ID);
+    const QString oldId = e.attribute(ssplib::svg_attr::ID);
     elements.remove(oldId);
 }
