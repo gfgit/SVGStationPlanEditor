@@ -68,4 +68,4 @@ target_link_libraries(
     )
 
 # Set compiler definitions
-target_compile_definitions(${SSP_EDITOR_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS})
+target_compile_definitions(${SSP_EDITOR_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS} -DSSPLIB_ENABLE_EDITING)
