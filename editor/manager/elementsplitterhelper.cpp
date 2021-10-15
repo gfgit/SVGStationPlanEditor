@@ -1,6 +1,7 @@
 #include "elementsplitterhelper.h"
 
 #include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/svg_constants.h"
 #include "utils/pathutils.h"
 
 #include "nodefindermgr.h"
@@ -34,7 +35,7 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     if(!ssplib::utils::convertPathToSVG(rest, restVal))
         return false;
 
-    if(origElem.tagName() != svg_tag::PathTag)
+    if(origElem.tagName() != ssplib::svg_tags::PathTag)
     {
         //Remove from original class
         bool isFakeId = false;
@@ -47,7 +48,7 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
         }
 
         //Convert to path
-        origElem.setTagName(svg_tag::PathTag);
+        origElem.setTagName(ssplib::svg_tags::PathTag);
 
         QStringList attrs{
             "points",
@@ -72,10 +73,10 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
 
     //Generate new ID
     int counter = 0;
-    const QString base = origElem.attribute(svg_attr::ID);
+    const QString base = origElem.attribute(ssplib::svg_attr::ID);
     QString id = nodeMgr->getConverter()->getFreeId_internal(base, counter);
 
-    newElem.setAttribute(svg_attr::ID, id);
+    newElem.setAttribute(ssplib::svg_attr::ID, id);
 
     //Store new element
     nodeMgr->getConverter()->storeElement(newElem);
