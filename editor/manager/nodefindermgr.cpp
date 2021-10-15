@@ -7,7 +7,8 @@
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
-#include "utils/svgutils.h"
+#include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/svg_constants.h"
 
 #include "elementsplitterhelper.h"
 
@@ -60,17 +61,17 @@ bool NodeFinderMgr::validateCurrentElement()
 {
     constexpr const qreal MinStrokeWidth = 5;
 
-    ElementPath elemPath;
+    ssplib::ElementPath elemPath;
     elemPath.elem = converter->currentWalker.element();
-    if(!utils::convertElementToPath(elemPath.elem, elemPath.path))
+    if(!ssplib::utils::convertElementToPath(elemPath.elem, elemPath.path))
         return false; //Canmot be converted to path, skip it.
 
     elemPath.strokeWidth = 0;
-    if(!utils::parseStrokeWidth(elemPath, elemPath.strokeWidth))
+    QRectF bounds = elemPath.path.boundingRect();
+    if(!ssplib::utils::parseStrokeWidth(elemPath.elem, bounds, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
     //Null rect breaks QRectF::contains() which returns always false
-    QRectF bounds = elemPath.path.boundingRect();
     if(bounds.width() == 0)
         bounds.setWidth(1);
     if(bounds.height() == 0)
@@ -155,7 +156,7 @@ QWidget *NodeFinderMgr::getCentralWidget(QWidget *parent)
         return centralWidget;
 
     //Create a new one
-    NodeFinderSVGWidget *w = new NodeFinderSVGWidget(this, parent);
+    NodeFinderSVGWidget *w = new NodeFinderSVGWidget(nullptr, this, parent);
     w->setRenderer(converter->renderer());
     connect(this, &NodeFinderMgr::repaintSVG, w, QOverload<>::of(&QWidget::update));
 
@@ -291,7 +292,7 @@ void NodeFinderMgr::goToPrevElem()
                 }
                 else
                 {
-                    converter->curElementPath = ElementPath(); //Reset
+                    converter->curElementPath = ssplib::ElementPath(); //Reset
                 }
                 break;
             }
@@ -363,7 +364,7 @@ void NodeFinderMgr::goToNextElem()
                 }
                 else
                 {
-                    converter->curElementPath = ElementPath(); //Reset
+                    converter->curElementPath = ssplib::ElementPath(); //Reset
                 }
                 break;
             }
@@ -437,7 +438,7 @@ void NodeFinderMgr::clearCurrentItem()
     setMode(EditingModes::NoEditing);
 }
 
-void NodeFinderMgr::requestEditItem(ItemBase *item, EditingModes m)
+void NodeFinderMgr::requestEditItem(ssplib::ItemBase *item, EditingModes m)
 {
     clearSelection();
     converter->setCurItem(item);
@@ -482,11 +483,11 @@ void NodeFinderMgr::endOrMoveSelection(const QPointF &p, bool isEnd)
         if(m_subMode == EditingSubModes::AddingSubElement)
         {
             //Restart element selection
-            QStringList tags{svg_tag::PathTag, svg_tag::LineTag, svg_tag::PolylineTag};
+            QStringList tags{ssplib::svg_tags::PathTag, ssplib::svg_tags::LineTag, ssplib::svg_tags::PolylineTag};
             if(m_mode == EditingModes::LabelEditing)
-                tags.prepend(svg_tag::RectTag);
+                tags.prepend(ssplib::svg_tags::RectTag);
             converter->currentWalker = converter->walkElements(tags);
-            converter->curElementPath = ElementPath(); //Reset
+            converter->curElementPath = ssplib::ElementPath(); //Reset
 
             if(m_isSinglePoint)
             {
@@ -508,7 +509,7 @@ void NodeFinderMgr::clearSelection()
     m_isSinglePoint = false;
     selectionStart = selectionEnd = QPointF();
     converter->currentWalker = NodeFinderElementWalker(); //Reset
-    converter->curElementPath = ElementPath();
+    converter->curElementPath = ssplib::ElementPath();
     emit repaintSVG();
 }
 

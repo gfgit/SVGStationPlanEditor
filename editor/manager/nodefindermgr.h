@@ -10,11 +10,13 @@
 
 #include "utils/nodefindereditingmodes.h"
 
+namespace ssplib {
+class ItemBase;
+} // namespace ssplib
+
 class QIODevice;
 class QWidget;
 class NodeFinderSVGConverter;
-
-class ItemBase;
 
 class NodeFinderMgr : public QObject
 {
@@ -72,7 +74,7 @@ public slots:
     void requestEndEditItem();
 
     void clearCurrentItem();
-    void requestEditItem(ItemBase *item, EditingModes m);
+    void requestEditItem(ssplib::ItemBase *item, EditingModes m);
 
 private:
     void setMode(EditingModes m, EditingSubModes sub = EditingSubModes::NotEditingCurrentItem);
