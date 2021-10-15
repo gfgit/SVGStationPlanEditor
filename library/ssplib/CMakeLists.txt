@@ -109,10 +109,19 @@ target_include_directories(${SSP_LIBRARY_TARGET}
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                            "$<INSTALL_INTERFACE:include>"
 )
+target_include_directories(${SSP_LIBRARY_EDIT_TARGET}
+                           PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                           "$<INSTALL_INTERFACE:include>"
+)
 
 INSTALL_HEADERS_WITH_DIRECTORY(SSP_LIBRARY_HEADERS "include/ssplib/")
 
 install(TARGETS ${SSP_LIBRARY_TARGET}
+    EXPORT ${SSP_LIBRARY_TARGET}
+    )
+
+install(TARGETS ${SSP_LIBRARY_EDIT_TARGET}
     EXPORT ${SSP_LIBRARY_TARGET}
     )
 
