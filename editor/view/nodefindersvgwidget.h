@@ -1,21 +1,15 @@
 #ifndef NODEFINDERSVGWIDGET_H
 #define NODEFINDERSVGWIDGET_H
 
-#include <QWidget>
-
-class QSvgRenderer;
+#include <ssplib/rendering/sspviewer.h>
 
 class NodeFinderMgr;
 
-class NodeFinderSVGWidget : public QWidget
+class NodeFinderSVGWidget : public ssplib::SSPViewer
 {
     Q_OBJECT
 public:
-    explicit NodeFinderSVGWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
-
-    QSize sizeHint() const override;
-
-    void setRenderer(QSvgRenderer *svg);
+    explicit NodeFinderSVGWidget(ssplib::StationPlan *plan, NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -28,8 +22,6 @@ protected:
 
 private:
     NodeFinderMgr *nodeMgr;
-
-    QSvgRenderer *mSvg;
 };
 
 #endif // NODEFINDERSVGWIDGET_H

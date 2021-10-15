@@ -1,4 +1,5 @@
 #include "nodefindersvgwidget.h"
+#include <ssplib/rendering/ssprenderhelper.h>
 
 #include "manager/nodefindermgr.h"
 #include "manager/nodefindersvgconverter.h"
@@ -12,46 +13,29 @@
 
 #include <QMouseEvent>
 
-NodeFinderSVGWidget::NodeFinderSVGWidget(NodeFinderMgr *mgr, QWidget *parent) :
-    QWidget(parent),
+NodeFinderSVGWidget::NodeFinderSVGWidget(ssplib::StationPlan *plan, NodeFinderMgr *mgr, QWidget *parent) :
+    ssplib::SSPViewer(plan, parent),
     nodeMgr(mgr)
 {
     setBackgroundRole(QPalette::Light);
-}
-
-QSize NodeFinderSVGWidget::sizeHint() const
-{
-    if(mSvg->isValid())
-        return mSvg->defaultSize();
-    return QSize(128, 64);
-}
-
-void NodeFinderSVGWidget::setRenderer(QSvgRenderer *svg)
-{
-    mSvg = svg;
 }
 
 void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
 {
     static constexpr double PenWidthFactor = 1.5;
 
-    QRectF target = rect();
-    QRectF source = mSvg->viewBoxF();
+    const QRectF target = rect();
+    const QRectF source = mSvg ? mSvg->viewBoxF() : target;
 
     QPainter p(this);
-    mSvg->render(&p, target);
 
-    const double scaleFactor = target.width() / source.width();
+    if(mSvg)
+        mSvg->render(&p, target);
 
-    QTransform transform;
-    transform.scale(target.width() / source.width(),
-                    target.height() / source.height());
-    QRectF c2 = transform.mapRect(source);
+    if(m_plan)
+        ssplib::SSPRenderHelper::drawPlan(&p, m_plan, target, source);
 
-    transform.reset();
-    transform.translate(target.x() - c2.x(),
-                        target.y() - c2.y());
-    transform.scale(scaleFactor, scaleFactor);
+    QTransform transform = ssplib::SSPRenderHelper::getTranform(target, source);
     p.setTransform(transform);
 
     QPen trackPen(Qt::darkGreen, nodeMgr->getTrackPenWidth());
@@ -196,13 +180,6 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
             p.drawPath(curPath.path);
         }
     }
-
-    p.resetTransform();
-
-    mSvg->render(&p, "text_layer", target);
-    mSvg->render(&p, "arrows_layer", target);
-
-    p.setTransform(transform);
 
     //Draw selection rect
     QColor col(nodeMgr->isSelecting() ? Qt::red : Qt::green);
