@@ -15,7 +15,15 @@
 # Set SSPLibrary info template file
 set(SSP_VIEWER_SOURCES
     ${SSP_VIEWER_SOURCES}
+    mainwindow.h
+
     main.cpp
+    mainwindow.cpp
+    )
+
+set(SSP_VIEWER_UI_FILES
+    ${SSP_VIEWER_UI_FILES}
+    mainwindow.ui
     )
 
 # Create main targets
@@ -23,7 +31,8 @@ set(SSP_VIEWER_TARGET "sspviewer")
 
 # Add executable
 add_executable(${SSP_VIEWER_TARGET} WIN32
-    ${SSP_LIBRARY_SOURCES}
+    ${SSP_VIEWER_SOURCES}
+    ${SSP_VIEWER_UI_FILES}
     #${SSP_VIEWER_SOURCES}
     )
 
