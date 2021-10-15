@@ -27,112 +27,21 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
     const QRectF target = rect();
     const QRectF source = mSvg ? mSvg->viewBoxF() : target;
 
+    QPen trackPen(Qt::darkGreen, nodeMgr->getTrackPenWidth());
+    trackPen.setCapStyle(Qt::RoundCap);
+
     QPainter p(this);
 
+    //Draw SVG image
     if(mSvg)
         mSvg->render(&p, target);
 
+    //Draw visible items
     if(m_plan)
         ssplib::SSPRenderHelper::drawPlan(&p, m_plan, target, source);
 
     QTransform transform = ssplib::SSPRenderHelper::getTranform(target, source);
     p.setTransform(transform);
-
-    QPen trackPen(Qt::darkGreen, nodeMgr->getTrackPenWidth());
-    trackPen.setCapStyle(Qt::RoundCap);
-
-    //Draw labels
-    if(nodeMgr->shouldDrawLabels())
-    {
-        NodeFinderSVGConverter *conv = nodeMgr->getConverter();
-        QFont f;
-        const QString fmt = QLatin1String("Label %1");
-
-        IObjectModel *labels = conv->getModel(EditingModes::LabelEditing);
-        if(labels)
-        {
-            const int count = labels->getItemCount();
-            for(int i = 0; i < count; i++)
-            {
-                const ssplib::ItemBase *item = labels->getItemAt(i);
-                if(!item->visible || item->elements.isEmpty())
-                    continue; //Skip it
-
-                for(const auto& elem : qAsConst(item->elements))
-                {
-                    //Do not draw path for labels
-
-                    const QRectF r = elem.path.boundingRect();
-
-                    //FIXME: bad code, use name getter func
-                    const QString text = fmt.arg(static_cast<const ssplib::LabelItem *>(item)->gateLetter);
-
-                    int sizeH = r.height() * 0.85;
-                    int sizeW = r.width() * 0.3;
-                    const int minPixelSize = 10;
-
-                    f.setPixelSize(qMax(minPixelSize, qMin(sizeH, sizeW)));
-                    p.setFont(f);
-                    p.drawText(r, text, QTextOption(Qt::AlignCenter));
-                }
-
-            }
-        }
-    }
-
-    //Draw tracks
-    if(nodeMgr->shouldDrawStationTracks())
-    {
-        NodeFinderSVGConverter *conv = nodeMgr->getConverter();
-
-        IObjectModel *tracks = conv->getModel(EditingModes::StationTrackEditing);
-        if(tracks)
-        {
-            const int count = tracks->getItemCount();
-
-            for(int i = 0; i < count; i++)
-            {
-                const ssplib::ItemBase *item = tracks->getItemAt(i);
-                if(!item->visible || item->elements.isEmpty())
-                    continue; //Skip it
-
-                for(const auto& elem : qAsConst(item->elements))
-                {
-                    if(elem.strokeWidth == 0)
-                        trackPen.setWidthF(nodeMgr->getTrackPenWidth());
-                    else
-                        trackPen.setWidthF(elem.strokeWidth * PenWidthFactor);
-                    p.setPen(trackPen);
-
-                    p.drawPath(elem.path);
-                }
-            }
-        }
-
-        IObjectModel *conns = conv->getModel(EditingModes::TrackPathEditing);
-        if(conns)
-        {
-            const int count = conns->getItemCount();
-
-            for(int i = 0; i < count; i++)
-            {
-                const ssplib::ItemBase *item = conns->getItemAt(i);
-                if(!item->visible || item->elements.isEmpty())
-                    continue; //Skip it
-
-                for(const auto& elem : qAsConst(item->elements))
-                {
-                    if(elem.strokeWidth == 0)
-                        trackPen.setWidthF(nodeMgr->getTrackPenWidth());
-                    else
-                        trackPen.setWidthF(elem.strokeWidth * PenWidthFactor);
-                    p.setPen(trackPen);
-
-                    p.drawPath(elem.path);
-                }
-            }
-        }
-    }
 
     //Draw selected item
     ssplib::ElementPath curPath = nodeMgr->getConverter()->getCurElementPath();
