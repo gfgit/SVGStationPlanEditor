@@ -28,6 +28,10 @@ public:
 
     void removeAttribute(const QString& name);
 
+#ifdef SSPLIB_ENABLE_EDITING
+    inline QDomElement toElement() const { return domElem; };
+#endif
+
 private:
     struct StreamElement
     {

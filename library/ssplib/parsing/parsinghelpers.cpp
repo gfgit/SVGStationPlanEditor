@@ -31,11 +31,11 @@ bool parsing::isElementSupported(const QString &tag)
 } // namespace ssplib
 
 
-int ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels)
+bool ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels)
 {
     QString labelName = e.attribute(svg_attr::LabelName);
     if(labelName.isEmpty())
-        return -1;
+        return false;
 
     bool ok = true;
     labelName = labelName.simplified();
@@ -47,6 +47,10 @@ int ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels
 
     ElementPath elemPath;
 
+#ifdef SSPLIB_ENABLE_EDITING
+    elemPath.elem = e.toElement();
+#endif
+
     if(ok)
     {
         ok = utils::convertElementToPath(e, elemPath.path);
@@ -56,7 +60,7 @@ int ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels
     {
         //Cannot parse attribute or element path, remove it
         e.removeAttribute(svg_attr::LabelName);
-        return -1;
+        return false;
     }
 
     QChar gateLetter = labelName.front();
@@ -85,19 +89,23 @@ int ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels
     LabelItem &item = labels[i];
     item.elements.append(elemPath);
 
-    return i;
+    return true;
 }
 
-int ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms)
+bool ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms)
 {
     QString trackPosStr = e.attribute(svg_attr::TrackPos);
     if(trackPosStr.isEmpty())
-        return -1;
+        return false;
 
     bool ok = false;
     int trackPos = trackPosStr.toInt(&ok);
 
     ElementPath elemPath;
+
+#ifdef SSPLIB_ENABLE_EDITING
+    elemPath.elem = e.toElement();
+#endif
 
     if(ok)
     {
@@ -108,7 +116,7 @@ int ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &pla
     {
         //Cannot parse attribute or element path, remove it
         e.removeAttribute(svg_attr::TrackPos);
-        return -1;
+        return false;
     }
 
     int i = 0;
@@ -136,12 +144,11 @@ int ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &pla
     TrackItem &item = platforms[i];
     item.elements.append(elemPath);
 
-    return i;
+    return true;
 }
 
 bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
-                                           QVector<TrackConnectionItem> &connections,
-                                           QVector<int> *indexes)
+                                           QVector<TrackConnectionItem> &connections)
 {
     QString trackConnStr = e.attribute(svg_attr::TrackConnections);
     if(trackConnStr.isEmpty())
@@ -151,6 +158,10 @@ bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
     bool ok = utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
 
     ElementPath elemPath;
+
+#ifdef SSPLIB_ENABLE_EDITING
+    elemPath.elem = e.toElement();
+#endif
 
     if(ok)
     {
@@ -189,9 +200,6 @@ bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
 
         TrackConnectionItem &item = connections[i];
         item.elements.append(elemPath);
-
-        if(indexes)
-            indexes->append(i);
     }
 
     return true;

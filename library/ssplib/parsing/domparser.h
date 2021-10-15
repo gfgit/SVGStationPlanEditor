@@ -26,8 +26,6 @@ private:
     void processTspan(QDomElement &tspan, QDomElement &text);
     void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
 
-    void processItemElement(QDomElement &elem);
-
 private:
     QDomDocument *m_doc;
     StationPlan *plan;

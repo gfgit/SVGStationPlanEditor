@@ -9,13 +9,12 @@ namespace ssplib {
 
 namespace parsing {
 
-int parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels);
+bool parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels);
 
-int parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms);
+bool parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms);
 
 bool parseTrackConnection(utils::XmlElement &e,
-                          QVector<TrackConnectionItem> &connections,
-                          QVector<int> *indexes = nullptr);
+                          QVector<TrackConnectionItem> &connections);
 
 
 
