@@ -4,12 +4,14 @@
 
 #include "ssplib/utils/svg_path_utils.h"
 #include "ssplib/utils/svg_constants.h"
+#include "ssplib/stationplan.h"
 
 #include <QBrush>
 
 NodeFinderTurnoutModel::NodeFinderTurnoutModel(NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
-    nodeMgr(mgr)
+    nodeMgr(mgr),
+    m_plan(mgr->getStationPlan())
 {
 
 }
@@ -34,7 +36,7 @@ QVariant NodeFinderTurnoutModel::headerData(int section, Qt::Orientation orienta
 
 int NodeFinderTurnoutModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : items.size();
+    return parent.isValid() ? 0 : m_plan->trackConnections.size();
 }
 
 int NodeFinderTurnoutModel::columnCount(const QModelIndex &parent) const
@@ -47,7 +49,7 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid())
         return QVariant();
 
-    const ssplib::TrackConnectionItem& item = items.at(idx.row());
+    const ssplib::TrackConnectionItem& item = m_plan->trackConnections.at(idx.row());
 
     switch (role)
     {
@@ -90,7 +92,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
     if (!idx.isValid())
         return false;
 
-    ssplib::TrackConnectionItem& item = items[idx.row()];
+    ssplib::TrackConnectionItem& item = m_plan->trackConnections[idx.row()];
 
     switch (role)
     {
@@ -152,7 +154,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
     }
     }
 
-    std::sort(items.begin(), items.end());
+    std::sort(m_plan->trackConnections.begin(), m_plan->trackConnections.end());
 
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
@@ -174,28 +176,13 @@ Qt::ItemFlags NodeFinderTurnoutModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderTurnoutModel::setItems(const QVector<ssplib::TrackConnectionItem> &vec)
-{
-    beginResetModel();
-    items = vec;
-    endResetModel();
-}
-
-void NodeFinderTurnoutModel::clear()
-{
-    beginResetModel();
-    items.clear();
-    items.squeeze();
-    endResetModel();
-}
-
 bool NodeFinderTurnoutModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
+    if(item < m_plan->trackConnections.data() || item >= m_plan->trackConnections.data() + m_plan->trackConnections.size() || item->elements.contains(p))
         return false; //Not a label item
 
     ssplib::TrackConnectionItem *ptr = static_cast<ssplib::TrackConnectionItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->trackConnections.data(); //Pointer aritmetics
 
     //Rebuild attribute
     QVector<ssplib::TrackConnectionInfo> infoVec;
@@ -214,11 +201,11 @@ bool NodeFinderTurnoutModel::addElementToItem(ssplib::ElementPath &p, ssplib::It
 
 bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < m_plan->trackConnections.data() || item >= m_plan->trackConnections.data() + m_plan->trackConnections.size())
         return false; //Not a label item
 
     ssplib::TrackConnectionItem *ptr = static_cast<ssplib::TrackConnectionItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->trackConnections.data(); //Pointer aritmetics
 
     ssplib::ElementPath p = ptr->elements.takeAt(pos);
 
@@ -244,8 +231,8 @@ bool NodeFinderTurnoutModel::addItem()
     item.info.gateTrackPos = 0;
     item.visible = false;
 
-    beginInsertRows(QModelIndex(), items.size(), items.size());
-    items.append(item);
+    beginInsertRows(QModelIndex(), m_plan->trackConnections.size(), m_plan->trackConnections.size());
+    m_plan->trackConnections.append(item);
     endInsertRows();
 
     return true;
@@ -253,24 +240,24 @@ bool NodeFinderTurnoutModel::addItem()
 
 bool NodeFinderTurnoutModel::removeItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->trackConnections.size())
         return false;
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = items[row];
+    ssplib::ItemBase& item = m_plan->trackConnections[row];
 
     for(ssplib::ElementPath& p : item.elements)
     {
         //Rebuild attribute
         QVector<ssplib::TrackConnectionInfo> infoVec;
         ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
-        infoVec.removeAll(items.at(row).info);
+        infoVec.removeAll(m_plan->trackConnections.at(row).info);
         p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
     }
 
     beginRemoveRows(QModelIndex(), row, row);
-    items.removeAt(row);
+    m_plan->trackConnections.removeAt(row);
     endRemoveRows();
 
     return true;
@@ -278,24 +265,11 @@ bool NodeFinderTurnoutModel::removeItem(int row)
 
 bool NodeFinderTurnoutModel::editItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->trackConnections.size())
         return false;
 
-    ssplib::ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &m_plan->trackConnections[row];
     nodeMgr->requestEditItem(item, EditingModes::TrackPathEditing);
 
     return true;
-}
-
-const ssplib::ItemBase* NodeFinderTurnoutModel::getItemAt(int row)
-{
-    if(row < 0 || row >= items.size())
-        return nullptr;
-
-    return &items.at(row);
-}
-
-int NodeFinderTurnoutModel::getItemCount() const
-{
-    return items.count();
 }

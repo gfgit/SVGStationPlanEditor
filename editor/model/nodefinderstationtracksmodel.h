@@ -7,6 +7,10 @@
 
 #include "ssplib/itemtypes.h"
 
+namespace ssplib {
+class StationPlan;
+} // namespace ssplib
+
 class NodeFinderMgr;
 
 class NodeFinderStationTracksModel : public IObjectModel
@@ -35,8 +39,6 @@ public:
     bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
-    void setItems(const QVector<ssplib::TrackItem>& vec);
-
     void clearElement(ssplib::ElementPath &elemPath);
 
     //IObjectModel
@@ -44,19 +46,13 @@ public:
     bool removeItem(int row) override;
     bool editItem(int row) override;
 
-    void clear() override;
-
     bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item) override;
     bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
-
-    const ssplib::ItemBase *getItemAt(int row) override;
-
-    int getItemCount() const override;
 
 private:
     friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;
-    QVector<ssplib::TrackItem> items;
+    ssplib::StationPlan *m_plan;
 };
 
 #endif // NODEFINDERSTATIONTRACKSMODEL_H

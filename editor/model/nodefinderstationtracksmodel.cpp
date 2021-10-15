@@ -3,12 +3,14 @@
 #include "manager/nodefindermgr.h"
 
 #include "ssplib/utils/svg_constants.h"
+#include "ssplib/stationplan.h"
 
 #include <QBrush>
 
 NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
-    nodeMgr(mgr)
+    nodeMgr(mgr),
+    m_plan(mgr->getStationPlan())
 {
 }
 
@@ -28,7 +30,7 @@ QVariant NodeFinderStationTracksModel::headerData(int section, Qt::Orientation o
 
 int NodeFinderStationTracksModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : items.size();
+    return parent.isValid() ? 0 : m_plan->platforms.size();
 }
 
 int NodeFinderStationTracksModel::columnCount(const QModelIndex &parent) const
@@ -41,7 +43,7 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
     if (!idx.isValid())
         return QVariant();
 
-    const ssplib::TrackItem& item = items.at(idx.row());
+    const ssplib::TrackItem& item = m_plan->platforms.at(idx.row());
 
     switch (role)
     {
@@ -85,7 +87,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     if (!idx.isValid())
         return false;
 
-    ssplib::TrackItem& item = items[idx.row()];
+    ssplib::TrackItem& item = m_plan->platforms[idx.row()];
 
     switch (role)
     {
@@ -121,7 +123,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     }
     }
 
-    std::sort(items.begin(), items.end());
+    std::sort(m_plan->platforms.begin(), m_plan->platforms.end());
 
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
@@ -142,28 +144,13 @@ Qt::ItemFlags NodeFinderStationTracksModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderStationTracksModel::setItems(const QVector<ssplib::TrackItem> &vec)
-{
-    beginResetModel();
-    items = vec;
-    endResetModel();
-}
-
-void NodeFinderStationTracksModel::clear()
-{
-    beginResetModel();
-    items.clear();
-    items.squeeze();
-    endResetModel();
-}
-
 bool NodeFinderStationTracksModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
+    if(item < m_plan->platforms.data() || item >= m_plan->platforms.data() + m_plan->platforms.size() || item->elements.contains(p))
         return false; //Not a label item
 
     ssplib::TrackItem *ptr = static_cast<ssplib::TrackItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->platforms.data(); //Pointer aritmetics
 
     p.elem.setAttribute(ssplib::svg_attr::TrackPos, QString::number(ptr->trackPos));
     item->elements.append(p);
@@ -176,11 +163,11 @@ bool NodeFinderStationTracksModel::addElementToItem(ssplib::ElementPath &p, sspl
 
 bool NodeFinderStationTracksModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < m_plan->platforms.data() || item >= m_plan->platforms.data() + m_plan->platforms.size())
         return false; //Not a label item
 
     ssplib::TrackItem *ptr = static_cast<ssplib::TrackItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->platforms.data(); //Pointer aritmetics
 
     clearElement(ptr->elements[pos]);
     ptr->elements.removeAt(pos);
@@ -196,7 +183,7 @@ bool NodeFinderStationTracksModel::addItem()
     nodeMgr->clearCurrentItem();
 
     int maxTrackPos = -1;
-    for(const ssplib::TrackItem& track : qAsConst(items))
+    for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
     {
         if(track.trackPos > maxTrackPos)
             maxTrackPos = track.trackPos;
@@ -206,8 +193,8 @@ bool NodeFinderStationTracksModel::addItem()
     item.trackPos = maxTrackPos + 1;
     item.visible = false;
 
-    beginInsertRows(QModelIndex(), items.size(), items.size());
-    items.append(item);
+    beginInsertRows(QModelIndex(), m_plan->platforms.size(), m_plan->platforms.size());
+    m_plan->platforms.append(item);
     endInsertRows();
 
     return true;
@@ -220,18 +207,18 @@ void NodeFinderStationTracksModel::clearElement(ssplib::ElementPath &elemPath)
 
 bool NodeFinderStationTracksModel::removeItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->platforms.size())
         return false;
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = items[row];
+    ssplib::ItemBase& item = m_plan->platforms[row];
 
     for(ssplib::ElementPath& elemPath : item.elements)
         clearElement(elemPath);
 
     beginRemoveRows(QModelIndex(), row, row);
-    items.removeAt(row);
+    m_plan->platforms.removeAt(row);
     endRemoveRows();
 
     return true;
@@ -239,24 +226,11 @@ bool NodeFinderStationTracksModel::removeItem(int row)
 
 bool NodeFinderStationTracksModel::editItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->platforms.size())
         return false;
 
-    ssplib::ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &m_plan->platforms[row];
     nodeMgr->requestEditItem(item, EditingModes::StationTrackEditing);
 
     return true;
-}
-
-const ssplib::ItemBase *NodeFinderStationTracksModel::getItemAt(int row)
-{
-    if(row < 0 || row >= items.size())
-        return nullptr;
-
-    return &items.at(row);
-}
-
-int NodeFinderStationTracksModel::getItemCount() const
-{
-    return items.count();
 }

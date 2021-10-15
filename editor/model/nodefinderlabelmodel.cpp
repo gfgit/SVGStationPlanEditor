@@ -4,9 +4,12 @@
 
 #include "ssplib/utils/svg_constants.h"
 
+#include <ssplib/stationplan.h>
+
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
-    nodeMgr(mgr)
+    nodeMgr(mgr),
+    m_plan(mgr->getStationPlan())
 {
 }
 
@@ -26,7 +29,7 @@ QVariant NodeFinderLabelModel::headerData(int section, Qt::Orientation orientati
 
 int NodeFinderLabelModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : items.size();
+    return parent.isValid() ? 0 : m_plan->labels.size();
 }
 
 int NodeFinderLabelModel::columnCount(const QModelIndex &parent) const
@@ -39,7 +42,7 @@ QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid())
         return QVariant();
 
-    const ssplib::LabelItem& item = items.at(idx.row());
+    const ssplib::LabelItem& item = m_plan->labels.at(idx.row());
 
     switch (role)
     {
@@ -72,7 +75,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     if (!idx.isValid())
         return false;
 
-    ssplib::LabelItem& item = items[idx.row()];
+    ssplib::LabelItem& item = m_plan->labels[idx.row()];
 
     switch (role)
     {
@@ -104,7 +107,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     }
     }
 
-    std::sort(items.begin(), items.end());
+    std::sort(m_plan->labels.begin(), m_plan->labels.end());
 
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
@@ -125,28 +128,13 @@ Qt::ItemFlags NodeFinderLabelModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-void NodeFinderLabelModel::setItems(const QVector<ssplib::LabelItem> &vec)
-{
-    beginResetModel();
-    items = vec;
-    endResetModel();
-}
-
-void NodeFinderLabelModel::clear()
-{
-    beginResetModel();
-    items.clear();
-    items.squeeze();
-    endResetModel();
-}
-
 bool NodeFinderLabelModel::addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item)
 {
-    if(item < items.data() || item >= items.data() + items.size() || item->elements.contains(p))
+    if(item < m_plan->labels.data() || item >= m_plan->labels.data() + m_plan->labels.size() || item->elements.contains(p))
         return false; //Not a label item
 
     ssplib::LabelItem *ptr = static_cast<ssplib::LabelItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->labels.data(); //Pointer aritmetics
 
     p.elem.setAttribute(ssplib::svg_attr::LabelName, ptr->gateLetter);
     item->elements.append(p);
@@ -159,11 +147,11 @@ bool NodeFinderLabelModel::addElementToItem(ssplib::ElementPath &p, ssplib::Item
 
 bool NodeFinderLabelModel::removeElementFromItem(ssplib::ItemBase *item, int pos)
 {
-    if(item < items.data() || item >= items.data() + items.size())
+    if(item < m_plan->labels.data() || item >= m_plan->labels.data() + m_plan->labels.size())
         return false; //Not a label item
 
     ssplib::LabelItem *ptr = static_cast<ssplib::LabelItem *>(item);
-    int row = ptr - items.data(); //Pointer aritmetics
+    int row = ptr - m_plan->labels.data(); //Pointer aritmetics
 
     ptr->elements[pos].elem.removeAttribute(ssplib::svg_attr::LabelName);
     ptr->elements.removeAt(pos);
@@ -174,19 +162,6 @@ bool NodeFinderLabelModel::removeElementFromItem(ssplib::ItemBase *item, int pos
     return true;
 }
 
-const ssplib::ItemBase* NodeFinderLabelModel::getItemAt(int row)
-{
-    if(row < 0 || row >= items.size())
-        return nullptr;
-
-    return &items.at(row);
-}
-
-int NodeFinderLabelModel::getItemCount() const
-{
-    return items.size();
-}
-
 bool NodeFinderLabelModel::addItem()
 {
     nodeMgr->clearCurrentItem();
@@ -195,8 +170,8 @@ bool NodeFinderLabelModel::addItem()
     item.gateLetter = '-';
     item.visible = false;
 
-    beginInsertRows(QModelIndex(), items.size(), items.size());
-    items.append(item);
+    beginInsertRows(QModelIndex(), m_plan->labels.size(), m_plan->labels.size());
+    m_plan->labels.append(item);
     endInsertRows();
 
     return true;
@@ -204,12 +179,12 @@ bool NodeFinderLabelModel::addItem()
 
 bool NodeFinderLabelModel::removeItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->labels.size())
         return false;
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = items[row];
+    ssplib::ItemBase& item = m_plan->labels[row];
 
     for(ssplib::ElementPath& elemPath : item.elements)
     {
@@ -217,7 +192,7 @@ bool NodeFinderLabelModel::removeItem(int row)
     }
 
     beginRemoveRows(QModelIndex(), row, row);
-    items.removeAt(row);
+    m_plan->labels.removeAt(row);
     endRemoveRows();
 
     return true;
@@ -225,10 +200,10 @@ bool NodeFinderLabelModel::removeItem(int row)
 
 bool NodeFinderLabelModel::editItem(int row)
 {
-    if(row < 0 || row >= items.size())
+    if(row < 0 || row >= m_plan->labels.size())
         return false;
 
-    ssplib::ItemBase *item = &items[row];
+    ssplib::ItemBase *item = &m_plan->labels[row];
     nodeMgr->requestEditItem(item, EditingModes::LabelEditing);
 
     return true;

@@ -18,13 +18,8 @@ public:
     virtual bool editItem(int row);
     virtual bool removeItem(int row);
 
-    virtual void clear();
-
     virtual bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item);
     virtual bool removeElementFromItem(ssplib::ItemBase *item, int pos);
-
-    virtual const ssplib::ItemBase* getItemAt(int row);
-    virtual int getItemCount() const;
 
 signals:
     void itemRemoved(int row);
