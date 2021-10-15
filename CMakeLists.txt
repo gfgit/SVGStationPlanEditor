@@ -101,6 +101,12 @@ endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Create main targets
+set(SSP_LIBRARY_TARGET "ssplib")
+set(SSP_LIBRARY_EDIT_TARGET "sspeditlib")
+set(SSP_EDITOR_TARGET "sspeditor")
+set(SSP_VIEWER_TARGET "sspviewer")
+
 add_subdirectory(editor)
 add_subdirectory(library)
 add_subdirectory(viewer)
