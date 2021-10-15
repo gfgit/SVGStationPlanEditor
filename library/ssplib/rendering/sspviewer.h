@@ -1,5 +1,5 @@
-#ifndef NODEFINDERSVGWIDGET_H
-#define NODEFINDERSVGWIDGET_H
+#ifndef SSPLIB_SSPVIEWER_H
+#define SSPLIB_SSPVIEWER_H
 
 #include <QWidget>
 
@@ -33,4 +33,4 @@ protected:
 
 } // namespace ssplib
 
-#endif // NODEFINDERSVGWIDGET_H
+#endif // SSPLIB_SSPVIEWER_H

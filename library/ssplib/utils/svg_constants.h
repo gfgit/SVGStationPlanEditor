@@ -1,5 +1,5 @@
-#ifndef SVG_CONSTANTS_H
-#define SVG_CONSTANTS_H
+#ifndef SSPLIB_SVG_CONSTANTS_H
+#define SSPLIB_SVG_CONSTANTS_H
 
 #include <QString>
 #include <QStringList>
@@ -40,4 +40,4 @@ const QStringList TSpanPassToTextAttrs{"x", "y"};
 
 } // namespace ssplib
 
-#endif // SVG_CONSTANTS_H
+#endif // SSPLIB_SVG_CONSTANTS_H

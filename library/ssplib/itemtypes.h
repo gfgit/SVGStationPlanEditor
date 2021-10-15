@@ -1,5 +1,5 @@
-#ifndef ITEMTYPES_H
-#define ITEMTYPES_H
+#ifndef SSPLIB_ITEMTYPES_H
+#define SSPLIB_ITEMTYPES_H
 
 #include <QString>
 #include <QPainterPath>
@@ -93,4 +93,4 @@ inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInf
 
 } // namespace ssplib
 
-#endif // ITEMTYPES_H
+#endif // SSPLIB_ITEMTYPES_H

@@ -1,8 +1,8 @@
-#ifndef SVGSTATIONPLANLIB_H
-#define SVGSTATIONPLANLIB_H
+#ifndef SSPLIB_SVGSTATIONPLANLIB_H
+#define SSPLIB_SVGSTATIONPLANLIB_H
 
 #include "stationplan.h"
 #include "rendering/sspviewer.h"
 #include "parsing/streamparser.h"
 
-#endif // SVGSTATIONPLANLIB_H
+#endif // SSPLIB_SVGSTATIONPLANLIB_H

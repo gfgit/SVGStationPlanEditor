@@ -1,5 +1,5 @@
-#ifndef STREAMPARSER_H
-#define STREAMPARSER_H
+#ifndef SSPLIB_STREAMPARSER_H
+#define SSPLIB_STREAMPARSER_H
 
 #include <QXmlStreamReader>
 
@@ -24,4 +24,4 @@ private:
 
 } // namespace ssplib
 
-#endif // STREAMPARSER_H
+#endif // SSPLIB_STREAMPARSER_H

@@ -1,5 +1,5 @@
-#ifndef SVG_PATH_UTILS_H
-#define SVG_PATH_UTILS_H
+#ifndef SSPLIB_SVG_PATH_UTILS_H
+#define SSPLIB_SVG_PATH_UTILS_H
 
 #include "../itemtypes.h"
 #include "xmlelement.h"
@@ -29,4 +29,4 @@ bool convertPathToSVG(const QPainterPath &path, QString &outD);
 
 } // namespace ssplib
 
-#endif // SVG_PATH_UTILS_H
+#endif // SSPLIB_SVG_PATH_UTILS_H

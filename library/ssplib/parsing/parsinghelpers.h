@@ -1,5 +1,5 @@
-#ifndef PARSINGHELPERS_H
-#define PARSINGHELPERS_H
+#ifndef SSPLIB_PARSINGHELPERS_H
+#define SSPLIB_PARSINGHELPERS_H
 
 #include "../utils/svg_constants.h"
 #include "../utils/svg_path_utils.h"
@@ -21,4 +21,4 @@ bool parseTrackConnection(utils::XmlElement &e,
 
 } // namespace ssplib
 
-#endif // PARSINGHELPERS_H
+#endif // SSPLIB_PARSINGHELPERS_H

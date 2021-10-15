@@ -1,5 +1,5 @@
-#ifndef STATIONPLAN_H
-#define STATIONPLAN_H
+#ifndef SSPLIB_STATIONPLAN_H
+#define SSPLIB_STATIONPLAN_H
 
 #include "itemtypes.h"
 
@@ -28,4 +28,4 @@ public:
 
 } // namespace ssplib
 
-#endif // STATIONPLAN_H
+#endif // SSPLIB_STATIONPLAN_H

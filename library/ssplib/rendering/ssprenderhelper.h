@@ -1,5 +1,5 @@
-#ifndef SSPRENDERHELPER_H
-#define SSPRENDERHELPER_H
+#ifndef SSPLIB_SSPRENDERHELPER_H
+#define SSPLIB_SSPRENDERHELPER_H
 
 class QPainter;
 class QRectF;
@@ -21,4 +21,4 @@ public:
 
 } // namespace ssplib
 
-#endif // SSPRENDERHELPER_H
+#endif // SSPLIB_SSPRENDERHELPER_H
