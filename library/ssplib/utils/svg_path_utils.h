@@ -1,7 +1,7 @@
 #ifndef SSPLIB_SVG_PATH_UTILS_H
 #define SSPLIB_SVG_PATH_UTILS_H
 
-#include "../itemtypes.h"
+#include "ssplib/itemtypes.h"
 #include "xmlelement.h"
 #include <QPointF>
 

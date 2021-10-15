@@ -1,9 +1,9 @@
 #ifndef SSPLIB_PARSINGHELPERS_H
 #define SSPLIB_PARSINGHELPERS_H
 
-#include "../utils/svg_constants.h"
-#include "../utils/svg_path_utils.h"
-#include "../utils/xmlelement.h"
+#include "ssplib/utils/svg_constants.h"
+#include "ssplib/utils/svg_path_utils.h"
+#include "ssplib/utils/xmlelement.h"
 
 namespace ssplib {
 

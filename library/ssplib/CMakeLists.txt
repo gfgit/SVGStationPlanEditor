@@ -57,13 +57,13 @@ target_compile_options(
 target_include_directories(
     ${SSP_LIBRARY_TARGET}
     PRIVATE
-    ${CMAKE_BINARY_DIR}/include #For template files
+    ${CMAKE_SOURCE_DIR}/library
     )
 
 target_include_directories(
     ${SSP_LIBRARY_EDIT_TARGET}
     PRIVATE
-    ${CMAKE_BINARY_DIR}/include #For template files
+    ${CMAKE_SOURCE_DIR}/library
     )
 
 # Set link libraries

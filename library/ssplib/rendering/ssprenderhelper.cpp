@@ -2,7 +2,7 @@
 
 #include <QPainter>
 
-#include "../stationplan.h"
+#include "ssplib/stationplan.h"
 
 QTransform ssplib::SSPRenderHelper::getTranform(const QRectF &target, const QRectF &source)
 {

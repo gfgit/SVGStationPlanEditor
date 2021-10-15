@@ -4,7 +4,7 @@
 
 #include <QPainter>
 
-#include "../stationplan.h"
+#include "ssplib/stationplan.h"
 #include "ssprenderhelper.h"
 
 using namespace ssplib;
