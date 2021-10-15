@@ -60,6 +60,7 @@ target_link_libraries(
     Qt5::Gui
     Qt5::Widgets
     Qt5::Svg
+    Qt5::Xml
     )
 
 # Set compiler definitions
