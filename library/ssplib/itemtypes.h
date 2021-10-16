@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QPainterPath>
+#include <QRgb>
 
 #ifdef SSPLIB_ENABLE_EDITING
 #include <QDomElement>
@@ -36,11 +37,25 @@ typedef struct LabelItem : ItemBase
     QString labelText;
 } LabelItem;
 
-typedef struct TrackItem : ItemBase
+typedef struct TrackBaseItem : ItemBase
+{
+    db_id jobId = 0;
+    QRgb color = 0;
+    QString jobName;
+};
+
+typedef struct TrackItem : TrackBaseItem
 {
     QString trackName;
     int trackPos = 0;
 } TrackItem;
+
+typedef struct LineTrackItem : TrackBaseItem
+{
+    db_id gateId = 0;
+    QChar gateLetter;
+    int gateTrackPos = 0;
+} LineTrackItem;
 
 typedef struct TrackConnectionInfo
 {
@@ -51,7 +66,7 @@ typedef struct TrackConnectionInfo
     QChar gateLetter;
 } TrackConnectionInfo;
 
-typedef struct TrackConnectionItem : ItemBase
+typedef struct TrackConnectionItem : TrackBaseItem
 {
     TrackConnectionInfo info;
 } TrackConnectionItem;
@@ -71,6 +86,13 @@ inline bool operator<(const LabelItem& left, const LabelItem& right)
 inline bool operator<(const TrackItem& left, const TrackItem& right)
 {
     return left.trackPos < right.trackPos;
+}
+
+inline bool operator<(const LineTrackItem& left, const LineTrackItem& right)
+{
+    if(left.gateLetter == right.gateLetter)
+        return left.gateTrackPos < right.gateTrackPos;
+    return left.gateLetter < right.gateLetter;
 }
 
 inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
