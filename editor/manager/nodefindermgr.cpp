@@ -154,7 +154,7 @@ QWidget *NodeFinderMgr::getCentralWidget(QWidget *parent)
         return centralWidget;
 
     //Create a new one
-    NodeFinderSVGWidget *w = new NodeFinderSVGWidget(nullptr, this, parent);
+    NodeFinderSVGWidget *w = new NodeFinderSVGWidget(getStationPlan(), this, parent);
     w->setRenderer(converter->renderer());
     connect(this, &NodeFinderMgr::repaintSVG, w, QOverload<>::of(&QWidget::update));
 
