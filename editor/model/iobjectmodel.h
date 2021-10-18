@@ -14,6 +14,8 @@ class IObjectModel : public QAbstractTableModel
 public:
     explicit IObjectModel(QObject *parent = nullptr);
 
+    void refreshModel();
+
     virtual bool addItem();
     virtual bool editItem(int row);
     virtual bool removeItem(int row);

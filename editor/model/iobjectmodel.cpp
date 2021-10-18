@@ -6,6 +6,12 @@ IObjectModel::IObjectModel(QObject *parent) :
 
 }
 
+void IObjectModel::refreshModel()
+{
+    beginResetModel();
+    endResetModel();
+}
+
 bool IObjectModel::addItem()
 {
     return false;

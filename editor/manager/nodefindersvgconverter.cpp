@@ -118,12 +118,23 @@ void NodeFinderSVGConverter::processElements()
     ssplib::DOMParser parser(&mDoc, &m_plan, &m_info);
     parser.parse();
 
+    //Set default text for empty labels
     const QString fmt = QLatin1String("Label_%1");
     for(ssplib::LabelItem& item : m_plan.labels)
     {
         if(item.labelText.isEmpty())
             item.labelText = fmt.arg(item.gateLetter);
     }
+
+    //Sort items
+    std::sort(m_plan.labels.begin(), m_plan.labels.end());
+    std::sort(m_plan.platforms.begin(), m_plan.platforms.end());
+    std::sort(m_plan.trackConnections.begin(), m_plan.trackConnections.end());
+
+    //Refresh models
+    labelsModel->refreshModel();
+    tracksModel->refreshModel();
+    turnoutModel->refreshModel();
 }
 
 QDomElement NodeFinderSVGConverter::elementById(const QString &id)
