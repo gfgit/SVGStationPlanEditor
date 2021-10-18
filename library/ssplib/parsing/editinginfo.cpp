@@ -30,7 +30,9 @@ void EditingInfo::storeElement(QDomElement &e)
         namedElements.insert(id, e);
     }
 
-    //TODO: store
+    //Store element
+    if(callback)
+        callback(e);
 }
 
 void EditingInfo::clear()

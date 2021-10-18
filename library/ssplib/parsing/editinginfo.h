@@ -24,12 +24,16 @@ public:
     void resetIdGenerator();
     QString getFreeId_internal(const QString &base, int &counter);
 
+    typedef std::function<void(QDomElement &)> Callback;
+    inline void setCallback(const Callback& func) { callback = func; }
+
 public:
     ElementMap namedElements;
 
 private:
     int generatedIdSerial;
     QString generatedIdBase;
+    Callback callback;
 };
 
 } // namespace ssplib
