@@ -117,6 +117,13 @@ void NodeFinderSVGConverter::processElements()
 {
     ssplib::DOMParser parser(&mDoc, &m_plan, &m_info);
     parser.parse();
+
+    const QString fmt = QLatin1String("Label_%1");
+    for(ssplib::LabelItem& item : m_plan.labels)
+    {
+        if(item.labelText.isEmpty())
+            item.labelText = fmt.arg(item.gateLetter);
+    }
 }
 
 QDomElement NodeFinderSVGConverter::elementById(const QString &id)
