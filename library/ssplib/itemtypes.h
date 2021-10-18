@@ -15,6 +15,8 @@ namespace ssplib {
 
 typedef qint64 db_id;
 
+constexpr QRgb whiteRGB = qRgb(255, 255, 255);
+
 struct ElementPath
 {
 #ifdef SSPLIB_ENABLE_EDITING
@@ -40,7 +42,7 @@ typedef struct LabelItem : ItemBase
 typedef struct TrackBaseItem : ItemBase
 {
     db_id jobId = 0;
-    QRgb color = 0;
+    QRgb color = whiteRGB;
     QString jobName;
 };
 

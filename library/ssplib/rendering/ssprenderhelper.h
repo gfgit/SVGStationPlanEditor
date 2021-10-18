@@ -12,7 +12,6 @@ class StationPlan;
 class SSPRenderHelper
 {
 public:
-
     static QTransform getTranform(const QRectF &target, const QRectF &source);
 
     static void drawPlan(QPainter *painter, StationPlan *plan,
