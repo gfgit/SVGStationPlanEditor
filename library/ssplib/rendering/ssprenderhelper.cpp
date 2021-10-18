@@ -54,7 +54,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
                     text = fmt.arg(item.gateLetter);
 
                 int sizeH = r.height() * 0.85;
-                int sizeW = r.width() * 0.3;
+                int sizeW = r.width() * 0.25;
                 const int minPixelSize = 10;
 
                 f.setPixelSize(qMax(minPixelSize, qMin(sizeH, sizeW)));
