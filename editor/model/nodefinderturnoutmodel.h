@@ -25,7 +25,7 @@ public:
         NCols
     };
 
-    explicit NodeFinderTurnoutModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
+    explicit NodeFinderTurnoutModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

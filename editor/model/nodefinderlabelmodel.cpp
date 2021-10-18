@@ -6,10 +6,10 @@
 
 #include <ssplib/stationplan.h>
 
-NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, QObject *parent) :
+NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(mgr->getStationPlan())
+    m_plan(plan)
 {
 }
 

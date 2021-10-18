@@ -8,10 +8,10 @@
 
 #include <QBrush>
 
-NodeFinderTurnoutModel::NodeFinderTurnoutModel(NodeFinderMgr *mgr, QObject *parent) :
+NodeFinderTurnoutModel::NodeFinderTurnoutModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(mgr->getStationPlan())
+    m_plan(plan)
 {
 
 }

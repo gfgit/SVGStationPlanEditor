@@ -24,7 +24,7 @@ public:
         NCols
     };
 
-    explicit NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent = nullptr);
+    explicit NodeFinderStationTracksModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

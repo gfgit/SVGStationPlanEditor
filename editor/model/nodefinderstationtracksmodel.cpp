@@ -7,10 +7,10 @@
 
 #include <QBrush>
 
-NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, QObject *parent) :
+NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(mgr->getStationPlan())
+    m_plan(plan)
 {
 }
 

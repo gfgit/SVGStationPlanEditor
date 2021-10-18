@@ -30,9 +30,9 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
 
     mSvg = new QSvgRenderer(this);
 
-    labelsModel = new NodeFinderLabelModel(nodeMgr, this);
-    tracksModel = new NodeFinderStationTracksModel(nodeMgr, this);
-    turnoutModel = new NodeFinderTurnoutModel(nodeMgr, this);
+    labelsModel = new NodeFinderLabelModel(nodeMgr, &m_plan, this);
+    tracksModel = new NodeFinderStationTracksModel(nodeMgr, &m_plan, this);
+    turnoutModel = new NodeFinderTurnoutModel(nodeMgr, &m_plan, this);
 }
 
 QSvgRenderer *NodeFinderSVGConverter::renderer() const
