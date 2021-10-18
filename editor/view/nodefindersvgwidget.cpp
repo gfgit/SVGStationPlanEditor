@@ -15,6 +15,7 @@ NodeFinderSVGWidget::NodeFinderSVGWidget(ssplib::StationPlan *plan, NodeFinderMg
     nodeMgr(mgr)
 {
     setBackgroundRole(QPalette::Light);
+    setPlan(plan);
 }
 
 void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
