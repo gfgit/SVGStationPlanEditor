@@ -63,3 +63,12 @@ target_link_libraries(
 
 # Set compiler definitions
 target_compile_definitions(${SSP_VIEWER_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS})
+
+## Install and Deploy ##
+
+# Copy executable
+install(TARGETS ${SSP_VIEWER_TARGET}
+    RUNTIME
+    DESTINATION bin)
+
+## Install end ##

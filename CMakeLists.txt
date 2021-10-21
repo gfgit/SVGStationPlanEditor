@@ -110,3 +110,27 @@ set(SSP_VIEWER_TARGET "sspviewer")
 add_subdirectory(editor)
 add_subdirectory(library)
 add_subdirectory(viewer)
+
+## Install and Deploy ##
+
+if(WIN32)
+    if(RUN_WINDEPLOYQT)
+        if(NOT WINDEPLOYQT_EXE)
+            message(FATAL_ERROR "In order to run windeployqt you must first set th exe path in WINDEPLOYQT_EXE")
+        endif()
+
+        install(CODE "
+            message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE}\")
+            execute_process(COMMAND ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/bin
+                WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
+                OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
+                ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
+
+            message(STATUS \${WINDEPLOYQT_EXE_RESULT})
+
+            message(STATUS \"windeployqt Done.\")
+            ")
+    endif()
+endif()
+
+## Install end ##

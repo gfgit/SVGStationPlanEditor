@@ -90,7 +90,7 @@ target_link_libraries(
 target_compile_definitions(${SSP_LIBRARY_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS})
 target_compile_definitions(${SSP_LIBRARY_EDIT_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS} -DSSPLIB_ENABLE_EDITING)
 
-# Install
+## Install and Deploy ##
 
 MACRO(INSTALL_HEADERS_WITH_DIRECTORY HEADER_LIST PREFIX)
 
@@ -129,3 +129,5 @@ install(EXPORT ${SSP_LIBRARY_TARGET}
     NAMESPACE "ssplib::"
     DESTINATION "lib/cmake/ssplib"
     FILE "ssplib-config.cmake")
+
+## Install end ##

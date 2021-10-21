@@ -69,3 +69,13 @@ target_link_libraries(
 
 # Set compiler definitions
 target_compile_definitions(${SSP_EDITOR_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS} -DSSPLIB_ENABLE_EDITING)
+
+
+## Install and Deploy ##
+
+# Copy executable
+install(TARGETS ${SSP_EDITOR_TARGET}
+    RUNTIME
+    DESTINATION bin)
+
+## Install end ##
