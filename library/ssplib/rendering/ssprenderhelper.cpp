@@ -4,6 +4,26 @@
 
 #include "ssplib/stationplan.h"
 
+void setFontSize(QPainter *painter, const QFont& originalFont, const QRectF& originalRect, const QString& text)
+{
+    QFont font = originalFont;
+    painter->setFont(originalFont);
+
+    QTextOption opt(Qt::AlignCenter);
+    opt.setWrapMode(QTextOption::WordWrap);
+
+    QRectF rect = painter->boundingRect(originalRect, text, opt);
+    if(!originalRect.contains(rect))
+    {
+        qreal factorX = originalRect.width() / rect.width();
+        qreal factorY = originalRect.height() / rect.height();
+
+        qreal factor = qMin(factorX, factorY);
+        font.setPointSizeF(originalFont.pointSize() * factor);
+        painter->setFont(font);
+    }
+}
+
 QTransform ssplib::SSPRenderHelper::getTranform(const QRectF &target, const QRectF &source)
 {
     const double scaleFactor = target.width() / source.width();
@@ -35,6 +55,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
     if(plan->drawLabels)
     {
         QFont f;
+
         const QString fmt = QLatin1String("Label %1");
 
         const int count = plan->labels.count();
@@ -53,12 +74,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
                 if(text.isEmpty())
                     text = fmt.arg(item.gateLetter);
 
-                int sizeH = r.height() * 0.85;
-                int sizeW = r.width() * 0.25;
-                const int minPixelSize = 10;
-
-                f.setPixelSize(qMax(minPixelSize, qMin(sizeH, sizeW)));
-                painter->setFont(f);
+                setFontSize(painter, f, r, text);
                 painter->drawText(r, text, QTextOption(Qt::AlignCenter));
             }
 
