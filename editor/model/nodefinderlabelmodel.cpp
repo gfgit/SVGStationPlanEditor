@@ -6,6 +6,8 @@
 
 #include <ssplib/stationplan.h>
 
+#include <QBrush>
+
 NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
@@ -54,6 +56,12 @@ QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
         case LabelNameCol:
             return item.gateLetter;
         }
+        break;
+    }
+    case Qt::BackgroundRole:
+    {
+        if(item.elements.isEmpty())
+            return QBrush(Qt::yellow);
         break;
     }
     case Qt::CheckStateRole:
