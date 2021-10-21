@@ -1,5 +1,7 @@
 #include "parsinghelpers.h"
 
+#include <QString>
+
 namespace ssplib {
 
 static const QString supportedElements[] =
