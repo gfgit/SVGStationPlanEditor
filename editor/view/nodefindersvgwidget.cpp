@@ -52,7 +52,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         QColor color(curPath.path.isEmpty() ? Qt::blue : Qt::red);
 
         QPen pen;
-        if(nodeMgr->mode() == EditingModes::StationTrackEditing || nodeMgr->mode() == EditingModes::TrackPathEditing)
+        if(nodeMgr->mode() != EditingModes::LabelEditing)
         {
             pen = trackPen;
             pen.setColor(color);
