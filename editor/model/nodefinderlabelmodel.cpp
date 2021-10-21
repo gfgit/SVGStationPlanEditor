@@ -76,6 +76,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
         return false;
 
     ssplib::LabelItem& item = m_plan->labels[idx.row()];
+    const QChar oldGateLetter = item.gateLetter;
 
     switch (role)
     {
@@ -88,8 +89,13 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
             if(name.isEmpty() || name.front() < 'A' || name.front() > 'Z')
                 return false;
 
+            const QChar letter = name.front();
+
+            if(item.gateLetter == letter)
+                return false;
+
             //Set name
-            item.gateLetter = name.front();
+            item.gateLetter = letter;
         }
         break;
     }
@@ -105,6 +111,16 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
         }
         break;
     }
+    }
+
+    if(oldGateLetter != item.gateLetter)
+    {
+        //Rebuild element attributes
+        for(ssplib::ElementPath &p : item.elements)
+        {
+            //Rebuild attribute
+            p.elem.setAttribute(ssplib::svg_attr::LabelName, item.gateLetter);
+        }
     }
 
     std::sort(m_plan->labels.begin(), m_plan->labels.end());
