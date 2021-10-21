@@ -94,6 +94,8 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
     ssplib::TrackConnectionItem& item = m_plan->trackConnections[idx.row()];
 
+    const ssplib::TrackConnectionInfo oldInfo = item.info;
+
     switch (role)
     {
     case Qt::EditRole:
@@ -107,7 +109,10 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             if(!ok || trk < 0 || trk > 255) //FIXME: max track?
                 return false;
 
-            //Set track
+            if(item.info.stationTrackPos == trk)
+                return false;
+
+            //Set station track
             item.info.stationTrackPos = trk;
             break;
         }
@@ -122,6 +127,9 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             if(gateLetter < 'A' || gateLetter > 'Z')
                 return false;
 
+            if(item.info.gateLetter == gateLetter)
+                return false;
+
             //Set gate
             item.info.gateLetter = gateLetter;
             break;
@@ -133,7 +141,10 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             if(!ok || trk < 0 || trk > 255) //FIXME: max track?
                 return false;
 
-            //Set track
+            if(item.info.gateTrackPos == trk)
+                return false;
+
+            //Set gate track
             item.info.gateTrackPos = trk;
             break;
         }
@@ -152,6 +163,21 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         }
         break;
     }
+    }
+
+    if(oldInfo != item.info)
+    {
+        //Rebuild element attributes
+        for(ssplib::ElementPath &p : item.elements)
+        {
+            //Rebuild attribute
+            QVector<ssplib::TrackConnectionInfo> infoVec;
+            ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
+            infoVec.removeAll(oldInfo); //Remove old
+            infoVec.append(item.info); //Add new
+            std::sort(infoVec.begin(), infoVec.end());
+            p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
+        }
     }
 
     std::sort(m_plan->trackConnections.begin(), m_plan->trackConnections.end());
