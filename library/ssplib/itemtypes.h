@@ -75,26 +75,45 @@ typedef struct TrackConnectionItem : TrackBaseItem
 
 //Operators
 
+//ElementPath
 inline bool operator==(const ElementPath& left, const ElementPath& right)
 {
     return left.path == right.path;
 }
 
+//LabelItem
 inline bool operator<(const LabelItem& left, const LabelItem& right)
 {
     return left.gateLetter < right.gateLetter;
 }
 
+//TrackItem
 inline bool operator<(const TrackItem& left, const TrackItem& right)
 {
     return left.trackPos < right.trackPos;
 }
 
+//LineTrackItem
 inline bool operator<(const LineTrackItem& left, const LineTrackItem& right)
 {
     if(left.gateLetter == right.gateLetter)
         return left.gateTrackPos < right.gateTrackPos;
     return left.gateLetter < right.gateLetter;
+}
+
+//TrackConnectionInfo
+inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
+{
+    return left.stationTrackPos == right.stationTrackPos &&
+           left.gateTrackPos == right.gateTrackPos &&
+           left.gateLetter == right.gateLetter;
+}
+
+inline bool operator!=(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
+{
+    return left.stationTrackPos != right.stationTrackPos ||
+           left.gateTrackPos != right.gateTrackPos ||
+           left.gateLetter != right.gateLetter;
 }
 
 inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
@@ -110,16 +129,10 @@ inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo
     return left.stationTrackPos < right.stationTrackPos;
 }
 
+//TrackConnectionItem
 inline bool operator<(const TrackConnectionItem& left, const TrackConnectionItem& right)
 {
     return left.info < right.info;
-}
-
-inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
-{
-    return left.stationTrackPos == right.stationTrackPos &&
-           left.gateTrackPos == right.gateTrackPos &&
-           left.gateLetter == right.gateLetter;
 }
 
 } // namespace ssplib
