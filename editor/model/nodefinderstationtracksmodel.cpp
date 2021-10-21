@@ -88,6 +88,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
         return false;
 
     ssplib::TrackItem& item = m_plan->platforms[idx.row()];
+    const int oldTrackPos = item.trackPos;
 
     switch (role)
     {
@@ -100,6 +101,9 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
             bool ok = false;
             int trk = value.toInt(&ok);
             if(!ok || trk < 0)
+                return false;
+
+            if(item.trackPos == trk)
                 return false;
 
             //Set name
@@ -121,6 +125,17 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
         }
         break;
     }
+    }
+
+    if(oldTrackPos != item.trackPos)
+    {
+        //Rebuild element attributes
+        const QString trkPosStr = QString::number(item.trackPos);
+        for(ssplib::ElementPath &p : item.elements)
+        {
+            //Rebuild attribute
+            p.elem.setAttribute(ssplib::svg_attr::TrackPos, trkPosStr);
+        }
     }
 
     std::sort(m_plan->platforms.begin(), m_plan->platforms.end());
