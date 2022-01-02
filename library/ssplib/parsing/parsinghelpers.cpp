@@ -187,7 +187,7 @@ bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
         int i = 0;
         for(; i < connections.size(); i++)
         {
-            if(connections.at(i).info == info)
+            if(connections.at(i).info.matchNames(info))
                 break; //Connection exists
         }
         if(i >= connections.size())

@@ -74,6 +74,27 @@ struct TrackConnectionInfo
     int gateTrackPos = 0;
     QChar gateLetter;
     Side trackSide = Side::NSides;
+
+    //NOTE: this matches Database Data
+    inline bool matchIDs(const TrackConnectionInfo& other) const
+    {
+        return trackId == other.trackId && gateId == other.gateId
+            && gateTrackPos == other.gateTrackPos && trackSide == other.trackSide;
+    }
+
+    //NOTE: this matches SVG Data
+    inline bool matchNames(const TrackConnectionInfo& other) const
+    {
+        return stationTrackPos == other.stationTrackPos && gateLetter == other.gateLetter
+               && gateTrackPos == other.gateTrackPos && trackSide == other.trackSide;
+    }
+
+    template <typename Container>
+    static inline void removeAllNames(Container &vec, const TrackConnectionInfo& info)
+    {
+        std::remove_if(vec.begin(), vec.end(),
+                       [info](const TrackConnectionInfo& other) -> bool { return info.matchNames(other);});
+    }
 };
 
 struct TrackConnectionItem : TrackBaseItem
@@ -110,20 +131,6 @@ inline bool operator<(const LineTrackItem& left, const LineTrackItem& right)
 }
 
 //TrackConnectionInfo
-inline bool operator==(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
-{
-    return left.stationTrackPos == right.stationTrackPos &&
-           left.gateTrackPos == right.gateTrackPos &&
-           left.gateLetter == right.gateLetter;
-}
-
-inline bool operator!=(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
-{
-    return left.stationTrackPos != right.stationTrackPos ||
-           left.gateTrackPos != right.gateTrackPos ||
-           left.gateLetter != right.gateLetter;
-}
-
 inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo& right)
 {
     if(left.stationTrackPos == right.stationTrackPos)

@@ -165,7 +165,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
     }
     }
 
-    if(oldInfo != item.info)
+    if(!oldInfo.matchNames(item.info))
     {
         //Rebuild element attributes
         for(ssplib::ElementPath &p : item.elements)
@@ -173,7 +173,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             //Rebuild attribute
             QVector<ssplib::TrackConnectionInfo> infoVec;
             ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
-            infoVec.removeAll(oldInfo); //Remove old
+            ssplib::TrackConnectionInfo::removeAllNames(infoVec, oldInfo); //Remove old
             infoVec.append(item.info); //Add new
             std::sort(infoVec.begin(), infoVec.end());
             p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
@@ -238,7 +238,7 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
     //Rebuild attribute
     QVector<ssplib::TrackConnectionInfo> infoVec;
     ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
-    infoVec.removeAll(ptr->info);
+    ssplib::TrackConnectionInfo::removeAllNames(infoVec, ptr->info);
     p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
 
     QModelIndex idx = index(row, 0);
@@ -278,7 +278,7 @@ bool NodeFinderTurnoutModel::removeItem(int row)
         //Rebuild attribute
         QVector<ssplib::TrackConnectionInfo> infoVec;
         ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
-        infoVec.removeAll(m_plan->trackConnections.at(row).info);
+        ssplib::TrackConnectionInfo::removeAllNames(infoVec, m_plan->trackConnections.at(row).info);
         p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
     }
 
