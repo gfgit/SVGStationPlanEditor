@@ -8,6 +8,11 @@
 
 using namespace ssplib;
 
+const char trackSideLetters[int(ssplib::Side::NSides)] = {
+    'W', //ssplib::Side::West
+    'E' //ssplib::Side::East
+};
+
 static int parseNumber(double &outVal, const QStringView &str)
 {
     //Calc number length
@@ -359,7 +364,8 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
         OutsideValue,
         GateLetter,
         GateTrack,
-        StationTrack
+        StationTrack,
+        StationTrackSide
     };
 
     Section section = Section::OutsideValue;
@@ -408,6 +414,21 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
         {
             int num = parseInteger(value, i);
             info.stationTrackPos = num;
+            section = Section::StationTrackSide;
+
+            break;
+        }
+        case Section::StationTrackSide:
+        {
+            const char sideLetter = value.at(i).toUpper().toLatin1();
+            if(sideLetter == trackSideLetters[int(ssplib::Side::East)])
+            {
+                info.trackSide = ssplib::Side::East;
+            }
+            else if(sideLetter == trackSideLetters[int(ssplib::Side::West)])
+            {
+                info.trackSide = ssplib::Side::West;
+            }
 
             //Skip spaces and commas
             while (i < value.size() && (value.at(i).isSpace() || value.at(i) == ','))
@@ -443,6 +464,12 @@ QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
         value += QString::number(info.gateTrackPos);
         value += ',';
         value += QString::number(info.stationTrackPos);
+        value += ',';
+        const int trackSide = int(info.trackSide);
+        if(trackSide >= int(ssplib::Side::NSides))
+            value += '?';
+        else
+            value += trackSideLetters[trackSide];
         value += "),";
     }
     if(!value.isEmpty() && value.endsWith(','))
