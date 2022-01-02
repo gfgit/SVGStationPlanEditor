@@ -24,6 +24,8 @@ QVariant NodeFinderTurnoutModel::headerData(int section, Qt::Orientation orienta
         {
         case StationTrackCol:
             return tr("St. Trk");
+        case StationTrackSideCol:
+            return tr("Side");
         case GateNameCol:
             return tr("Gate");
         case GateTrackCol:
@@ -54,12 +56,28 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case StationTrackCol:
+            return item.info.stationTrackPos;
+        case StationTrackSideCol:
+            return getTrackSideName(item.info.trackSide);
+        case GateNameCol:
+            return item.info.gateLetter;
+        case GateTrackCol:
+            return item.info.gateTrackPos;
+        }
+        break;
+    }
     case Qt::EditRole:
     {
         switch (idx.column())
         {
         case StationTrackCol:
             return item.info.stationTrackPos;
+        case StationTrackSideCol:
+            return int(item.info.trackSide);
         case GateNameCol:
             return item.info.gateLetter;
         case GateTrackCol:
@@ -114,6 +132,21 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
             //Set station track
             item.info.stationTrackPos = trk;
+            break;
+        }
+        case StationTrackSideCol:
+        {
+            bool ok = false;
+            int trk = value.toInt(&ok);
+            if(!ok || trk < 0 || trk >= int(ssplib::Side::NSides))
+                return false;
+
+            const ssplib::Side trkSide = ssplib::Side(trk);
+            if(item.info.trackSide == trkSide)
+                return false;
+
+            //Set station track
+            item.info.trackSide = trkSide;
             break;
         }
         case GateNameCol:
@@ -253,6 +286,7 @@ bool NodeFinderTurnoutModel::addItem()
 
     ssplib::TrackConnectionItem item;
     item.info.stationTrackPos = 0;
+    item.info.trackSide = ssplib::Side::West;
     item.info.gateLetter = '-';
     item.info.gateTrackPos = 0;
     item.visible = false;

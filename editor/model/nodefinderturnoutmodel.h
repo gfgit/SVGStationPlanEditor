@@ -20,6 +20,7 @@ public:
     enum Columns
     {
         StationTrackCol = 0,
+        StationTrackSideCol,
         GateNameCol,
         GateTrackCol,
         NCols
@@ -47,6 +48,20 @@ public:
 
     bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item) override;
     bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
+
+    static inline QString getTrackSideName(ssplib::Side s)
+    {
+        switch (s)
+        {
+        case ssplib::Side::East:
+            return tr("East");
+        case ssplib::Side::West:
+            return tr("West");
+        default:
+            break;
+        }
+        return QString();
+    }
 
 private:
     friend class NodeFinderSVGWidget;
