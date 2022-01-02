@@ -416,6 +416,25 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
             info.stationTrackPos = num;
             section = Section::StationTrackSide;
 
+            //Skip spaces and commas
+            while (i < value.size() && (value.at(i).isSpace() || value.at(i) == ','))
+            {
+                i++;
+            }
+
+            if(i < value.size() && value.at(i) == ')')
+            {
+                //NOTE: we ignore StationTrackSide if not present to keep compatibility
+                //with old format
+                //Store value and restart parsing
+                outVec.append(info);
+                section = Section::OutsideValue;
+            }else{
+                //NOTE: go back by 1 so next loop goes forward by 1
+                //And gets to StationTrackSide to parse it.
+                i--;
+            }
+
             break;
         }
         case Section::StationTrackSide:
@@ -428,6 +447,10 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
             else if(sideLetter == trackSideLetters[int(ssplib::Side::West)])
             {
                 info.trackSide = ssplib::Side::West;
+            }
+            else
+            {
+                info.trackSide = ssplib::Side::NSides;
             }
 
             //Skip spaces and commas
