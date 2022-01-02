@@ -17,6 +17,13 @@ typedef qint64 db_id;
 
 constexpr QRgb whiteRGB = qRgb(255, 255, 255);
 
+enum class Side : qint8
+{
+    West = 0,
+    East = 1,
+    NSides
+};
+
 struct ElementPath
 {
 #ifdef SSPLIB_ENABLE_EDITING
@@ -26,52 +33,53 @@ struct ElementPath
     double strokeWidth = 0;
 };
 
-typedef struct ItemBase
+struct ItemBase
 {
     QVector<ElementPath> elements;
     db_id itemId = 0;
     bool visible = false;
-} ItemBase;
+};
 
-typedef struct LabelItem : ItemBase
+struct LabelItem : ItemBase
 {
     QChar gateLetter;
     QString labelText;
-} LabelItem;
+};
 
-typedef struct TrackBaseItem : ItemBase
+struct TrackBaseItem : ItemBase
 {
     db_id jobId = 0;
     QRgb color = whiteRGB;
     QString jobName;
 };
 
-typedef struct TrackItem : TrackBaseItem
+struct TrackItem : TrackBaseItem
 {
     QString trackName;
     int trackPos = 0;
-} TrackItem;
+};
 
-typedef struct LineTrackItem : TrackBaseItem
+struct LineTrackItem : TrackBaseItem
 {
     db_id gateId = 0;
     QChar gateLetter;
     int gateTrackPos = 0;
-} LineTrackItem;
+};
 
-typedef struct TrackConnectionInfo
+struct TrackConnectionInfo
 {
     db_id trackId = 0;
     db_id gateId = 0;
     int stationTrackPos = 0;
     int gateTrackPos = 0;
     QChar gateLetter;
-} TrackConnectionInfo;
+    Side trackSide = Side::NSides;
+};
 
-typedef struct TrackConnectionItem : TrackBaseItem
+struct TrackConnectionItem : TrackBaseItem
 {
     TrackConnectionInfo info;
-} TrackConnectionItem;
+};
 
 //Operators
 
