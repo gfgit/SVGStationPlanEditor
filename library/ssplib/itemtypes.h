@@ -135,10 +135,15 @@ inline bool operator<(const TrackConnectionInfo& left, const TrackConnectionInfo
 {
     if(left.stationTrackPos == right.stationTrackPos)
     {
-        if(left.gateLetter == right.gateLetter)
-            return left.gateTrackPos < right.gateTrackPos;
+        if(left.trackSide == right.trackSide)
+        {
+            if(left.gateLetter == right.gateLetter)
+                return left.gateTrackPos < right.gateTrackPos;
 
-        return left.gateLetter < right.gateLetter;
+            return left.gateLetter < right.gateLetter;
+        }
+
+        return left.trackSide < right.trackSide;
     }
 
     return left.stationTrackPos < right.stationTrackPos;
