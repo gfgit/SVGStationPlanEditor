@@ -46,7 +46,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
 
     painter->setTransform(getTranform(target, source));
 
-    QPen trackPen(plan->platforRGB);
+    QPen trackPen(plan->platformRGB);
     trackPen.setCapStyle(Qt::RoundCap);
 
     painter->setPen(plan->labelRGB);
@@ -91,7 +91,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
                 continue; //Skip it
 
             if(item.color == whiteRGB)
-                trackPen.setColor(plan->platforRGB);
+                trackPen.setColor(plan->platformRGB);
             else
                 trackPen.setColor(item.color);
 

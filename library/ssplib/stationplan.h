@@ -24,7 +24,7 @@ public:
     bool drawTracks;
 
     QRgb labelRGB;
-    QRgb platforRGB;
+    QRgb platformRGB;
     qreal platformPenWidth;
 };
 
