@@ -71,6 +71,7 @@ const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &
     }
 
     //Then try with track connections
+    const TrackConnectionItem *possibleTrack = nullptr;
     for(const TrackConnectionItem& track : qAsConst(m_plan->trackConnections))
     {
         for(const ElementPath& elem : track.elements)
@@ -80,10 +81,24 @@ const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &
 
             if(elem.path.intersects(r))
             {
-                outType = FindItemType::TrackConnection;
-                return &track;
+                if(possibleTrack)
+                {
+                    //Prefer visible track if we get multiple matches
+                    if(!possibleTrack->visible && track.visible)
+                        possibleTrack = &track;
+                }
+                else
+                {
+                    possibleTrack = &track;
+                }
             }
         }
+    }
+
+    if(possibleTrack)
+    {
+        outType = FindItemType::TrackConnection;
+        return possibleTrack;
     }
 
     outType = FindItemType::NotFound;
