@@ -113,6 +113,11 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
             if(!item.visible || item.elements.isEmpty())
                 continue; //Skip it
 
+            if(item.color == whiteRGB)
+                trackPen.setColor(plan->platformRGB);
+            else
+                trackPen.setColor(item.color);
+
             for(const auto& elem : qAsConst(item.elements))
             {
                 if(elem.strokeWidth == 0)
