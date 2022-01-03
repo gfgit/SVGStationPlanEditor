@@ -452,6 +452,7 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
             {
                 info.trackSide = ssplib::Side::NSides;
             }
+            i++;
 
             //Skip spaces and commas
             while (i < value.size() && (value.at(i).isSpace() || value.at(i) == ','))
