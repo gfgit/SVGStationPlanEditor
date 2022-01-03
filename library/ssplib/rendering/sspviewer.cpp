@@ -8,6 +8,8 @@
 #include "ssprenderhelper.h"
 
 #include <QMouseEvent>
+#include <QHelpEvent>
+#include <QToolTip>
 
 using namespace ssplib;
 
@@ -36,6 +38,114 @@ void SSPViewer::setPlan(StationPlan *newPlan)
     m_plan = newPlan;
 }
 
+const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &outType) const
+{
+    //First try with labels
+    for(const LabelItem& label : qAsConst(m_plan->labels))
+    {
+        for(const ElementPath& elem : label.elements)
+        {
+            const QRectF bounds = elem.path.boundingRect();
+            if(bounds.contains(scenePos))
+            {
+                outType = FindItemType::Label;
+                return &label;
+            }
+        }
+    }
+
+    //Then try with station tracks
+    for(const TrackItem& track : qAsConst(m_plan->platforms))
+    {
+        for(const ElementPath& elem : track.elements)
+        {
+            const double halfWidth = elem.strokeWidth / 2;
+            QRectF r(scenePos.x() - halfWidth, scenePos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
+
+            if(elem.path.intersects(r))
+            {
+                outType = FindItemType::StationTrack;
+                return &track;
+            }
+        }
+    }
+
+    //Then try with track connections
+    for(const TrackConnectionItem& track : qAsConst(m_plan->trackConnections))
+    {
+        for(const ElementPath& elem : track.elements)
+        {
+            const double halfWidth = elem.strokeWidth / 2;
+            QRectF r(scenePos.x() - halfWidth, scenePos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
+
+            if(elem.path.intersects(r))
+            {
+                outType = FindItemType::TrackConnection;
+                return &track;
+            }
+        }
+    }
+
+    outType = FindItemType::NotFound;
+    return nullptr;
+}
+
+bool ssplib::SSPViewer::event(QEvent *e)
+{
+    if(e->type() == QEvent::ToolTip)
+    {
+        if(!mSvg || !m_plan)
+        {
+            QToolTip::hideText();
+            e->ignore();
+            return true;
+        }
+
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
+
+        const QRectF target = rect();
+        const QRectF source = mSvg->viewBoxF();
+
+        const double inverseScaleFactor = source.width() / target.width();
+        const QPointF scenePos = helpEvent->pos() * inverseScaleFactor + source.topLeft();
+
+        FindItemType itemType = FindItemType::NotFound;
+        const ItemBase *item = findItemAtPos(scenePos, itemType);
+        if(!item)
+        {
+            QToolTip::hideText();
+            e->ignore();
+            return true;
+        }
+
+        QString msg;
+        if(itemType == FindItemType::Label)
+        {
+            const LabelItem *label = static_cast<const LabelItem *>(item);
+            msg = tr("Gate: %1<br>"
+                     "<b>%2</b><br>"
+                     "Double click to get more details").arg(label->gateLetter).arg(label->labelText);
+        }
+
+        if(itemType == FindItemType::StationTrack)
+        {
+            const TrackItem *track = static_cast<const TrackItem *>(item);
+            msg = track->jobName;
+        }
+
+        if(itemType == FindItemType::TrackConnection)
+        {
+            const TrackConnectionItem *track = static_cast<const TrackConnectionItem *>(item);
+            msg = track->jobName;
+        }
+
+        QToolTip::showText(helpEvent->globalPos(), msg, this);
+        return true;
+    }
+
+    return QWidget::event(e);
+}
+
 void SSPViewer::paintEvent(QPaintEvent *)
 {
     const QRectF target = rect();
@@ -61,74 +171,35 @@ void SSPViewer::mouseDoubleClickEvent(QMouseEvent *e)
     const QRectF source = mSvg->viewBoxF();
 
     const double inverseScaleFactor = source.width() / target.width();
-    const QPointF pos = e->pos() * inverseScaleFactor + source.topLeft();
+    const QPointF scenePos = e->pos() * inverseScaleFactor + source.topLeft();
 
-    //First try with labels
-    bool found = false;
-    for(const LabelItem& label : qAsConst(m_plan->labels))
-    {
-        for(const ElementPath& elem : label.elements)
-        {
-            const QRectF bounds = elem.path.boundingRect();
-            if(bounds.contains(pos))
-            {
-                e->accept();
-                emit labelClicked(label.itemId, label.gateLetter, label.labelText);
-                found = true;
-                break;
-            }
-        }
-
-        if(found)
-            break;
-    }
-
-    if(found)
+    FindItemType itemType = FindItemType::NotFound;
+    const ItemBase *item = findItemAtPos(scenePos, itemType);
+    if(!item)
         return;
 
-    //Then try with station tracks
-    for(const TrackItem& track : qAsConst(m_plan->platforms))
+    if(itemType == FindItemType::Label)
     {
-        for(const ElementPath& elem : track.elements)
-        {
-            const double halfWidth = elem.strokeWidth / 2;
-            QRectF r(pos.x() - halfWidth, pos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
-
-            if(elem.path.intersects(r))
-            {
-                e->accept();
-                emit trackClicked(track.itemId, track.trackName);
-                found = true;
-                break;
-            }
-        }
-
-        if(found)
-            break;
+        const LabelItem *label = static_cast<const LabelItem *>(item);
+        e->accept();
+        emit labelClicked(label->itemId, label->gateLetter, label->labelText);
+        return;
     }
 
-    if(found)
-        return;
-
-    //Then try with track connections
-    for(const TrackConnectionItem& track : qAsConst(m_plan->trackConnections))
+    if(itemType == FindItemType::StationTrack)
     {
-        for(const ElementPath& elem : track.elements)
-        {
-            const double halfWidth = elem.strokeWidth / 2;
-            QRectF r(pos.x() - halfWidth, pos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
+        const TrackItem *track = static_cast<const TrackItem *>(item);
+        e->accept();
+        emit trackClicked(track->itemId, track->trackName);
+        return;
+    }
 
-            if(elem.path.intersects(r))
-            {
-                e->accept();
-                emit trackConnClicked(track.itemId, track.info.trackId, track.info.gateId,
-                                      track.info.gateTrackPos, int(track.info.trackSide));
-                found = true;
-                break;
-            }
-        }
-
-        if(found)
-            break;
+    if(itemType == FindItemType::TrackConnection)
+    {
+        const TrackConnectionItem *track = static_cast<const TrackConnectionItem *>(item);
+        e->accept();
+        emit trackConnClicked(track->itemId, track->info.trackId, track->info.gateId,
+                              track->info.gateTrackPos, int(track->info.trackSide));
+        return;
     }
 }
