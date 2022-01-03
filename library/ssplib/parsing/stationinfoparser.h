@@ -24,6 +24,20 @@ private:
     StationInfo *m_info;
 };
 
+class StationInfoWriter
+{
+public:
+    StationInfoWriter(QIODevice *dev);
+
+    bool write(StationInfo *info);
+
+private:
+    void writeStation(StationInfo *info);
+
+private:
+    QXmlStreamWriter xml;
+};
+
 } // namespace ssplib
 
 #endif // STATIONINFOPARSER_H

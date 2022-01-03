@@ -80,7 +80,7 @@ void StationInfoReader::parseStation()
 {
     m_info->stationName = xml.attributes().value(ssp_info_attrs::Name).toString();
 
-    if(!xml.readNextStartElement() || xml.name() != ssp_info_tags::Gate)
+    if(!xml.readNextStartElement())
         return;
 
     if(xml.name() != ssp_info_tags::GateList)
@@ -104,6 +104,9 @@ void StationInfoReader::parseStation()
         xml.skipCurrentElement();
     }
 
+    if(!xml.readNextStartElement())
+        return;
+
     if(xml.name() != ssp_info_tags::TrackList)
     {
         //Skip current element
@@ -114,6 +117,9 @@ void StationInfoReader::parseStation()
 
         return;
     }
+
+    if(!xml.readNextStartElement())
+        return;
 
     //Parse Track List
     while (xml.readNextStartElement())
@@ -203,3 +209,33 @@ void StationInfoReader::parseTrack()
     m_info->platforms.append(track);
 }
 
+
+StationInfoWriter::StationInfoWriter(QIODevice *dev) :
+    xml(dev)
+{
+
+}
+
+bool StationInfoWriter::write(StationInfo *info)
+{
+    xml.writeStartDocument();
+
+    xml.writeStartElement(ssp_info_tags::XmlDocName);
+
+    writeStation(info);
+
+    xml.writeEndElement(); //ssp_info_tags::XmlDocName
+
+    xml.writeEndDocument();
+
+    return true;
+}
+
+void StationInfoWriter::writeStation(StationInfo *info)
+{
+    xml.writeStartElement(ssp_info_tags::Station);
+
+    xml.writeAttribute(ssp_info_attrs::Name, info->stationName);
+
+    xml.writeEndElement(); //ssp_info_tags::Station
+}
