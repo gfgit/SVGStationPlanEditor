@@ -52,6 +52,8 @@ void SSPViewer::paintEvent(QPaintEvent *)
 
 void SSPViewer::mouseDoubleClickEvent(QMouseEvent *e)
 {
+    e->ignore();
+
     if(!mSvg || !m_plan)
         return;
 
@@ -61,6 +63,8 @@ void SSPViewer::mouseDoubleClickEvent(QMouseEvent *e)
     const double inverseScaleFactor = source.width() / target.width();
     const QPointF pos = e->pos() * inverseScaleFactor + source.topLeft();
 
+    //First try with labels
+    bool found = false;
     for(const LabelItem& label : qAsConst(m_plan->labels))
     {
         for(const ElementPath& elem : label.elements)
@@ -70,8 +74,61 @@ void SSPViewer::mouseDoubleClickEvent(QMouseEvent *e)
             {
                 e->accept();
                 emit labelClicked(label.itemId, label.gateLetter, label.labelText);
+                found = true;
                 break;
             }
         }
+
+        if(found)
+            break;
+    }
+
+    if(found)
+        return;
+
+    //Then try with station tracks
+    for(const TrackItem& track : qAsConst(m_plan->platforms))
+    {
+        for(const ElementPath& elem : track.elements)
+        {
+            const double halfWidth = elem.strokeWidth / 2;
+            QRectF r(pos.x() - halfWidth, pos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
+
+            if(elem.path.intersects(r))
+            {
+                e->accept();
+                emit trackClicked(track.itemId, track.trackName);
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+            break;
+    }
+
+    if(found)
+        return;
+
+    //Then try with track connections
+    for(const TrackConnectionItem& track : qAsConst(m_plan->trackConnections))
+    {
+        for(const ElementPath& elem : track.elements)
+        {
+            const double halfWidth = elem.strokeWidth / 2;
+            QRectF r(pos.x() - halfWidth, pos.y() - halfWidth, elem.strokeWidth, elem.strokeWidth);
+
+            if(elem.path.intersects(r))
+            {
+                e->accept();
+                emit trackConnClicked(track.itemId, track.info.trackId, track.info.gateId,
+                                      track.info.gateTrackPos, int(track.info.trackSide));
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+            break;
     }
 }

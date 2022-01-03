@@ -24,6 +24,9 @@ public:
 
 signals:
     void labelClicked(qint64 labelId, QChar letter, const QString& text);
+    void trackClicked(qint64 trackId, const QString& name);
+    void trackConnClicked(qint64 connId, qint64 trackId, qint64 gateId,
+                          int gateTrackPos, int trackSide);
 
 protected:
     void paintEvent(QPaintEvent *) override;
