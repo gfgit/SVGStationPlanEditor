@@ -131,12 +131,18 @@ bool ssplib::SSPViewer::event(QEvent *e)
         {
             const TrackItem *track = static_cast<const TrackItem *>(item);
             msg = track->jobName;
+            if(msg.isEmpty() && !track->trackName.isEmpty())
+                msg = tr("Platform: <b>%1</b>").arg(track->trackName);
         }
 
         if(itemType == FindItemType::TrackConnection)
         {
             const TrackConnectionItem *track = static_cast<const TrackConnectionItem *>(item);
             msg = track->jobName;
+            if(msg.isEmpty() && !track->info.gateLetter.isNull())
+            {
+                msg = tr("Track connection to gate <b>%1</b>").arg(track->info.gateLetter);
+            }
         }
 
         QToolTip::showText(helpEvent->globalPos(), msg, this);
