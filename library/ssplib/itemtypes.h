@@ -79,7 +79,7 @@ struct TrackConnectionInfo
     inline bool matchIDs(const TrackConnectionInfo& other) const
     {
         return trackId == other.trackId && gateId == other.gateId
-            && gateTrackPos == other.gateTrackPos && trackSide == other.trackSide;
+               && gateTrackPos == other.gateTrackPos && trackSide == other.trackSide;
     }
 
     //NOTE: this matches SVG Data
@@ -92,8 +92,12 @@ struct TrackConnectionInfo
     template <typename Container>
     static inline void removeAllNames(Container &vec, const TrackConnectionInfo& info)
     {
-        std::remove_if(vec.begin(), vec.end(),
-                       [info](const TrackConnectionInfo& other) -> bool { return info.matchNames(other);});
+        auto it =std::remove_if(vec.begin(), vec.end(),
+                                 [info](const TrackConnectionInfo& other) -> bool
+                                 {
+                                     return info.matchNames(other);
+                                 });
+        vec.erase(it, vec.end());
     }
 };
 
