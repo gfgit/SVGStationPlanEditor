@@ -112,7 +112,11 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     const QChar oldGateLetter = item.gateLetter;
 
     if(itemIsInXML(item) && role != Qt::CheckStateRole)
-        return false; //For items in XML allow only to set visible/non visible
+    {
+        //For items in XML allow only to set visible/non visible
+        emit errorOccurred(IObjectModel::tr(errMsgCannotEditWithXML));
+        return false;
+    }
 
     switch (role)
     {
@@ -293,8 +297,7 @@ bool NodeFinderLabelModel::removeItem(int row)
     ssplib::LabelItem& item = m_plan->labels[row];
     if(itemIsInXML(item))
     {
-        emit errorOccurred(tr("This item was added by XML.\n"
-                              "To remove it, first unload XML plan."));
+        emit errorOccurred(IObjectModel::tr(errMsgCannotRemWithXML));
         return false;
     }
 

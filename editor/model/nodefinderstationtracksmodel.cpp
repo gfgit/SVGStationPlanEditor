@@ -94,7 +94,11 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     const int oldTrackPos = item.trackPos;
 
     if(itemIsInXML(item) && role != Qt::CheckStateRole)
-        return false; //For items in XML allow only to set visible/non visible
+    {
+        //For items in XML allow only to set visible/non visible
+        emit errorOccurred(IObjectModel::tr(errMsgCannotEditWithXML));
+        return false;
+    }
 
     switch (role)
     {
@@ -279,8 +283,7 @@ bool NodeFinderStationTracksModel::removeItem(int row)
     ssplib::TrackItem& item = m_plan->platforms[row];
     if(itemIsInXML(item))
     {
-        emit errorOccurred(tr("This item was added by XML.\n"
-                              "To remove it, first unload XML plan."));
+        emit errorOccurred(IObjectModel::tr(errMsgCannotRemWithXML));
         return false;
     }
 

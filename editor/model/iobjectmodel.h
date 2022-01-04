@@ -6,8 +6,8 @@
 #include <ssplib/itemtypes.h>
 
 namespace ssplib {
-class ItemBase;
-class ElementPath;
+struct ItemBase;
+struct ElementPath;
 } // namespace ssplib
 
 class IObjectModel : public QAbstractTableModel
@@ -25,6 +25,7 @@ public:
     virtual bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item);
     virtual bool removeElementFromItem(ssplib::ItemBase *item, int pos);
 
+    //Common translations
     static inline QString getTrackSideName(ssplib::Side s)
     {
         switch (s)
@@ -38,6 +39,15 @@ public:
         }
         return QString();
     }
+
+    static constexpr const char *errMsgCannotEditWithXML =
+        QT_TRANSLATE_NOOP("IObjectModel",
+                          "Cannot edit item loaded from XML.\n"
+                          "Unload XML to edit this item.");
+    static constexpr const char *errMsgCannotRemWithXML =
+        QT_TRANSLATE_NOOP("IObjectModel",
+                          "Cannot remove item loaded from XML.\n"
+                          "Unload XML to remove this item.");
 
 signals:
     void itemRemoved(int row);

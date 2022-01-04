@@ -27,6 +27,7 @@ private slots:
     void onAddItem();
     void onEditItem();
     void onRemoveItem();
+    void showErrMsg(const QString& msg);
 
 private:
     NodeFinderMgr *nodeMgr;

@@ -126,7 +126,11 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
     ssplib::TrackConnectionItem& item = m_plan->trackConnections[idx.row()];
 
     if(itemIsInXML(item) && role != Qt::CheckStateRole)
-        return false; //For items in XML allow only to set visible/non visible
+    {
+        //For items in XML allow only to set visible/non visible
+        emit errorOccurred(IObjectModel::tr(errMsgCannotEditWithXML));
+        return false;
+    }
 
     const ssplib::TrackConnectionInfo oldInfo = item.info;
 
@@ -398,8 +402,7 @@ bool NodeFinderTurnoutModel::removeItem(int row)
     ssplib::TrackConnectionItem& item = m_plan->trackConnections[row];
     if(itemIsInXML(item))
     {
-        emit errorOccurred(tr("This item was added by XML.\n"
-                              "To remove it, first unload XML plan."));
+        emit errorOccurred(IObjectModel::tr(errMsgCannotRemWithXML));
         return false;
     }
 

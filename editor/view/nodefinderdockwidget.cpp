@@ -7,6 +7,8 @@
 
 #include "model/iobjectmodel.h"
 
+#include <QMessageBox>
+
 NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
     nodeMgr(mgr)
@@ -43,7 +45,11 @@ NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) 
 
 void NodeFinderDockWidget::setModel(IObjectModel *m, const QString &text)
 {
+    if(model)
+        disconnect(model, &IObjectModel::errorOccurred, this, &NodeFinderDockWidget::showErrMsg);
+
     model = m;
+    connect(model, &IObjectModel::errorOccurred, this, &NodeFinderDockWidget::showErrMsg);
     view->setModel(model);
     setWindowTitle(text);
 }
@@ -80,4 +86,9 @@ void NodeFinderDockWidget::onRemoveItem()
         return;
 
     model->removeItem(idx.row());
+}
+
+void NodeFinderDockWidget::showErrMsg(const QString &msg)
+{
+    QMessageBox::warning(this, tr("Model Error"), msg);
 }
