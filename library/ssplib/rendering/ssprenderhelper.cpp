@@ -2,7 +2,7 @@
 
 #include <QPainter>
 
-#include "ssplib/stationplan.h"
+#include <ssplib/stationplan.h>
 
 void setFontSize(QPainter *painter, const QFont& originalFont, const QRectF& originalRect, const QString& text)
 {

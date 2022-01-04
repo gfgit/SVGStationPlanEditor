@@ -1,8 +1,8 @@
 #include "domparser.h"
 
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_constants.h>
 
-#include "ssplib/stationplan.h"
+#include <ssplib/stationplan.h>
 
 #include "editinginfo.h"
 

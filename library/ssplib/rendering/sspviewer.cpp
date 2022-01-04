@@ -4,7 +4,7 @@
 
 #include <QPainter>
 
-#include "ssplib/stationplan.h"
+#include <ssplib/stationplan.h>
 #include "ssprenderhelper.h"
 
 #include <QMouseEvent>

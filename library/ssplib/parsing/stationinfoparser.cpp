@@ -1,6 +1,6 @@
 #include "stationinfoparser.h"
 
-#include "ssplib/stationplan.h"
+#include <ssplib/stationplan.h>
 
 #include "parsinghelpers.h"
 

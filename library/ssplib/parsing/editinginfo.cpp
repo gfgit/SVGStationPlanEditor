@@ -1,6 +1,6 @@
 #include "editinginfo.h"
 
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_constants.h>
 
 #ifdef SSPLIB_ENABLE_EDITING
 
