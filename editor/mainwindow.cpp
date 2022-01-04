@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVG);
     fileMenu->addAction(tr("Save SVG"), this, &MainWindow::saveConvertedSVG);
     fileMenu->addAction(tr("Load XML"), this, &MainWindow::loadXML);
+    fileMenu->addAction(tr("Unload XML"), nodeMgr, &NodeFinderMgr::clearXML);
     ui->menubar->addMenu(fileMenu);
 
     QMenu *viewMenu = new QMenu(tr("View"), this);
