@@ -5,7 +5,7 @@
 
 #include <QVector>
 
-#include "ssplib/itemtypes.h"
+#include <ssplib/itemtypes.h>
 
 namespace ssplib {
 class StationPlan;

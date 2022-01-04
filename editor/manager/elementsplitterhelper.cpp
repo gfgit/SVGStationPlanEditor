@@ -1,7 +1,7 @@
 #include "elementsplitterhelper.h"
 
-#include "ssplib/utils/svg_path_utils.h"
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_path_utils.h>
+#include <ssplib/utils/svg_constants.h>
 #include "utils/pathutils.h"
 
 #include "nodefindermgr.h"

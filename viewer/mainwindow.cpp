@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "ssplib/svgstationplanlib.h"
+#include <ssplib/svgstationplanlib.h>
 #include <QSvgRenderer>
 
 #include <QScrollArea>

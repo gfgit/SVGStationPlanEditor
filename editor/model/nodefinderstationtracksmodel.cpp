@@ -2,8 +2,8 @@
 
 #include "manager/nodefindermgr.h"
 
-#include "ssplib/utils/svg_constants.h"
-#include "ssplib/stationplan.h"
+#include <ssplib/utils/svg_constants.h>
+#include <ssplib/stationplan.h>
 
 #include <QBrush>
 

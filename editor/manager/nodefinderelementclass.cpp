@@ -2,7 +2,7 @@
 
 #include "nodefindersvgconverter.h"
 
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_constants.h>
 
 NodeFinderElementClass::NodeFinderElementClass(const QString &tag, const QString &baseId) :
     tagName(tag),
