@@ -26,7 +26,8 @@ public:
         NCols
     };
 
-    explicit NodeFinderTurnoutModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent = nullptr);
+    explicit NodeFinderTurnoutModel(ssplib::StationPlan *plan, ssplib::StationPlan *xml,
+                                    NodeFinderMgr *mgr, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -49,24 +50,13 @@ public:
     bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item) override;
     bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
 
-    static inline QString getTrackSideName(ssplib::Side s)
-    {
-        switch (s)
-        {
-        case ssplib::Side::East:
-            return tr("East");
-        case ssplib::Side::West:
-            return tr("West");
-        default:
-            break;
-        }
-        return QString();
-    }
+    bool itemIsInXML(const ssplib::TrackConnectionItem &item) const;
 
 private:
     friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;
     ssplib::StationPlan *m_plan;
+    ssplib::StationPlan *xmlPlan;
 };
 
 #endif // NODEFINDERTURNOUTMODEL_H

@@ -22,10 +22,13 @@ public:
     enum Columns
     {
         LabelNameCol = 0,
+        TrackCountCol,
+        GateSideCol,
         NCols
     };
 
-    explicit NodeFinderLabelModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent = nullptr);
+    explicit NodeFinderLabelModel(ssplib::StationPlan *plan, ssplib::StationPlan *xml,
+                                  NodeFinderMgr *mgr, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -47,11 +50,14 @@ public:
     bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item) override;
     bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
 
+    bool itemIsInXML(const ssplib::LabelItem &item) const;
+
 private:
     friend class NodeFinderSVGWidget;
 
     NodeFinderMgr *nodeMgr;
     ssplib::StationPlan *m_plan;
+    ssplib::StationPlan *xmlPlan;
 };
 
 #endif // NODEFINDERLABELMODEL_H

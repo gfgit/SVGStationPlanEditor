@@ -7,10 +7,12 @@
 
 #include <QBrush>
 
-NodeFinderStationTracksModel::NodeFinderStationTracksModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
+NodeFinderStationTracksModel::NodeFinderStationTracksModel(ssplib::StationPlan *plan, ssplib::StationPlan *xml,
+                                                           NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(plan)
+    m_plan(plan),
+    xmlPlan(xml)
 {
 }
 
@@ -22,6 +24,8 @@ QVariant NodeFinderStationTracksModel::headerData(int section, Qt::Orientation o
         {
         case TrackNameCol:
             return tr("Track Name");
+        case TrackPosCol:
+            return tr("Pos");
         }
     }
 
@@ -53,19 +57,18 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
         switch (idx.column())
         {
         case TrackNameCol:
+            return item.trackName;
+        case TrackPosCol:
             return item.trackPos;
         }
         break;
     }
     case Qt::BackgroundRole:
     {
-        switch (idx.column())
-        {
-        case TrackNameCol:
-            if(item.elements.isEmpty())
-                return QBrush(Qt::yellow);
-            break;
-        }
+        if(!itemIsInXML(item))
+            return QBrush(Qt::red);
+        if(item.elements.isEmpty())
+            return QBrush(Qt::yellow);
         break;
     }
     case Qt::CheckStateRole:
@@ -90,6 +93,9 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     ssplib::TrackItem& item = m_plan->platforms[idx.row()];
     const int oldTrackPos = item.trackPos;
 
+    if(itemIsInXML(item) && role != Qt::CheckStateRole)
+        return false; //For items in XML allow only to set visible/non visible
+
     switch (role)
     {
     case Qt::EditRole:
@@ -98,6 +104,29 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
         {
         case TrackNameCol:
         {
+            QString name = value.toString();
+            if(name.isEmpty())
+                return false;
+
+            if(item.trackName == name)
+                return false;
+
+            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            {
+                if(track.trackName == name)
+                {
+                    emit errorOccurred(tr("Track Name <b>%1</b> is already used.")
+                                           .arg(track.trackName));
+                    return false;
+                }
+            }
+
+            //Set name
+            item.trackName = name;
+            break;
+        }
+        case TrackPosCol:
+        {
             bool ok = false;
             int trk = value.toInt(&ok);
             if(!ok || trk < 0)
@@ -105,6 +134,16 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
 
             if(item.trackPos == trk)
                 return false;
+
+            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            {
+                if(track.trackPos == trk)
+                {
+                    emit errorOccurred(tr("Track Pos <b>%1</b> is already used by track <b>%2</b>")
+                                           .arg(trk).arg(track.trackName));
+                    return false;
+                }
+            }
 
             //Set name
             item.trackPos = trk;
@@ -193,6 +232,16 @@ bool NodeFinderStationTracksModel::removeElementFromItem(ssplib::ItemBase *item,
     return true;
 }
 
+bool NodeFinderStationTracksModel::itemIsInXML(const ssplib::TrackItem &item) const
+{
+    for(const ssplib::TrackItem& track : qAsConst(xmlPlan->platforms))
+    {
+        if(track.trackPos == item.trackPos)
+            return true;
+    }
+    return false;
+}
+
 bool NodeFinderStationTracksModel::addItem()
 {
     nodeMgr->clearCurrentItem();
@@ -227,7 +276,13 @@ bool NodeFinderStationTracksModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = m_plan->platforms[row];
+    ssplib::TrackItem& item = m_plan->platforms[row];
+    if(itemIsInXML(item))
+    {
+        emit errorOccurred(tr("This item was added by XML.\n"
+                              "To remove it, first unload XML plan."));
+        return false;
+    }
 
     for(ssplib::ElementPath& elemPath : item.elements)
         clearElement(elemPath);

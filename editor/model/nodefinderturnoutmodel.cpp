@@ -8,10 +8,12 @@
 
 #include <QBrush>
 
-NodeFinderTurnoutModel::NodeFinderTurnoutModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
+NodeFinderTurnoutModel::NodeFinderTurnoutModel(ssplib::StationPlan *plan, ssplib::StationPlan *xml,
+                                               NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(plan)
+    m_plan(plan),
+    xmlPlan(xml)
 {
 
 }
@@ -60,7 +62,16 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case StationTrackCol:
+        {
+            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            {
+                if(track.trackPos == item.info.stationTrackPos)
+                    return track.trackName;
+            }
+
+            //Fallback to track position
             return item.info.stationTrackPos;
+        }
         case StationTrackSideCol:
             return getTrackSideName(item.info.trackSide);
         case GateNameCol:
@@ -87,6 +98,8 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::BackgroundRole:
     {
+        if(!itemIsInXML(item))
+            return QBrush(Qt::red);
         if(item.elements.isEmpty())
             return QBrush(Qt::yellow);
         break;
@@ -111,6 +124,9 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         return false;
 
     ssplib::TrackConnectionItem& item = m_plan->trackConnections[idx.row()];
+
+    if(itemIsInXML(item) && role != Qt::CheckStateRole)
+        return false; //For items in XML allow only to set visible/non visible
 
     const ssplib::TrackConnectionInfo oldInfo = item.info;
 
@@ -137,11 +153,11 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         case StationTrackSideCol:
         {
             bool ok = false;
-            int trk = value.toInt(&ok);
-            if(!ok || trk < 0 || trk >= int(ssplib::Side::NSides))
+            int side = value.toInt(&ok);
+            if(!ok || side < 0 || side >= int(ssplib::Side::NSides))
                 return false;
 
-            const ssplib::Side trkSide = ssplib::Side(trk);
+            const ssplib::Side trkSide = ssplib::Side(side);
             if(item.info.trackSide == trkSide)
                 return false;
 
@@ -158,10 +174,32 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
             QChar gateLetter = str.front().toUpper();
             if(gateLetter < 'A' || gateLetter > 'Z')
+            {
+                emit errorOccurred(tr("Gate Name must be a letter"));
                 return false;
+            }
 
             if(item.info.gateLetter == gateLetter)
                 return false;
+
+            bool found = false;
+            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            {
+                if(gate.gateLetter == gateLetter)
+                {
+                    found = true;
+                    //Fix out of bound gate track
+                    if(item.info.gateTrackPos >= gate.gateOutTrkCount)
+                        item.info.gateTrackPos = gate.gateOutTrkCount - 1;
+                    break;
+                }
+            }
+
+            if(!found)
+            {
+                emit errorOccurred(tr("Gate <b>%1</b> does not exist").arg(gateLetter));
+                return false;
+            }
 
             //Set gate
             item.info.gateLetter = gateLetter;
@@ -176,6 +214,17 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
             if(item.info.gateTrackPos == trk)
                 return false;
+
+            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            {
+                if(gate.gateLetter == item.info.gateLetter)
+                {
+                    //Fix out of bound gate track
+                    if(item.info.gateTrackPos >= gate.gateOutTrkCount)
+                        item.info.gateTrackPos = gate.gateOutTrkCount - 1;
+                    break;
+                }
+            }
 
             //Set gate track
             item.info.gateTrackPos = trk;
@@ -280,6 +329,16 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
     return true;
 }
 
+bool NodeFinderTurnoutModel::itemIsInXML(const ssplib::TrackConnectionItem &item) const
+{
+    for(const ssplib::TrackConnectionItem& conn : qAsConst(xmlPlan->trackConnections))
+    {
+        if(conn.info.matchNames(item.info))
+            return true;
+    }
+    return false;
+}
+
 bool NodeFinderTurnoutModel::addItem()
 {
     nodeMgr->clearCurrentItem();
@@ -305,7 +364,13 @@ bool NodeFinderTurnoutModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = m_plan->trackConnections[row];
+    ssplib::TrackConnectionItem& item = m_plan->trackConnections[row];
+    if(itemIsInXML(item))
+    {
+        emit errorOccurred(tr("This item was added by XML.\n"
+                              "To remove it, first unload XML plan."));
+        return false;
+    }
 
     for(ssplib::ElementPath& p : item.elements)
     {

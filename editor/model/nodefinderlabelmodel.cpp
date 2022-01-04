@@ -8,10 +8,12 @@
 
 #include <QBrush>
 
-NodeFinderLabelModel::NodeFinderLabelModel(NodeFinderMgr *mgr, ssplib::StationPlan *plan, QObject *parent) :
+NodeFinderLabelModel::NodeFinderLabelModel(ssplib::StationPlan *plan, ssplib::StationPlan *xml,
+                                           NodeFinderMgr *mgr, QObject *parent) :
     IObjectModel(parent),
     nodeMgr(mgr),
-    m_plan(plan)
+    m_plan(plan),
+    xmlPlan(xml)
 {
 }
 
@@ -23,6 +25,10 @@ QVariant NodeFinderLabelModel::headerData(int section, Qt::Orientation orientati
         {
         case LabelNameCol:
             return tr("Label Name");
+        case TrackCountCol:
+            return tr("Trk Count");
+        case GateSideCol:
+            return tr("Side");
         }
     }
 
@@ -49,17 +55,35 @@ QVariant NodeFinderLabelModel::data(const QModelIndex &idx, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case LabelNameCol:
+            return item.gateLetter;
+        case TrackCountCol:
+            return item.gateOutTrkCount;
+        case GateSideCol:
+            return getTrackSideName(item.gateSide);
+        }
+        break;
+    }
     case Qt::EditRole:
     {
         switch (idx.column())
         {
         case LabelNameCol:
             return item.gateLetter;
+        case TrackCountCol:
+            return item.gateOutTrkCount;
+        case GateSideCol:
+            return int(item.gateSide);
         }
         break;
     }
     case Qt::BackgroundRole:
     {
+        if(!itemIsInXML(item))
+            return QBrush(Qt::red);
         if(item.elements.isEmpty())
             return QBrush(Qt::yellow);
         break;
@@ -83,8 +107,12 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     if (!idx.isValid())
         return false;
 
+
     ssplib::LabelItem& item = m_plan->labels[idx.row()];
     const QChar oldGateLetter = item.gateLetter;
+
+    if(itemIsInXML(item) && role != Qt::CheckStateRole)
+        return false; //For items in XML allow only to set visible/non visible
 
     switch (role)
     {
@@ -93,17 +121,61 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
         switch (idx.column())
         {
         case LabelNameCol:
+        {
             const QString name = value.toString().simplified();
             if(name.isEmpty() || name.front() < 'A' || name.front() > 'Z')
+            {
+                emit errorOccurred(tr("Gate name must be a letter"));
                 return false;
+            }
 
             const QChar letter = name.front();
 
             if(item.gateLetter == letter)
                 return false;
 
+            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            {
+                if(gate.gateLetter == letter)
+                {
+                    emit errorOccurred(tr("Gate <b>%1</b> already exists").arg(letter));
+                    return false; //Name already exists
+                }
+            }
+
             //Set name
             item.gateLetter = letter;
+            break;
+        }
+        case TrackCountCol:
+        {
+            bool ok = false;
+            int trkCount = value.toInt(&ok);
+            if(!ok || trkCount < 1 || trkCount > 255) //TODO: max track?
+                return false;
+
+            if(item.gateOutTrkCount == trkCount)
+                return false;
+
+            //Set track count
+            item.gateOutTrkCount = trkCount;
+            break;
+        }
+        case GateSideCol:
+        {
+            bool ok = false;
+            int side = value.toInt(&ok);
+            if(!ok || side < 0 || side >= int(ssplib::Side::NSides))
+                return false;
+
+            const ssplib::Side gateSide = ssplib::Side(side);
+            if(item.gateSide == gateSide)
+                return false;
+
+            //Set station track
+            item.gateSide = gateSide;
+            break;
+        }
         }
         break;
     }
@@ -186,6 +258,16 @@ bool NodeFinderLabelModel::removeElementFromItem(ssplib::ItemBase *item, int pos
     return true;
 }
 
+bool NodeFinderLabelModel::itemIsInXML(const ssplib::LabelItem &item) const
+{
+    for(const ssplib::LabelItem& gate : qAsConst(xmlPlan->labels))
+    {
+        if(gate.gateLetter == item.gateLetter)
+            return true;
+    }
+    return false;
+}
+
 bool NodeFinderLabelModel::addItem()
 {
     nodeMgr->clearCurrentItem();
@@ -208,7 +290,13 @@ bool NodeFinderLabelModel::removeItem(int row)
 
     nodeMgr->clearCurrentItem();
 
-    ssplib::ItemBase& item = m_plan->labels[row];
+    ssplib::LabelItem& item = m_plan->labels[row];
+    if(itemIsInXML(item))
+    {
+        emit errorOccurred(tr("This item was added by XML.\n"
+                              "To remove it, first unload XML plan."));
+        return false;
+    }
 
     for(ssplib::ElementPath& elemPath : item.elements)
     {

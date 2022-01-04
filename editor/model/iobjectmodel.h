@@ -3,6 +3,8 @@
 
 #include <QAbstractTableModel>
 
+#include <ssplib/itemtypes.h>
+
 namespace ssplib {
 class ItemBase;
 class ElementPath;
@@ -23,8 +25,23 @@ public:
     virtual bool addElementToItem(ssplib::ElementPath &p, ssplib::ItemBase *item);
     virtual bool removeElementFromItem(ssplib::ItemBase *item, int pos);
 
+    static inline QString getTrackSideName(ssplib::Side s)
+    {
+        switch (s)
+        {
+        case ssplib::Side::East:
+            return tr("East");
+        case ssplib::Side::West:
+            return tr("West");
+        default:
+            break;
+        }
+        return QString();
+    }
+
 signals:
     void itemRemoved(int row);
+    void errorOccurred(const QString& msg);
 };
 
 #endif // IOBJECTMODEL_H
