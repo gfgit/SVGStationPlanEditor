@@ -11,6 +11,8 @@ class QToolButton;
 class QTableView;
 class IObjectModel;
 
+class QAbstractItemDelegate;
+
 class NodeFinderDockWidget : public QWidget
 {
     Q_OBJECT
@@ -18,6 +20,8 @@ public:
     explicit NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent = nullptr);
 
     void setModel(IObjectModel *m, const QString& text);
+
+    void setDelegate(int col, QAbstractItemDelegate *delegate);
 
 private slots:
     void onAddItem();

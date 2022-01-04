@@ -48,6 +48,11 @@ void NodeFinderDockWidget::setModel(IObjectModel *m, const QString &text)
     setWindowTitle(text);
 }
 
+void NodeFinderDockWidget::setDelegate(int col, QAbstractItemDelegate *delegate)
+{
+    view->setItemDelegateForColumn(col, delegate);
+}
+
 void NodeFinderDockWidget::onAddItem()
 {
     model->addItem();

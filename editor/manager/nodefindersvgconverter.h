@@ -26,6 +26,8 @@ class IObjectModel;
 class QSvgRenderer;
 class QIODevice;
 
+class QAbstractItemDelegate;
+
 class NodeFinderSVGConverter : public QObject
 {
     Q_OBJECT
@@ -37,6 +39,7 @@ public:
     void clear();
 
     bool loadXML(QIODevice *dev);
+    void clearXML();
 
     bool loadDocument(QIODevice *dev);
     bool save(QIODevice *dev);
@@ -53,6 +56,8 @@ public:
 
     IObjectModel *getModel(EditingModes mode) const;
 
+    QAbstractItemDelegate *getDelegateFor(int col, EditingModes mode, QObject *parent) const;
+
     inline NodeFinderElementWalker walkElements(const QStringList& tagOrder)
     {
         return NodeFinderElementWalker(tagOrder, elementClasses);
@@ -68,6 +73,8 @@ public:
     void setCurItemSubElemIdx(int value);
 
     inline ssplib::ElementPath getCurElementPath() const { return curElementPath; }
+
+    inline bool hasXML() const { return m_hasXML; }
 
 private:
     void renameElement(QDomElement &e, const QString &newId);
@@ -109,6 +116,8 @@ private:
     ssplib::ItemBase *curItem;
     int curItemSubElemIdx;
     ssplib::ElementPath curElementPath;
+
+    bool m_hasXML;
 };
 
 #endif // NODEFINDERSVGCONVERTER_H

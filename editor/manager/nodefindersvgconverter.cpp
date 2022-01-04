@@ -6,6 +6,9 @@
 #include "model/nodefinderstationtracksmodel.h"
 #include "model/nodefinderturnoutmodel.h"
 
+#include "utils/comboboxdelegate.h"
+#include "utils/completiondelegate.h"
+
 #include <ssplib/utils/svg_path_utils.h>
 #include <ssplib/utils/svg_constants.h>
 
@@ -21,7 +24,9 @@
 NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
     QObject(parent),
     nodeMgr(parent),
-    curItem(nullptr)
+    curItem(nullptr),
+    curItemSubElemIdx(-1),
+    m_hasXML(false)
 {
     registerClass(ssplib::svg_tags::GroupTag); //Groups
     registerClass(ssplib::svg_tags::RectTag);
@@ -31,9 +36,9 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
 
     mSvg = new QSvgRenderer(this);
 
-    labelsModel = new NodeFinderLabelModel(nodeMgr, &m_plan, this);
-    tracksModel = new NodeFinderStationTracksModel(nodeMgr, &m_plan, this);
-    turnoutModel = new NodeFinderTurnoutModel(nodeMgr, &m_plan, this);
+    labelsModel = new NodeFinderLabelModel(&m_plan, &m_xmlPlan, nodeMgr, this);
+    tracksModel = new NodeFinderStationTracksModel(&m_plan, &m_xmlPlan, nodeMgr, this);
+    turnoutModel = new NodeFinderTurnoutModel(&m_plan, &m_xmlPlan, nodeMgr, this);
 
     m_info.setCallback([this](QDomElement &e) { storeElement(e); });
 }
@@ -52,7 +57,10 @@ void NodeFinderSVGConverter::clear()
     fakeIds.squeeze();
 
     m_plan.clear();
+    m_xmlPlan.clear();
     m_info.clear();
+
+    m_hasXML = false;
 
     currentWalker = NodeFinderElementWalker();
     curItem = nullptr;
@@ -64,8 +72,112 @@ void NodeFinderSVGConverter::clear()
 
 bool NodeFinderSVGConverter::loadXML(QIODevice *dev)
 {
+    m_xmlPlan.clear();
+
+    m_hasXML = false;
+
     ssplib::StationInfoReader reader(&m_xmlPlan, dev);
-    return reader.parse();
+    if(!reader.parse())
+    {
+        clearXML();
+        return false;
+    }
+
+    //Create missing items and mirror data
+    for(const ssplib::LabelItem& gate : qAsConst(m_xmlPlan.labels))
+    {
+        bool found = false;
+        for(int i = 0; i < m_plan.labels.size(); i++)
+        {
+            ssplib::LabelItem& item = m_plan.labels[i];
+            if(gate.gateLetter == item.gateLetter)
+            {
+                //Found, merge info
+                found = true;
+                item.gateOutTrkCount = gate.gateOutTrkCount;
+                item.gateSide = gate.gateSide;
+            }
+            else if(gate.labelText == item.labelText)
+            {
+                //Clear name because it's duplicate
+                item.labelText.clear();
+            }
+        }
+
+        if(!found)
+        {
+            //Item was missing, add it
+            m_plan.labels.append(gate);
+        }
+    }
+
+    for(const ssplib::TrackItem& track : qAsConst(m_xmlPlan.platforms))
+    {
+        bool found = false;
+        for(int i = 0; i < m_plan.platforms.size(); i++)
+        {
+            ssplib::TrackItem& item = m_plan.platforms[i];
+            if(track.trackPos == item.trackPos)
+            {
+                //Found, merge info
+                found = true;
+                item.trackName = track.trackName;
+            }
+            else if(track.trackName == item.trackName)
+            {
+                //Clear name because it's duplicate
+                item.trackName.clear();
+            }
+        }
+
+        if(!found)
+        {
+            //Item was missing, add it
+            m_plan.platforms.append(track);
+        }
+    }
+
+    for(const ssplib::TrackConnectionItem& track : qAsConst(m_xmlPlan.trackConnections))
+    {
+        bool found = false;
+        for(int i = 0; i < m_plan.trackConnections.size(); i++)
+        {
+            ssplib::TrackConnectionItem& item = m_plan.trackConnections[i];
+            if(track.info.matchNames(item.info))
+            {
+                //Found, merge info
+                found = true;
+                break;
+            }
+        }
+
+        if(!found)
+        {
+            //Item was missing, add it
+            m_plan.trackConnections.append(track);
+        }
+    }
+
+    m_hasXML = true;
+
+    //Refresh models
+    labelsModel->refreshModel();
+    tracksModel->refreshModel();
+    turnoutModel->refreshModel();
+
+    return true;
+}
+
+void NodeFinderSVGConverter::clearXML()
+{
+    m_xmlPlan.clear();
+
+    m_hasXML = false;
+
+    //Refresh models
+    labelsModel->refreshModel();
+    tracksModel->refreshModel();
+    turnoutModel->refreshModel();
 }
 
 bool NodeFinderSVGConverter::loadDocument(QIODevice *dev)
@@ -182,6 +294,41 @@ IObjectModel *NodeFinderSVGConverter::getModel(EditingModes mode) const
         break;
     }
 
+    return nullptr;
+}
+
+QAbstractItemDelegate *NodeFinderSVGConverter::getDelegateFor(int col, EditingModes mode, QObject *parent) const
+{
+    switch (mode)
+    {
+    case EditingModes::LabelEditing:
+    {
+        if(col == NodeFinderLabelModel::GateSideCol)
+        {
+            QStringList list = {IObjectModel::getTrackSideName(ssplib::Side::West),
+                                IObjectModel::getTrackSideName(ssplib::Side::East)};
+            return new ComboboxDelegate(list, parent);
+        }
+        break;
+    }
+    case EditingModes::TrackPathEditing:
+    {
+        if(col == NodeFinderTurnoutModel::StationTrackSideCol)
+        {
+            QStringList list = {IObjectModel::getTrackSideName(ssplib::Side::West),
+                                IObjectModel::getTrackSideName(ssplib::Side::East)};
+            return new ComboboxDelegate(list, parent);
+        }
+        if(col == NodeFinderTurnoutModel::StationTrackCol)
+        {
+            CompletionDelegate *delegate = new CompletionDelegate(tracksModel, parent);
+            return delegate;
+        }
+        break;
+    }
+    default:
+        break;
+    }
     return nullptr;
 }
 

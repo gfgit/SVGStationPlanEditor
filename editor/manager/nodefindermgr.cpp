@@ -14,6 +14,8 @@
 
 #include <QMessageBox>
 
+#include "model/iobjectmodel.h"
+
 NodeFinderMgr::NodeFinderMgr(QObject *parent) :
     QObject(parent),
     m_isSelecting(false),
@@ -166,7 +168,15 @@ QWidget *NodeFinderMgr::getDockWidget(EditingModes mode)
 {
     //Create a new one
     NodeFinderDockWidget *w = new NodeFinderDockWidget(this);
-    w->setModel(converter->getModel(mode), getModeName(mode));
+    IObjectModel *m = converter->getModel(mode);
+    w->setModel(m, getModeName(mode));
+
+    for(int i = 0; i < m->columnCount(); i++)
+    {
+        auto del = converter->getDelegateFor(i, mode, w);
+        if(del)
+            w->setDelegate(i, del);
+    }
 
     return w;
 }
@@ -207,6 +217,11 @@ bool NodeFinderMgr::saveSVG(QIODevice *dev)
 bool NodeFinderMgr::loadXML(QIODevice *dev)
 {
     return converter->loadXML(dev);
+}
+
+void NodeFinderMgr::clearXML()
+{
+    converter->clearXML();
 }
 
 ssplib::StationPlan *NodeFinderMgr::getStationPlan() const
