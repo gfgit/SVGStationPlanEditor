@@ -20,6 +20,8 @@ public:
     QVector<TrackConnectionItem> trackConnections;
 
 public:
+    QString stationName;
+
     bool drawLabels;
     bool drawTracks;
 

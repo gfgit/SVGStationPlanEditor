@@ -44,6 +44,7 @@ struct LabelItem : ItemBase
 {
     QChar gateLetter;
     QString labelText;
+    int gateOutTrkCount = 0;
     Side gateSide = Side::NSides;
 };
 

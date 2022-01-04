@@ -5,12 +5,12 @@
 
 namespace ssplib {
 
-class StationInfo;
+class StationPlan;
 
 class StationInfoReader
 {
 public:
-    StationInfoReader(StationInfo *ptr, QIODevice *dev);
+    StationInfoReader(StationPlan *ptr, QIODevice *dev);
 
     bool parse();
 
@@ -21,7 +21,7 @@ private:
 
 private:
     QXmlStreamReader xml;
-    StationInfo *m_info;
+    StationPlan *m_plan;
 };
 
 class StationInfoWriter
@@ -29,10 +29,10 @@ class StationInfoWriter
 public:
     StationInfoWriter(QIODevice *dev);
 
-    bool write(StationInfo *info);
+    bool write(const StationPlan *plan);
 
 private:
-    void writeStation(StationInfo *info);
+    void writeStation(const StationPlan *plan);
 
 private:
     QXmlStreamWriter xml;

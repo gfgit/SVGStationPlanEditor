@@ -1,6 +1,6 @@
 #include "stationinfoparser.h"
 
-#include "ssplib/stationinfo.h"
+#include "ssplib/stationplan.h"
 
 #include "parsinghelpers.h"
 
@@ -33,9 +33,9 @@ const QLatin1String gateSideValues[int(ssplib::Side::NSides)] = {
     QLatin1String("East") //ssplib::Side::East
 };
 
-StationInfoReader::StationInfoReader(StationInfo *ptr, QIODevice *dev) :
+StationInfoReader::StationInfoReader(StationPlan *ptr, QIODevice *dev) :
     xml(dev),
-    m_info(ptr)
+    m_plan(ptr)
 {
 
 }
@@ -78,7 +78,7 @@ bool StationInfoReader::parse()
 
 void StationInfoReader::parseStation()
 {
-    m_info->stationName = xml.attributes().value(ssp_info_attrs::Name).toString();
+    m_plan->stationName = xml.attributes().value(ssp_info_attrs::Name).toString();
 
     if(!xml.readNextStartElement())
         return;
@@ -146,8 +146,17 @@ void StationInfoReader::parseStation()
     const QString conns = xml.attributes().value(ssp_info_attrs::Value).toString();
     if(!conns.isEmpty())
     {
-        utils::parseTrackConnectionAttribute(conns, m_info->trackConnections);
-        std::sort(m_info->trackConnections.begin(), m_info->trackConnections.end());
+        QVector<TrackConnectionInfo> infoVec;
+        utils::parseTrackConnectionAttribute(conns, infoVec);
+        std::sort(infoVec.begin(), infoVec.end());
+
+        m_plan->trackConnections.reserve(infoVec.size());
+        for(const TrackConnectionInfo& info : qAsConst(infoVec))
+        {
+            TrackConnectionItem item;
+            item.info = info;
+            m_plan->trackConnections.append(item);
+        }
     }
 
     xml.skipCurrentElement();
@@ -155,7 +164,7 @@ void StationInfoReader::parseStation()
 
 void StationInfoReader::parseGate()
 {
-    StationInfo::GateInfo gate;
+    LabelItem gate;
     QStringRef name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
     if(name.isEmpty())
         return;
@@ -164,7 +173,7 @@ void StationInfoReader::parseGate()
     if(gate.gateLetter < 'A' || gate.gateLetter > 'Z')
         return; //Invalid name
 
-    for(const StationInfo::GateInfo& other : qAsConst(m_info->gates))
+    for(const LabelItem& other : qAsConst(m_plan->labels))
     {
         if(other.gateLetter == gate.gateLetter)
             return; //Name already exist
@@ -183,12 +192,12 @@ void StationInfoReader::parseGate()
     else
         return; //Invalid side
 
-    m_info->gates.append(gate);
+    m_plan->labels.append(gate);
 }
 
 void StationInfoReader::parseTrack()
 {
-    StationInfo::TrackInfo track;
+    TrackItem track;
     QStringRef name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
     if(name.isEmpty())
         return;
@@ -200,13 +209,13 @@ void StationInfoReader::parseTrack()
     if(!ok || track.trackPos < 0 || track.trackPos > 255) //TODO: max track?
         return;
 
-    for(const StationInfo::TrackInfo& other : qAsConst(m_info->platforms))
+    for(const TrackItem& other : qAsConst(m_plan->platforms))
     {
         if(other.trackPos == track.trackPos || other.trackName == track.trackName)
             return; //Name or Pos already exist
     }
 
-    m_info->platforms.append(track);
+    m_plan->platforms.append(track);
 }
 
 
@@ -216,13 +225,13 @@ StationInfoWriter::StationInfoWriter(QIODevice *dev) :
 
 }
 
-bool StationInfoWriter::write(StationInfo *info)
+bool StationInfoWriter::write(const StationPlan *plan)
 {
     xml.writeStartDocument();
 
     xml.writeStartElement(ssp_info_tags::XmlDocName);
 
-    writeStation(info);
+    writeStation(plan);
 
     xml.writeEndElement(); //ssp_info_tags::XmlDocName
 
@@ -231,11 +240,53 @@ bool StationInfoWriter::write(StationInfo *info)
     return true;
 }
 
-void StationInfoWriter::writeStation(StationInfo *info)
+void StationInfoWriter::writeStation(const StationPlan *plan)
 {
     xml.writeStartElement(ssp_info_tags::Station);
 
-    xml.writeAttribute(ssp_info_attrs::Name, info->stationName);
+    xml.writeAttribute(ssp_info_attrs::Name, plan->stationName);
+
+    //Write Gates
+    xml.writeStartElement(ssp_info_tags::GateList);
+    for(const LabelItem& gate : qAsConst(plan->labels))
+    {
+        xml.writeStartElement(ssp_info_tags::Gate);
+
+        xml.writeAttribute(ssp_info_attrs::Name, gate.gateLetter);
+        xml.writeAttribute(ssp_info_attrs::TrkCount, QString::number(gate.gateOutTrkCount));
+        QString side = QChar('?');
+        if(gate.gateSide == ssplib::Side::West || gate.gateSide == ssplib::Side::East)
+            side = gateSideValues[int(gate.gateSide)];
+        xml.writeAttribute(ssp_info_attrs::GateSide, side);
+
+        xml.writeEndElement(); //ssp_info_tags::Gate
+    }
+    xml.writeEndElement(); //ssp_info_tags::GateList
+
+    //Write Tracks
+    xml.writeStartElement(ssp_info_tags::TrackList);
+    for(const TrackItem& track : qAsConst(plan->platforms))
+    {
+        xml.writeStartElement(ssp_info_tags::Track);
+
+        xml.writeAttribute(ssp_info_attrs::Name, track.trackName);
+        xml.writeAttribute(ssp_info_attrs::TrackPos, QString::number(track.trackPos));
+
+        xml.writeEndElement(); //ssp_info_tags::Track
+    }
+    xml.writeEndElement(); //ssp_info_tags::TrackList
+
+    //Write Track connections
+    xml.writeStartElement(ssp_info_tags::TrackConnList);
+
+    QVector<TrackConnectionInfo> infoVec(plan->trackConnections.size());
+    for(const TrackConnectionItem& item : plan->trackConnections)
+        infoVec.append(item.info);
+
+    QString conn = utils::trackConnInfoToString(infoVec);
+    xml.writeAttribute(ssp_info_attrs::Value, conn);
+
+    xml.writeEndElement(); //ssp_info_tags::TrackConnList
 
     xml.writeEndElement(); //ssp_info_tags::Station
 }
