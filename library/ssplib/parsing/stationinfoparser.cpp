@@ -118,9 +118,6 @@ void StationInfoReader::parseStation()
         return;
     }
 
-    if(!xml.readNextStartElement())
-        return;
-
     //Parse Track List
     while (xml.readNextStartElement())
     {
@@ -130,6 +127,9 @@ void StationInfoReader::parseStation()
         }
         xml.skipCurrentElement();
     }
+
+    if(!xml.readNextStartElement())
+        return;
 
     if(xml.name() != ssp_info_tags::TrackConnList)
     {
@@ -186,9 +186,9 @@ void StationInfoReader::parseGate()
 
     QString side = xml.attributes().value(ssp_info_attrs::GateSide).toString();
     if(side == gateSideValues[int(Side::West)])
-        gate.gateSide = Side::East;
-    else if(side == gateSideValues[int(Side::East)])
         gate.gateSide = Side::West;
+    else if(side == gateSideValues[int(Side::East)])
+        gate.gateSide = Side::East;
     else
         return; //Invalid side
 
