@@ -18,13 +18,11 @@ set(SSP_LIBRARY_HEADERS
     ${SSP_LIBRARY_HEADERS}
     itemtypes.h
     stationplan.h
-    stationinfo.h
     svgstationplanlib.h
     )
 
 set(SSP_LIBRARY_SOURCES
     ${SSP_LIBRARY_SOURCES}
-    stationinfo.cpp
     stationplan.cpp
     )
 
