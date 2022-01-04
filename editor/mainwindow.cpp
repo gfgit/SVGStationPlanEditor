@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *fileMenu = new QMenu(tr("File"), this);
     fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVG);
     fileMenu->addAction(tr("Save SVG"), this, &MainWindow::saveConvertedSVG);
+    fileMenu->addAction(tr("Load XML"), this, &MainWindow::loadXML);
     ui->menubar->addMenu(fileMenu);
 
     QMenu *viewMenu = new QMenu(tr("View"), this);
@@ -69,6 +70,24 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::loadXML()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    QString(), QString(),
+                                                    QString("XML (*.xml);;All Files (*)"));
+    if(fileName.isEmpty())
+        return;
+
+    QFile f(fileName);
+    if(!f.open(QFile::ReadOnly))
+    {
+        qDebug() << f.errorString();
+        return;
+    }
+
+    nodeMgr->loadXML(&f);
 }
 
 void MainWindow::loadSVG()

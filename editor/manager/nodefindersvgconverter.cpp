@@ -6,10 +6,11 @@
 #include "model/nodefinderstationtracksmodel.h"
 #include "model/nodefinderturnoutmodel.h"
 
-#include "ssplib/utils/svg_path_utils.h"
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_path_utils.h>
+#include <ssplib/utils/svg_constants.h>
 
-#include "ssplib/parsing/domparser.h"
+#include <ssplib/parsing/domparser.h>
+#include <ssplib/parsing/stationinfoparser.h>
 
 #include <QSvgRenderer>
 
@@ -59,6 +60,12 @@ void NodeFinderSVGConverter::clear()
     curElementPath = ssplib::ElementPath();
 
     mDoc.clear();
+}
+
+bool NodeFinderSVGConverter::loadXML(QIODevice *dev)
+{
+    ssplib::StationInfoReader reader(&m_xmlPlan, dev);
+    return reader.parse();
 }
 
 bool NodeFinderSVGConverter::loadDocument(QIODevice *dev)

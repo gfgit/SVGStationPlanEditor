@@ -43,6 +43,8 @@ public:
     bool loadSVG(QIODevice *dev);
     bool saveSVG(QIODevice *dev);
 
+    bool loadXML(QIODevice *dev);
+
     //For NodeFinderSVGWidget
     inline NodeFinderSVGConverter *getConverter() const { return converter; }
     ssplib::StationPlan *getStationPlan() const;

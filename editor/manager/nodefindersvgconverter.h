@@ -36,6 +36,8 @@ public:
 
     void clear();
 
+    bool loadXML(QIODevice *dev);
+
     bool loadDocument(QIODevice *dev);
     bool save(QIODevice *dev);
     void reloadSVGRenderer();
@@ -91,6 +93,7 @@ private:
 
     QDomDocument mDoc;
     ssplib::StationPlan m_plan;
+    ssplib::StationPlan m_xmlPlan;
     ssplib::EditingInfo m_info;
 
     QHash<QString, NodeFinderElementClass> elementClasses;

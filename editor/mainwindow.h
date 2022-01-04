@@ -21,6 +21,7 @@ public:
     ~MainWindow();
 
 public slots:
+    void loadXML();
     void loadSVG();
     void saveConvertedSVG();
     void setZoom(int val);

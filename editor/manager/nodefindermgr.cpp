@@ -7,8 +7,8 @@
 #include "nodefindersvgconverter.h"
 
 #include <QSvgRenderer>
-#include "ssplib/utils/svg_path_utils.h"
-#include "ssplib/utils/svg_constants.h"
+#include <ssplib/utils/svg_path_utils.h>
+#include <ssplib/utils/svg_constants.h>
 
 #include "elementsplitterhelper.h"
 
@@ -202,6 +202,11 @@ bool NodeFinderMgr::loadSVG(QIODevice *dev)
 bool NodeFinderMgr::saveSVG(QIODevice *dev)
 {
     return converter->save(dev);
+}
+
+bool NodeFinderMgr::loadXML(QIODevice *dev)
+{
+    return converter->loadXML(dev);
 }
 
 ssplib::StationPlan *NodeFinderMgr::getStationPlan() const
