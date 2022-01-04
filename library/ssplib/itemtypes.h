@@ -44,13 +44,13 @@ struct LabelItem : ItemBase
 {
     QChar gateLetter;
     QString labelText;
+    Side gateSide = Side::NSides;
 };
 
 struct TrackBaseItem : ItemBase
 {
-    db_id jobId = 0;
     QRgb color = whiteRGB;
-    QString jobName;
+    QString tooltip;
 };
 
 struct TrackItem : TrackBaseItem

@@ -145,7 +145,7 @@ bool ssplib::SSPViewer::event(QEvent *e)
         if(itemType == FindItemType::StationTrack)
         {
             const TrackItem *track = static_cast<const TrackItem *>(item);
-            msg = track->jobName;
+            msg = track->tooltip;
             if(msg.isEmpty() && !track->trackName.isEmpty())
                 msg = tr("Platform: <b>%1</b>").arg(track->trackName);
         }
@@ -153,7 +153,7 @@ bool ssplib::SSPViewer::event(QEvent *e)
         if(itemType == FindItemType::TrackConnection)
         {
             const TrackConnectionItem *track = static_cast<const TrackConnectionItem *>(item);
-            msg = track->jobName;
+            msg = track->tooltip;
             if(msg.isEmpty() && !track->info.gateLetter.isNull())
             {
                 msg = tr("Track connection to gate <b>%1</b>").arg(track->info.gateLetter);
