@@ -138,16 +138,47 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         {
         case StationTrackCol:
         {
-            bool ok = false;
-            int trk = value.toInt(&ok);
-            if(!ok || trk < 0 || trk > 255) //FIXME: max track?
-                return false;
+            if(value.type() == QVariant::Int)
+            {
+                bool ok = false;
+                int trk = value.toInt(&ok);
+                if(!ok || trk < 0 || trk > 255) //FIXME: max track?
+                    return false;
 
-            if(item.info.stationTrackPos == trk)
-                return false;
+                if(item.info.stationTrackPos == trk)
+                    return false;
 
-            //Set station track
-            item.info.stationTrackPos = trk;
+                //Set station track
+                item.info.stationTrackPos = trk;
+            }
+            else if(value.type() == QVariant::String)
+            {
+                QString name = value.toString();
+                if(name.isEmpty())
+                    return false;
+
+                int pos = -1;
+                for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+                {
+                    if(track.trackName == name)
+                    {
+                        pos = track.trackPos;
+                        break;
+                    }
+                }
+
+                if(pos == -1)
+                {
+                    emit errorOccurred(tr("No track found with name <b>%1</b>").arg(name));
+                    return false;
+                }
+
+                item.info.stationTrackPos = pos;
+            }
+            else
+            {
+                return false;
+            }
             break;
         }
         case StationTrackSideCol:
