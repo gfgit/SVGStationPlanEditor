@@ -37,6 +37,9 @@ set(CMAKE_AUTORCC ON)
 
 set(SSP_PROJECT_DEFINITIONS ${SSP_PROJECT_DEFINITIONS} -DAPPVERSION="${PROJECT_VERSION}" -DQT_DEPRECATED_WARNINGS)
 
+# Include our custom FindXXX moudules in '/cmake' subdirectory
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 find_package(Qt5 REQUIRED
     COMPONENTS
     Core
@@ -75,29 +78,7 @@ else()
         -Wshadow)
 endif()
 
-
-#Locate windeployqt
-if(WIN32 AND RUN_WINDEPLOYQT AND NOT WINDEPLOYQT_EXE)
-    set(WINDEPLOYQT_EXE_TMP NOTFOUND)
-    message("Searching windeployqt executable")
-    if(QT_QMAKE_EXECUTABLE)
-        get_filename_component(WINDEPLOYQT_DIR ${QT_QMAKE_EXECUTABLE} DIRECTORY)
-        set(WINDEPLOYQT_EXE_TMP "${WINDEPLOYQT_DIR}/windeployqt.exe")
-    endif()
-    if(NOT EXISTS ${WINDEPLOYQT_EXE_TMP} AND Qt5_DIR)
-        get_filename_component(WINDEPLOYQT_EXE_TMP "${Qt5_DIR}/../../../bin/windeployqt.exe" REALPATH)
-    endif()
-
-    if(EXISTS ${WINDEPLOYQT_EXE_TMP})
-        message("Found ${WINDEPLOYQT_EXE_TMP}")
-    else()
-        message("windeployqt NOT FOUND")
-        set(WINDEPLOYQT_EXE_TMP NOTFOUND)
-    endif()
-    set(WINDEPLOYQT_EXE ${WINDEPLOYQT_EXE_TMP} CACHE FILEPATH "windeployqt executable file path.")
-    unset(WINDEPLOYQT_EXE_TMP)
-    unset(WINDEPLOYQT_DIR)
-endif()
+include(LocateWinDeployQt)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -115,20 +96,20 @@ add_subdirectory(viewer)
 
 if(WIN32)
     if(RUN_WINDEPLOYQT)
-        if(NOT WINDEPLOYQT_EXE)
-            message(FATAL_ERROR "In order to run windeployqt you must first set th exe path in WINDEPLOYQT_EXE")
+        if(NOT TARGET windeployqt_exe)
+            message(FATAL_ERROR "In order to run windeployqt you must first set the exe path in WINDEPLOYQT_EXE_DIR")
         endif()
 
         install(CODE "
-            message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE}\")
-            execute_process(COMMAND ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/bin
+            message(STATUS \"Running windeployqt ${windeployqt_exe}\")
+            execute_process(COMMAND ${windeployqt_exe} ${CMAKE_INSTALL_PREFIX}/bin
                 WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
                 OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
                 ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
 
             message(STATUS \${WINDEPLOYQT_EXE_RESULT})
 
-            message(STATUS \"windeployqt Done.\")
+            message(STATUS \"${windeployqt_exe} Done.\")
             ")
     endif()
 endif()
