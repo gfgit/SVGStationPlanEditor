@@ -11,7 +11,8 @@
 
 NodeFinderDockWidget::NodeFinderDockWidget(NodeFinderMgr *mgr, QWidget *parent) :
     QWidget(parent),
-    nodeMgr(mgr)
+    nodeMgr(mgr),
+    model(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
