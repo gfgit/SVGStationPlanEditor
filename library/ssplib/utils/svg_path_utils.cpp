@@ -533,59 +533,134 @@ QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
     return value;
 }
 
-bool utils::parseStrokeWidth(const utils::XmlElement &e, const QRectF& bounds, double &outVal)
+static bool parseStyleAttr(const QString& style, QString& strokeStr)
 {
+    //Parse CSS style
+    const int idx = style.indexOf("stroke-width");
+    if(idx < 0)
+        return false;
+
+    const int start = style.indexOf(':', idx + 12);
+    if(start < 0)
+        return false;
+
+    const int end = style.indexOf(';', start);
+    int length = end - start - 1;
+    if(length < 0)
+        length = -1; //Take all string
+
+    strokeStr = style.mid(start + 1, length);
+    return true;
+}
+
+utils::ElementStyle parseStrokeWidthStyle(const utils::XmlElement &e, const ElementStyle& parentStyle, const QRectF& bounds)
+{
+    utils::ElementStyle elemStyle = parentStyle;
+    bool isFromStyle = false;
+
     QString strokeWidth;
-    if(e.hasAttribute("stroke-width"))
+    if(e.hasAttribute("style"))
     {
-        //Parse SVG attribute
+        //Parse CSS style first
+        QString style = e.attribute("style");
+        if(parseStyleAttr(style, strokeWidth))
+            isFromStyle = true;
+    }
+    else if(e.hasAttribute("stroke-width"))
+    {
+        //Parse SVG attribute as fallback
         strokeWidth = e.attribute("stroke-width").simplified();
     }
-    else if(e.hasAttribute("style"))
+
+    if(!strokeWidth.isEmpty())
     {
-        //Parse CSS style
-        QString style = e.attribute("style");
+        //Parse our stroke width
+        double val = 0;
+        QStringRef ref(&strokeWidth);
+        if(utils::parseNumberAndAdvance(val, ref))
+        {
+            if(ref.contains('%'))
+            {
+                //Width relative to element size
+                QSizeF sz = bounds.size();
+                double averageSize = (sz.width() + sz.height()) / 2.0;
+                val = val / 100 * averageSize;
+            }
 
-        const int idx = style.indexOf("stroke-width");
-        if(idx < 0)
-            return false;
-
-        const int start = style.indexOf(':', idx + 12);
-        if(start < 0)
-            return false;
-
-        const int end = style.indexOf(';', start);
-        int length = end - start - 1;
-        if(length < 0)
-            length = -1; //Take all string
-
-        strokeWidth = style.mid(start + 1, length);
+            if(!qFuzzyIsNull(val) && val > 0)
+            {
+                //Set the stroke width we found
+                if(isFromStyle)
+                    elemStyle.styleStrokeWidth = val;
+                else
+                    elemStyle.normalStrokeWidth = val;
+            }
+        }
     }
-    else
+
+    return elemStyle;
+}
+
+bool utils::parseStrokeWidth(const utils::XmlElement &e, const ElementStyle& parentStyle, const QRectF& bounds, double &outVal)
+{
+    ElementStyle elemStyle = parseStrokeWidthStyle(e, parentStyle, bounds);
+
+    if(elemStyle.styleStrokeWidth < 0)
     {
-        //No way of getting stroke width
-        return false;
-    }
-
-    QStringRef ref(&strokeWidth);
-    if(!parseNumberAndAdvance(outVal, ref))
-        return false;
-
-    if(ref.contains('%'))
-    {
-        //Width relative to element size
-        QSizeF sz = bounds.size();
-        double averageSize = (sz.width() + sz.height()) / 2.0;
-        outVal = outVal / 100 * averageSize;
-
-        if(outVal < 0 || qFuzzyIsNull(outVal))
-            return false;
+        //Fallback to normal style
+        if(elemStyle.normalStrokeWidth < 0)
+            return false; //No stroke width could be parsed
+        outVal = elemStyle.normalStrokeWidth;
+    }else{
+        outVal = elemStyle.styleStrokeWidth;
     }
 
     return true;
 }
 
 #ifdef SSPLIB_ENABLE_EDITING
+
+bool utils::parseStrokeWidthRecursve(QDomElement &e, const QRectF &bounds, double &outVal)
+{
+    const int N_Parents = 5;
+
+    QDomElement parentElem = e;
+
+    QDomElement arr[N_Parents + 1];
+    arr[0] = e;
+
+    //Go back to max N parents
+    int i = 0;
+    for(; i < N_Parents; i++)
+    {
+        QDomElement p = parentElem.parentNode().toElement();
+        if(p.isNull())
+            break; //This node has no parent
+
+        arr[i + 1] = p;
+        parentElem = p;
+    }
+
+    ElementStyle parentStyle;
+
+    //Loop in reverse order
+    for(int j = i; j >= 0; j--)
+    {
+        parentStyle = parseStrokeWidthStyle(XmlElement(arr[j]), parentStyle, bounds)
+    }
+
+    if(parentStyle.styleStrokeWidth < 0)
+    {
+        //Fallback to normal style
+        if(parentStyle.normalStrokeWidth < 0)
+            return false; //No stroke width could be parsed
+        outVal = parentStyle.normalStrokeWidth;
+    }else{
+        outVal = parentStyle.styleStrokeWidth;
+    }
+
+    return true;
+}
 
 bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
 {

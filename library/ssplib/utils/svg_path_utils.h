@@ -19,9 +19,18 @@ bool parseTrackConnectionAttribute(const QString& value, QVector<TrackConnection
 
 QString trackConnInfoToString(const QVector<TrackConnectionInfo>& vec);
 
-bool parseStrokeWidth(const XmlElement &e, const QRectF &bounds, double& outVal);
+struct ElementStyle
+{
+    //Give precedence to style if both found
+    double styleStrokeWidth = -1;
+    double normalStrokeWidth = -1;
+};
+
+bool parseStrokeWidth(const XmlElement &e, const ElementStyle& parentStyle, const QRectF &bounds, double& outVal);
 
 #ifdef SSPLIB_ENABLE_EDITING
+bool parseStrokeWidthRecursve(QDomElement &e, const QRectF &bounds, double& outVal);
+
 bool convertPathToSVG(const QPainterPath &path, QString &outD);
 #endif // SSPLIB_ENABLE_EDITING
 
