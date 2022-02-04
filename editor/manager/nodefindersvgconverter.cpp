@@ -361,7 +361,7 @@ bool NodeFinderSVGConverter::addCurrentElementToItem()
 
     path.strokeWidth = 0;
     const QRectF bounds = path.path.boundingRect();
-    if(!ssplib::utils::parseStrokeWidth(path.elem, bounds, path.strokeWidth))
+    if(!ssplib::utils::parseStrokeWidthRecursve(path.elem, bounds, path.strokeWidth))
         path.strokeWidth = 0;
 
     return model->addElementToItem(path, curItem);

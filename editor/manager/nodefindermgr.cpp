@@ -68,7 +68,7 @@ bool NodeFinderMgr::validateCurrentElement()
 
     elemPath.strokeWidth = 0;
     QRectF bounds = elemPath.path.boundingRect();
-    if(!ssplib::utils::parseStrokeWidth(elemPath.elem, bounds, elemPath.strokeWidth))
+    if(!ssplib::utils::parseStrokeWidthRecursve(elemPath.elem, bounds, elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
     //Null rect breaks QRectF::contains() which returns always false
