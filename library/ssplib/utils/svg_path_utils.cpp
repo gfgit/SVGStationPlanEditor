@@ -13,47 +13,75 @@ const char trackSideLetters[int(ssplib::Side::NSides)] = {
     'E' //ssplib::Side::East
 };
 
-static int parseNumber(double &outVal, const QStringView &str)
+static int parseNumber(double &outVal, const QStringRef &str)
 {
     //Calc number length
     int i = 0;
+    int start = 0;
     bool isExponential = false;
+    bool insideNumber = false;
     const QChar *c = str.data();
     for(; c && !c->isNull(); i++, c++)
     {
-        if(c->isDigit() || *c == '.' || *c == '-')
-            continue; //Still number
+        if(!insideNumber && c->isSpace())
+            continue; //Skip leading spaces
+
+        if(*c == '-' || *c == '+')
+        {
+            if(insideNumber)
+            {
+                //We are already inside number
+                //A second sign is allowed only after 'e' in exponent
+                //Check if previous char is 'e'
+                if(i > 0)
+                {
+                    QChar prevCh = *(c - 1);
+                    if(prevCh == 'e')
+                        continue;
+                }
+
+                //Not exponent sign, it's unexpected so break
+                break;
+            }
+
+            //Process sign at start of number
+            insideNumber = true;
+            start = i;
+            continue;
+        }
 
         if(c->toLower() == 'e')
         {
+            if(!insideNumber || isExponential)
+                break; //Already found 'e' or 'e' is not preceeded by numbers
+
+            //First time we find 'e'
             isExponential = true;
             continue;
         }
 
-        if(c->isSpace() || *c == ',')
-            break; //Separator
+        if(c->isDigit() || *c == '.')
+        {
+            if(!insideNumber)
+            {
+                start = i;
+                insideNumber = true;
+            }
+            continue; //Still number
+        }
 
-        //Unexpected char
-        return -1;
+        //Do not consider group separators (comma) because they should not be written to SVG
+        //If we get other char, our number is terminated, so break
+        break;
     }
-    if(i == 0)
-        return -1;
 
+    //Cut only number part and skip the rest to avoid confusing toDouble()
+    QStringRef numberStr = str.mid(start, i - start);
     bool ok = false;
-    if(isExponential)
-    {
-        //Parse exponential notation 1.5e-1 -> 0.15
-        QString tmp = str.left(i).toString();
-        QTextStream stream(&tmp);
-        stream >> outVal;
-        ok = stream.status() == QTextStream::Ok;
-    }
-    else
-    {
-        outVal = str.left(i).toDouble(&ok);
-    }
-
-    return ok ? i : -1;
+    outVal = numberStr.toDouble(&ok);
+    if(!ok)
+        return -1;
+    return i;
 }
 
 static bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
@@ -105,28 +133,28 @@ static bool convertLine(const utils::XmlElement &e, QPainterPath &path)
     if(str.isEmpty())
         return false;
     double x1 = 0;
-    if(!parseNumber(x1, str))
+    if(!parseNumber(x1, &str))
         return false;
 
     str = e.attribute(QLatin1String("y1"));
     if(str.isEmpty())
         return false;
     double y1 = 0;
-    if(!parseNumber(y1, str))
+    if(!parseNumber(y1, &str))
         return false;
 
     str = e.attribute(QLatin1String("x2"));
     if(str.isEmpty())
         return false;
     double x2 = 0;
-    if(!parseNumber(x2, str))
+    if(!parseNumber(x2, &str))
         return false;
 
     str = e.attribute(QLatin1String("y2"));
     if(str.isEmpty())
         return false;
     double y2 = 0;
-    if(!parseNumber(y2, str))
+    if(!parseNumber(y2, &str))
         return false;
 
     path.moveTo(x1, y1);
@@ -280,19 +308,19 @@ static bool convertRect(const utils::XmlElement &e, QPainterPath &path)
     double x = 0, y = 0, w = 0, h = 0;
 
     QString str = e.attribute(QLatin1String("x"));
-    if(str.isEmpty() || !parseNumber(x, str))
+    if(str.isEmpty() || !parseNumber(x, &str))
         return false;
 
     str = e.attribute(QLatin1String("y"));
-    if(str.isEmpty() || !parseNumber(y, str))
+    if(str.isEmpty() || !parseNumber(y, &str))
         return false;
 
     str = e.attribute(QLatin1String("width"));
-    if(str.isEmpty() || !parseNumber(w, str))
+    if(str.isEmpty() || !parseNumber(w, &str))
         return false;
 
     str = e.attribute(QLatin1String("height"));
-    if(str.isEmpty() || !parseNumber(h, str))
+    if(str.isEmpty() || !parseNumber(h, &str))
         return false;
 
     path.addRect(x, y, w, h);
@@ -319,6 +347,9 @@ bool utils::parsePointAndAdvance(QPointF &outPoint, QStringRef &str)
     // X
     if(!parseNumberAndAdvance(outPoint.rx(), str))
         return false;
+
+    if(str.isEmpty())
+        return false; //We expected also Y coordinate
 
     if(str.at(0) == ',')
         str = str.mid(1); //Eat comma
