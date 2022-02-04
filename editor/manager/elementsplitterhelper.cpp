@@ -27,48 +27,19 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     if(!cutPathAtPoint(pos, m_threshold, path, dest, rest))
         return false;
 
-    QString destVal;
-    if(!ssplib::utils::convertPathToSVG(dest, destVal))
+    if(!convertToPath(origElem, dest, nodeMgr))
         return false;
 
     QString restVal;
     if(!ssplib::utils::convertPathToSVG(rest, restVal))
         return false;
 
-    if(origElem.tagName() != ssplib::svg_tags::PathTag)
-    {
-        //Remove from original class
-        bool isFakeId = false;
-        nodeMgr->getConverter()->removeElement(origElem, &isFakeId);
-
-        if(isFakeId)
-        {
-            //Clear ID to trigger generation of new one.
-            nodeMgr->getConverter()->renameElement(origElem, QString());
-        }
-
-        //Convert to path
-        origElem.setTagName(ssplib::svg_tags::PathTag);
-
-        QStringList attrs{
-            "points",
-            "x", "x1", "x2",
-            "y", "y1", "y2",
-            "height", "width"
-        };
-
-        for(const QString& attr : attrs)
-            origElem.removeAttribute(attr);
-
-        //Add to path class
-        nodeMgr->getConverter()->storeElement(origElem);
-    }
+    convertToPath(origElem, dest, nodeMgr);
 
     //Copy
     QDomElement newElem = origElem.cloneNode().toElement();
     origElem.parentNode().insertAfter(newElem, origElem);
 
-    origElem.setAttribute("d", destVal);
     newElem.setAttribute("d", restVal);
 
     //Generate new ID
@@ -81,5 +52,46 @@ bool ElementSplitterHelper::splitAt(const QPointF &pos)
     //Store new element
     nodeMgr->getConverter()->storeElement(newElem);
 
+    return true;
+}
+
+bool ElementSplitterHelper::convertToPath(QDomElement &e, const QPainterPath &path, NodeFinderMgr *mgr)
+{
+    //Morph into path element
+    if(e.tagName() != ssplib::svg_tags::PathTag)
+    {
+        //Remove from original class
+        bool isFakeId = false;
+        mgr->getConverter()->removeElement(e, &isFakeId);
+
+        if(isFakeId)
+        {
+            //Clear ID to trigger generation of new one.
+            mgr->getConverter()->renameElement(e, QString());
+        }
+
+        //Convert to path
+        e.setTagName(ssplib::svg_tags::PathTag);
+
+        QStringList attrs{
+            "points",
+            "x", "x1", "x2",
+            "y", "y1", "y2",
+            "height", "width"
+        };
+
+        for(const QString& attr : attrs)
+            e.removeAttribute(attr);
+
+        //Add to path class
+        mgr->getConverter()->storeElement(e);
+    }
+
+    //Build and set path
+    QString destVal;
+    if(!ssplib::utils::convertPathToSVG(path, destVal))
+        return false;
+
+    e.setAttribute("d", destVal);
     return true;
 }
