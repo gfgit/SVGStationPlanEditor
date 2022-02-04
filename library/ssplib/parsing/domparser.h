@@ -12,6 +12,10 @@ namespace ssplib {
 class StationPlan;
 class EditingInfo;
 
+namespace utils {
+struct ElementStyle;
+}
+
 class DOMParser
 {
 public:
@@ -20,7 +24,7 @@ public:
     bool parse();
 
 private:
-    void processGroup(QDomElement& g);
+    void processGroup(QDomElement& g, const ssplib::utils::ElementStyle &parentStyle);
     void processDefs(QDomElement& defs);
     void processText(QDomElement& text);
     void processTspan(QDomElement &tspan, QDomElement &text);

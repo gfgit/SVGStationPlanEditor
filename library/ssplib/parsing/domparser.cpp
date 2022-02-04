@@ -25,12 +25,14 @@ DOMParser::DOMParser(QDomDocument *doc, StationPlan *ptr, EditingInfo *info) :
 bool DOMParser::parse()
 {
     QDomElement root = m_doc->documentElement();
-    processGroup(root);
+    processGroup(root, utils::ElementStyle());
     return true;
 }
 
-void DOMParser::processGroup(QDomElement &g)
+void DOMParser::processGroup(QDomElement &g, const utils::ElementStyle& parentStyle)
 {
+    utils::ElementStyle elemStyle = utils::parseStrokeWidthStyle(g, parentStyle, QRectF());
+
     QDomNode n = g.firstChild();
     while(!n.isNull())
     {
@@ -44,7 +46,7 @@ void DOMParser::processGroup(QDomElement &g)
             if(e.tagName() == ssplib::svg_tags::GroupTag)
             {
                 //Process also sub elements
-                processGroup(e);
+                processGroup(e, elemStyle);
             }
             else if(e.tagName() == ssplib::svg_tags::TextTag)
             {
@@ -58,9 +60,9 @@ void DOMParser::processGroup(QDomElement &g)
             {
                 utils::XmlElement e2(e);
 
-                parsing::parseLabel(e2, plan->labels);
-                parsing::parsePlatform(e2, plan->platforms);
-                parsing::parseTrackConnection(e2, plan->trackConnections);
+                parsing::parseLabel(e2, plan->labels, elemStyle);
+                parsing::parsePlatform(e2, plan->platforms, elemStyle);
+                parsing::parseTrackConnection(e2, plan->trackConnections, elemStyle);
             }
         }
         n = n.nextSibling();
