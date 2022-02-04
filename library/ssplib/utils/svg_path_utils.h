@@ -26,6 +26,8 @@ struct ElementStyle
     double normalStrokeWidth = -1;
 };
 
+ElementStyle parseStrokeWidthStyle(const utils::XmlElement &e, const ElementStyle& parentStyle, const QRectF& bounds);
+
 bool parseStrokeWidth(const XmlElement &e, const ElementStyle& parentStyle, const QRectF &bounds, double& outVal);
 
 #ifdef SSPLIB_ENABLE_EDITING

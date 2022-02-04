@@ -553,9 +553,9 @@ static bool parseStyleAttr(const QString& style, QString& strokeStr)
     return true;
 }
 
-utils::ElementStyle parseStrokeWidthStyle(const utils::XmlElement &e, const ElementStyle& parentStyle, const QRectF& bounds)
+utils::ElementStyle utils::parseStrokeWidthStyle(const utils::XmlElement &e, const ElementStyle& parentStyle, const QRectF& bounds)
 {
-    utils::ElementStyle elemStyle = parentStyle;
+    ElementStyle elemStyle = parentStyle;
     bool isFromStyle = false;
 
     QString strokeWidth;
@@ -577,7 +577,7 @@ utils::ElementStyle parseStrokeWidthStyle(const utils::XmlElement &e, const Elem
         //Parse our stroke width
         double val = 0;
         QStringRef ref(&strokeWidth);
-        if(utils::parseNumberAndAdvance(val, ref))
+        if(parseNumberAndAdvance(val, ref))
         {
             if(ref.contains('%'))
             {
