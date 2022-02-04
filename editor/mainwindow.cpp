@@ -11,6 +11,8 @@
 
 #include "manager/nodefindermgr.h"
 
+#include <QMessageBox>
+
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -106,7 +108,11 @@ void MainWindow::loadSVG()
         return;
     }
 
-    nodeMgr->loadSVG(&f);
+    if(!nodeMgr->loadSVG(&f))
+    {
+        QMessageBox::warning(this, tr("Loading Error"), tr("Could not load SVG from '%1'").arg(fileName));
+    }
+
     setZoom(100);
 }
 
