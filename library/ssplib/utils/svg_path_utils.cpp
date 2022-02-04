@@ -646,7 +646,7 @@ bool utils::parseStrokeWidthRecursve(QDomElement &e, const QRectF &bounds, doubl
     //Loop in reverse order
     for(int j = i; j >= 0; j--)
     {
-        parentStyle = parseStrokeWidthStyle(XmlElement(arr[j]), parentStyle, bounds)
+        parentStyle = parseStrokeWidthStyle(XmlElement(arr[j]), parentStyle, bounds);
     }
 
     if(parentStyle.styleStrokeWidth < 0)
@@ -655,7 +655,9 @@ bool utils::parseStrokeWidthRecursve(QDomElement &e, const QRectF &bounds, doubl
         if(parentStyle.normalStrokeWidth < 0)
             return false; //No stroke width could be parsed
         outVal = parentStyle.normalStrokeWidth;
-    }else{
+    }
+    else
+    {
         outVal = parentStyle.styleStrokeWidth;
     }
 
