@@ -31,7 +31,7 @@ bool StreamParser::parse()
         return false;
     }
 
-    parseGroup();
+    parseGroup(utils::ElementStyle());
 
     if(xml.hasError())
     {
@@ -41,22 +41,25 @@ bool StreamParser::parse()
     return !xml.hasError();
 }
 
-void StreamParser::parseGroup()
+void StreamParser::parseGroup(const utils::ElementStyle& parentStyle)
 {
+    utils::XmlElement groupElem(xml.name(), xml.attributes());
+    utils::ElementStyle elemStyle = utils::parseStrokeWidthStyle(groupElem, parentStyle, QRectF());
+
     while (xml.readNextStartElement())
     {
         if(xml.name() == svg_tags::GroupTag)
         {
-            parseGroup();
+            parseGroup(elemStyle);
             continue;
         }
         else if(parsing::isElementSupported(xml.name()))
         {
             utils::XmlElement e(xml.name(), xml.attributes());
 
-            parsing::parseLabel(e, plan->labels);
-            parsing::parsePlatform(e, plan->platforms);
-            parsing::parseTrackConnection(e, plan->trackConnections);
+            parsing::parseLabel(e, plan->labels, elemStyle);
+            parsing::parsePlatform(e, plan->platforms, elemStyle);
+            parsing::parseTrackConnection(e, plan->trackConnections, elemStyle);
         }
 
         xml.skipCurrentElement();

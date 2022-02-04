@@ -5,6 +5,10 @@
 
 namespace ssplib {
 
+namespace utils {
+struct ElementStyle;
+}
+
 class StationPlan;
 
 class StreamParser
@@ -15,7 +19,7 @@ public:
     bool parse();
 
 private:
-    void parseGroup();
+    void parseGroup(const ssplib::utils::ElementStyle &parentStyle);
 
 private:
     QXmlStreamReader xml;
