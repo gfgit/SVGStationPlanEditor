@@ -6,19 +6,22 @@
 
 using namespace ssplib;
 
-static inline const QChar *parseNumbersArray(const QStringRef &str, QVarLengthArray<qreal, 8> &points)
+static inline const QChar *parseNumbersArray(const QStringRef &origStr, QVarLengthArray<qreal, 8> &points)
 {
-    QStringRef copy = str;
+    QStringRef str = origStr;
 
     double val = 0;
-    while (!str.isEmpty())
-    {
-        if(!utils::parseNumberAndAdvance(val, copy))
+    while (!str.isEmpty() && str.at(0) != ')')
+    {   
+        if(!utils::parseNumberAndAdvance(val, str))
             break;
         points.append(val);
+
+        if(!str.isEmpty() && str.at(0) == ',')
+            str = str.mid(1); //Skip comma
     }
 
-    return copy.constData();
+    return str.trimmed().constData();
 }
 
 
