@@ -26,6 +26,7 @@ namespace svg_attr {
 //Default
 const QString ID = QLatin1String("id");
 const QString XmlSpace = QLatin1String("xml:space");
+const QString Transform = QLatin1String("transform");
 
 //Custom
 const QString LabelName = QLatin1String("labelname");
