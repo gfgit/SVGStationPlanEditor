@@ -14,6 +14,20 @@
 
 using namespace ssplib;
 
+void applyTransform(utils::Transform& transf, QDomElement& e)
+{
+    QString val = transf.value;
+    QString newVal = e.attribute(svg_attr::Transform).trimmed();
+    if(!val.isEmpty() && !newVal.isEmpty())
+    {
+        //Separate from parent transform
+        val.append('\n');
+    }
+    val.append(newVal);
+    if(!val.isEmpty())
+        e.setAttribute(svg_attr::Transform, val);
+}
+
 DOMParser::DOMParser(QDomDocument *doc, StationPlan *ptr, EditingInfo *info) :
     m_doc(doc),
     plan(ptr),
@@ -25,13 +39,20 @@ DOMParser::DOMParser(QDomDocument *doc, StationPlan *ptr, EditingInfo *info) :
 bool DOMParser::parse()
 {
     QDomElement root = m_doc->documentElement();
-    processGroup(root, utils::ElementStyle());
+    processGroup(root, utils::ElementStyle(), utils::Transform());
     return true;
 }
 
-void DOMParser::processGroup(QDomElement &g, const utils::ElementStyle& parentStyle)
+void DOMParser::processGroup(QDomElement &g, const utils::ElementStyle& parentStyle, const utils::Transform &parentTransf)
 {
     utils::ElementStyle elemStyle = utils::parseStrokeWidthStyle(g, parentStyle, QRectF());
+
+    utils::Transform groupTransf = parentTransf;
+    if(g.hasAttribute(svg_attr::Transform))
+    {
+        groupTransf = utils::combineTransform(parentTransf, g.attribute(svg_attr::Transform));
+        g.removeAttribute(svg_attr::Transform); //Remove it once processed
+    }
 
     QDomNode n = g.firstChild();
     while(!n.isNull())
@@ -43,26 +64,76 @@ void DOMParser::processGroup(QDomElement &g, const utils::ElementStyle& parentSt
             // The node really is an element.
             m_info->storeElement(e);
 
+            bool tranformProcessed = false;
+
             if(e.tagName() == ssplib::svg_tags::GroupTag)
             {
                 //Process also sub elements
-                processGroup(e, elemStyle);
+                processGroup(e, elemStyle, groupTransf);
+                tranformProcessed = true;
             }
             else if(e.tagName() == ssplib::svg_tags::TextTag)
             {
-                processText(e);
+                processText(e, groupTransf);
+                tranformProcessed = true;
             }
             else if(e.tagName() == ssplib::svg_tags::DefsTag)
             {
                 processDefs(e);
+                tranformProcessed = true;
             }
             else if(parsing::isElementSupported(e.tagName()))
             {
                 utils::XmlElement e2(e);
 
-                parsing::parseLabel(e2, plan->labels, elemStyle);
-                parsing::parsePlatform(e2, plan->platforms, elemStyle);
-                parsing::parseTrackConnection(e2, plan->trackConnections, elemStyle);
+                utils::Transform elemTransf = utils::combineTransform(groupTransf, e.attribute(svg_attr::Transform));
+                tranformProcessed = elemTransf.matrix.isIdentity();
+
+                if(!tranformProcessed)
+                {
+                    //Transform is not identity, we need to apply transform
+                    QPainterPath path;
+                    if(utils::convertElementToPath(e2, path))
+                    {
+                        path = elemTransf.matrix.map(path);
+
+                        //Now rebuild path
+                        QString pathD;
+                        if(utils::convertPathToSVG(path, pathD))
+                        {
+                            //Convert to path element
+                            e.setTagName(ssplib::svg_tags::PathTag);
+
+                            QStringList attrs_to_remove{
+                                "points",
+                                "x", "x1", "x2",
+                                "y", "y1", "y2",
+                                "height", "width",
+                                ssplib::svg_attr::Transform
+                            };
+
+                            for(const QString& attr : attrs_to_remove)
+                                e.removeAttribute(attr);
+
+                            e.setAttribute("d", pathD);
+
+                            tranformProcessed = true;
+                        }
+                    }
+                }
+
+                if(tranformProcessed)
+                {
+                    parsing::parseLabel(e2, plan->labels, elemStyle);
+                    parsing::parsePlatform(e2, plan->platforms, elemStyle);
+                    parsing::parseTrackConnection(e2, plan->trackConnections, elemStyle);
+                }
+            }
+
+            if(!tranformProcessed)
+            {
+                //Apply transform to single element
+                applyTransform(groupTransf, e);
             }
         }
         n = n.nextSibling();
@@ -99,10 +170,13 @@ void DOMParser::processDefs(QDomElement &defs)
     }
 }
 
-void DOMParser::processText(QDomElement &text)
+void DOMParser::processText(QDomElement &text, utils::Transform &parentTransf)
 {
     //xml:space="preserve" moves text to right, remove it
     text.removeAttribute(ssplib::svg_attr::XmlSpace);
+
+    //Apply transform to single element
+    applyTransform(parentTransf, text);
 
     QDomNode n = text.firstChild();
     while(!n.isNull())
