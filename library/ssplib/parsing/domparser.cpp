@@ -7,6 +7,7 @@
 #include "editinginfo.h"
 
 #include "parsinghelpers.h"
+#include <ssplib/utils/transform_utils.h>
 
 #include <QDebug>
 
