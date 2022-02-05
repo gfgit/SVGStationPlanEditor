@@ -7,12 +7,12 @@ namespace ssplib {
 
 namespace utils {
 
-QMatrix parseTransformationMatrix(const QStringRef &value);
+QTransform parseTransformationMatrix(const QStringRef &value);
 
 struct Transform
 {
     QString value;
-    QMatrix matrix;
+    QTransform matrix;
 };
 
 Transform combineTransform(const Transform& parent, const QString& val);

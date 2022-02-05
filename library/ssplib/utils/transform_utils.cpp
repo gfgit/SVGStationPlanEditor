@@ -25,11 +25,11 @@ static inline const QChar *parseNumbersArray(const QStringRef &origStr, QVarLeng
 }
 
 
-QMatrix ssplib::utils::parseTransformationMatrix(const QStringRef &value)
+QTransform ssplib::utils::parseTransformationMatrix(const QStringRef &value)
 {
     if (value.isEmpty())
-        return QMatrix();
-    QMatrix matrix;
+        return QTransform();
+    QTransform matrix;
     const QChar *str = value.constData();
     const QChar *end = str + value.length();
     while (str < end) {
@@ -110,9 +110,9 @@ QMatrix ssplib::utils::parseTransformationMatrix(const QStringRef &value)
         if(state == Matrix) {
             if(points.count() != 6)
                 goto error;
-            matrix = QMatrix(points[0], points[1],
-                             points[2], points[3],
-                             points[4], points[5]) * matrix;
+            matrix = QTransform(points[0], points[1],
+                                points[2], points[3],
+                                points[4], points[5]) * matrix;
         } else if (state == Translate) {
             if (points.count() == 1)
                 matrix.translate(points[0], 0);
@@ -164,7 +164,7 @@ utils::Transform utils::combineTransform(const Transform &parent, const QString 
     }
     result.value.append(val);
 
-    QMatrix matrix = parseTransformationMatrix(&val);
+    QTransform matrix = parseTransformationMatrix(&val);
     result.matrix *= matrix;
     return result;
 }
