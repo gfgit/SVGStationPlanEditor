@@ -3,6 +3,8 @@
 
 #include <QStyledItemDelegate>
 
+class ComplEdit;
+
 class CompletionDelegate : public QStyledItemDelegate
 {
 public:
@@ -18,8 +20,19 @@ public:
                       QAbstractItemModel *model,
                       const QModelIndex &index) const override;
 
+    int getColumn() const;
+    void setColumn(int newColumn);
+
+    int getRole() const;
+    void setRole(int newRole);
+
+public slots:
+    void onActivated(ComplEdit *ed, const QModelIndex& idx);
+
 private:
     QAbstractItemModel *sourceModel;
+    int column;
+    int role;
 };
 
 #endif // COMPLETIONDELEGATE_H
