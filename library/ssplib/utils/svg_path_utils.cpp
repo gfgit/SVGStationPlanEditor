@@ -700,15 +700,6 @@ bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
 
     const int count = path.elementCount();
 
-    enum PointType
-    {
-        NormalPoint,
-        CubicControl_2,
-        CubicEndPoint
-    };
-
-    PointType nextType = NormalPoint;
-
     for(int i = 0; i < count; i++)
     {
         QPainterPath::Element e = path.elementAt(i);
@@ -717,45 +708,32 @@ bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
         case QPainterPath::MoveToElement:
         {
             stream << "M " << e.x << ' ' << e.y << ' ';
-            nextType = NormalPoint;
             break;
         }
         case QPainterPath::LineToElement:
         {
             stream << "L " << e.x << ' ' << e.y << ' ';
-            nextType = NormalPoint;
             break;
         }
         case QPainterPath::CurveToElement:
         {
-            if(nextType != NormalPoint)
-                qWarning() << "Cubic INSIDE Cubic";
-            nextType = CubicControl_2;
+            //Start cubic, write first control point
+            stream << "C " << e.x << ' ' << e.x << ' ';
             break;
         }
         case QPainterPath::CurveToDataElement:
         {
-            switch (nextType)
-            {
-            case NormalPoint:
-                break;
-            case CubicControl_2:
-                nextType = CubicEndPoint;
-                break;
-            case CubicEndPoint:
-            {
-                //Fake cubic to line from start to end
-                stream << "L " << e.x << ' ' << e.y << ' ';
-
-                nextType = NormalPoint;
-            }
-            }
+            //Write second control point or end point
+            stream << e.x << ' ' << e.x << ' ';
             break;
         }
         }
     }
 
-    return stream.status() == QTextStream::Ok;
+    if(outD.endsWith(' '))
+        outD.chop(1); //Remove last space
+
+    return true;
 }
 
 #endif // SSPLIB_ENABLE_EDITING
