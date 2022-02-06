@@ -253,6 +253,7 @@ static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
         {
         case 'M':
         {
+            //Move to
             if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
                 return false;
             path.moveTo(pt);
@@ -260,6 +261,7 @@ static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
         }
         case 'L':
         {
+            //Line to
             if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
                 return false;
             path.lineTo(pt);
@@ -267,6 +269,7 @@ static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
         }
         case 'H':
         {
+            //Horizontal line
             double newX = 0;
             if(!parseNumberAndAdvanceRelative(newX, strRef, isRelative, prevPt.x()))
                 return false;
@@ -276,11 +279,38 @@ static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
         }
         case 'V':
         {
+            //Vertical line
             double newY = 0;
             if(!parseNumberAndAdvanceRelative(newY, strRef, isRelative, prevPt.y()))
                 return false;
             pt.setY(newY);
             path.lineTo(pt);
+            break;
+        }
+        case 'C':
+        {
+            //Cubic Bezier curve (x1 y1, x2 y2, x y)
+            QPointF controlPt1, controlPt2;
+            if(!parsePointAndAdvanceRelative(controlPt1, strRef, isRelative, prevPt))
+                return false;
+            if(!parsePointAndAdvanceRelative(controlPt2, strRef, isRelative, prevPt))
+                return false;
+            if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
+                return false;
+
+            path.cubicTo(controlPt1, controlPt2, pt);
+            break;
+        }
+        case 'Q':
+        {
+            //Quadratic Bezier curve (x1 y1, x y)
+            QPointF controlPt1;
+            if(!parsePointAndAdvanceRelative(controlPt1, strRef, isRelative, prevPt))
+                return false;
+            if(!parsePointAndAdvanceRelative(pt, strRef, isRelative, prevPt))
+                return false;
+
+            path.quadTo(controlPt1, pt);
             break;
         }
         default:
