@@ -52,6 +52,18 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
     switch (role)
     {
     case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case TrackNameCol:
+            return item.trackName;
+        case TrackPosCol:
+            return item.trackPos;
+        case SpecialMixedColumn: //Mixed colummn for completion
+            return item.trackName.isEmpty() ? QString("#%1").arg(item.trackPos) : item.trackName;
+        }
+        break;
+    }
     case Qt::EditRole:
     {
         switch (idx.column())
@@ -59,6 +71,8 @@ QVariant NodeFinderStationTracksModel::data(const QModelIndex &idx, int role) co
         case TrackNameCol:
             return item.trackName;
         case TrackPosCol:
+            return item.trackPos;
+        case SpecialMixedColumn: //Mixed colummn for completion
             return item.trackPos;
         }
         break;
@@ -186,6 +200,8 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
 
+    emit tracksChanged();
+
     return true;
 }
 
@@ -265,6 +281,8 @@ bool NodeFinderStationTracksModel::addItem()
     m_plan->platforms.append(item);
     endInsertRows();
 
+    emit tracksChanged();
+
     return true;
 }
 
@@ -293,6 +311,8 @@ bool NodeFinderStationTracksModel::removeItem(int row)
     beginRemoveRows(QModelIndex(), row, row);
     m_plan->platforms.removeAt(row);
     endRemoveRows();
+
+    emit tracksChanged();
 
     return true;
 }

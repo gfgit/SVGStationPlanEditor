@@ -22,6 +22,7 @@ public:
     {
         TrackNameCol = 0,
         TrackPosCol,
+        SpecialMixedColumn,
         NCols
     };
 
@@ -52,6 +53,9 @@ public:
     bool removeElementFromItem(ssplib::ItemBase *item, int pos) override;
 
     bool itemIsInXML(const ssplib::TrackItem &item) const;
+
+signals:
+    void tracksChanged();
 
 private:
     friend class NodeFinderSVGWidget;
