@@ -110,13 +110,32 @@ void MainWindow::loadSVG()
         return;
     }
 
+    //Show everithing
+    for(ssplib::ItemBase& label : stationPlan->labels)
+    {
+        label.visible = true;
+    }
+    for(ssplib::ItemBase& track : stationPlan->platforms)
+    {
+        track.visible = true;
+    }
+    for(ssplib::ItemBase& track : stationPlan->trackConnections)
+    {
+        track.visible = true;
+    }
+    stationPlan->drawLabels = true;
+    stationPlan->drawTracks = true;
+    stationPlan->platformPenWidth = 2;
+
     setZoom(100);
     zoomToFit();
 }
 
 void MainWindow::setZoom(int val)
 {
-    if(val == zoom || val > 400 || val < 25)
+    val = qBound(25, val, 400);
+
+    if(val == zoom)
         return;
 
     zoom = val;
