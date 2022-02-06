@@ -30,7 +30,6 @@ private:
                       const ssplib::utils::Transform &parentTransf);
     void processDefs(QDomElement& defs);
     void processText(QDomElement& text, utils::Transform &parentTransf);
-    void processTspan(QDomElement &tspan, QDomElement &text);
     void processInternalTspan(QDomElement &top, QDomElement &cur, QString &value);
 
 private:

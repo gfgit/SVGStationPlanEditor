@@ -34,8 +34,8 @@ const QString TrackPos = QLatin1String("trackpos");
 const QString TrackConnections = QLatin1String("trackconn");
 
 //Text processing, attribute white list
-const QStringList TSpanPassAttrs{"x", "y", "style", "fill", "stroke", "font-family", "font-size", "font-weight"};
-const QStringList TSpanPassToTextAttrs{"x", "y"};
+const QStringList TSpanPassToTextAttrs{"x", "y", "style", "fill", "stroke", "font-family", "font-size", "font-weight",
+                                       "text-anchor"};
 
 }
 

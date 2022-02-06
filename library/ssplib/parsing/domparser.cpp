@@ -173,108 +173,45 @@ void DOMParser::processDefs(QDomElement &defs)
 
 void DOMParser::processText(QDomElement &text, utils::Transform &parentTransf)
 {
+    //Qt SVG doens't seem to support <text> and <tspan> elements well
+    //We remove all <tspan> and put all contents and attributes in <text> elements
+
     //xml:space="preserve" moves text to right, remove it
     text.removeAttribute(ssplib::svg_attr::XmlSpace);
 
     //Apply transform to single element
     applyTransform(parentTransf, text);
 
-    QDomNode n = text.firstChild();
-    while(!n.isNull())
-    {
-        if(n.isText())
-        {
-            //Skip normal text (leave it as is)
-            n = n.nextSibling();
-            continue;
-        }
-
-        //Try to convert the node to an element.
-        QDomElement e = n.toElement();
-        if(e.isNull())
-        {
-            //Node is not an element, skip it
-            n = n.nextSibling();
-            continue;
-        }
-
-        //The node really is an element.
-        if(e.tagName() == ssplib::svg_tags::TextTag)
-        {
-            //Remove text elements inside a text element
-            qDebug() << "TEXT inside TEXT" << e.lineNumber() << e.columnNumber();
-            QDomNode old = n;
-            n = n.nextSibling();
-            text.removeChild(old);
-        }
-        else
-        {
-            if(e.tagName() == ssplib::svg_tags::TSpanTag)
-            {
-                if(e.hasAttribute(ssplib::svg_attr::ID))
-                {
-                    const QString id = e.attribute(ssplib::svg_attr::ID);
-                    if(m_info->namedElements.contains(id))
-                    {
-                        //Duplicate id, remove ID
-                        e.removeAttribute(ssplib::svg_attr::ID);
-                    }
-                }
-
-                processTspan(e, text);
-            }
-
-            n = n.nextSibling();
-        }
-    }
-}
-
-void DOMParser::processTspan(QDomElement &tspan, QDomElement &text)
-{
     QString value;
 
-    QDomNode n = tspan.firstChild();
+    QDomNode n = text.firstChild();
     while(!n.isNull())
     {
         if(n.isText())
         {
             //Keep text
             value.append(n.nodeValue());
-            QDomNode old = n;
-            n = n.nextSibling();
-            tspan.removeChild(old);
-            continue;
         }
-
-        // Try to convert the node to an element.
-        QDomElement e = n.toElement();
-        if(!e.isNull())
+        else
         {
-            // the node really is an element.
-            if(e.tagName() == ssplib::svg_tags::TSpanTag)
+            //Try to convert the node to an element.
+            QDomElement e = n.toElement();
+            if(!e.isNull() && e.tagName() == ssplib::svg_tags::TSpanTag)
             {
-                processInternalTspan(tspan, e, value);
+                //Keep tspan attributes and contents
+                processInternalTspan(text, e, value);
             }
         }
+
+        //Remove child elements from <text>
+        QDomNode old = n;
         n = n.nextSibling();
-        if(!e.isNull())
-        {
-            //Remove internal tspan
-            tspan.removeChild(e);
-        }
+        text.removeChild(old);
     }
 
-    for(const QString& attr : ssplib::svg_attr::TSpanPassToTextAttrs)
-    {
-        if(tspan.hasAttribute(attr))
-        {
-            text.setAttribute(attr, tspan.attribute(attr));
-            tspan.removeAttribute(attr);
-        }
-    }
-
+    //Now re-create text content
     QDomText textVal = m_doc->createTextNode(value);
-    tspan.appendChild(textVal);
+    text.appendChild(textVal);
 }
 
 void DOMParser::processInternalTspan(QDomElement &top, QDomElement &cur, QString &value)
@@ -304,7 +241,7 @@ void DOMParser::processInternalTspan(QDomElement &top, QDomElement &cur, QString
         n = n.nextSibling();
     }
 
-    for(const QString& attr : ssplib::svg_attr::TSpanPassAttrs)
+    for(const QString& attr : ssplib::svg_attr::TSpanPassToTextAttrs)
     {
         if(cur.hasAttribute(attr))
             top.setAttribute(attr, cur.attribute(attr));
