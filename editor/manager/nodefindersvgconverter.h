@@ -56,7 +56,7 @@ public:
 
     IObjectModel *getModel(EditingModes mode) const;
 
-    QAbstractItemDelegate *getDelegateFor(int col, EditingModes mode, QObject *parent) const;
+    QAbstractItemDelegate *getDelegateFor(int col, EditingModes mode, QObject *parent, bool &outShowCol) const;
 
     inline NodeFinderElementWalker walkElements(const QStringList& tagOrder)
     {

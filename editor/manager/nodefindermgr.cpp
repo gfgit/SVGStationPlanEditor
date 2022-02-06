@@ -173,9 +173,12 @@ QWidget *NodeFinderMgr::getDockWidget(EditingModes mode)
 
     for(int i = 0; i < m->columnCount(); i++)
     {
-        auto del = converter->getDelegateFor(i, mode, w);
+        bool showCol = true;
+        auto del = converter->getDelegateFor(i, mode, w, showCol);
         if(del)
             w->setDelegate(i, del);
+
+        w->setColumnVisible(i, showCol);
     }
 
     return w;

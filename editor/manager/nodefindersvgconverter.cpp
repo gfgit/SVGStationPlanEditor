@@ -40,6 +40,10 @@ NodeFinderSVGConverter::NodeFinderSVGConverter(NodeFinderMgr *parent) :
     tracksModel = new NodeFinderStationTracksModel(&m_plan, &m_xmlPlan, nodeMgr, this);
     turnoutModel = new NodeFinderTurnoutModel(&m_plan, &m_xmlPlan, nodeMgr, this);
 
+    //Connect models to keep views updated
+    connect(labelsModel, &NodeFinderLabelModel::labelsChanged, turnoutModel, &NodeFinderTurnoutModel::refreshData);
+    connect(tracksModel, &NodeFinderStationTracksModel::tracksChanged, turnoutModel, &NodeFinderTurnoutModel::refreshData);
+
     m_info.setCallback([this](QDomElement &e) { storeElement(e); });
 }
 
@@ -297,8 +301,10 @@ IObjectModel *NodeFinderSVGConverter::getModel(EditingModes mode) const
     return nullptr;
 }
 
-QAbstractItemDelegate *NodeFinderSVGConverter::getDelegateFor(int col, EditingModes mode, QObject *parent) const
+QAbstractItemDelegate *NodeFinderSVGConverter::getDelegateFor(int col, EditingModes mode, QObject *parent, bool &outShowCol) const
 {
+    outShowCol = true;
+
     switch (mode)
     {
     case EditingModes::LabelEditing:
@@ -309,6 +315,12 @@ QAbstractItemDelegate *NodeFinderSVGConverter::getDelegateFor(int col, EditingMo
                                 IObjectModel::getTrackSideName(ssplib::Side::East)};
             return new ComboboxDelegate(list, parent);
         }
+        break;
+    }
+    case EditingModes::StationTrackEditing:
+    {
+        if(col == NodeFinderStationTracksModel::SpecialMixedColumn)
+            outShowCol = false; //Hide column to the user
         break;
     }
     case EditingModes::TrackPathEditing:
@@ -322,6 +334,7 @@ QAbstractItemDelegate *NodeFinderSVGConverter::getDelegateFor(int col, EditingMo
         if(col == NodeFinderTurnoutModel::StationTrackCol)
         {
             CompletionDelegate *delegate = new CompletionDelegate(tracksModel, parent);
+            delegate->setColumn(NodeFinderStationTracksModel::SpecialMixedColumn);
             return delegate;
         }
         break;
