@@ -21,6 +21,8 @@ public:
 
     void setModel(IObjectModel *m, const QString& text);
 
+    void setColumnVisible(int col, bool visible);
+
     void setDelegate(int col, QAbstractItemDelegate *delegate);
 
 private slots:
