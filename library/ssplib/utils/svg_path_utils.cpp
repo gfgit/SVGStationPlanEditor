@@ -697,6 +697,7 @@ bool utils::parseStrokeWidthRecursve(QDomElement &e, const QRectF &bounds, doubl
 bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
 {
     QTextStream stream(&outD);
+    stream.setRealNumberPrecision(9);
 
     const int count = path.elementCount();
 
@@ -718,13 +719,13 @@ bool utils::convertPathToSVG(const QPainterPath &path, QString &outD)
         case QPainterPath::CurveToElement:
         {
             //Start cubic, write first control point
-            stream << "C " << e.x << ' ' << e.x << ' ';
+            stream << "C " << e.x << ' ' << e.y << ' ';
             break;
         }
         case QPainterPath::CurveToDataElement:
         {
             //Write second control point or end point
-            stream << e.x << ' ' << e.x << ' ';
+            stream << e.x << ' ' << e.y << ' ';
             break;
         }
         }
