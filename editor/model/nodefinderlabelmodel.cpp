@@ -212,6 +212,8 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
     emit dataChanged(idx, idx);
     emit nodeMgr->repaintSVG();
 
+    emit labelsChanged();
+
     return true;
 }
 
@@ -284,6 +286,8 @@ bool NodeFinderLabelModel::addItem()
     m_plan->labels.append(item);
     endInsertRows();
 
+    emit labelsChanged();
+
     return true;
 }
 
@@ -309,6 +313,8 @@ bool NodeFinderLabelModel::removeItem(int row)
     beginRemoveRows(QModelIndex(), row, row);
     m_plan->labels.removeAt(row);
     endRemoveRows();
+
+    emit labelsChanged();
 
     return true;
 }

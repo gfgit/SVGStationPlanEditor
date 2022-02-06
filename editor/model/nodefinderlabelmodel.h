@@ -52,6 +52,9 @@ public:
 
     bool itemIsInXML(const ssplib::LabelItem &item) const;
 
+signals:
+    void labelsChanged();
+
 private:
     friend class NodeFinderSVGWidget;
 
