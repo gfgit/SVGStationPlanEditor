@@ -66,11 +66,15 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
             for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
             {
                 if(track.trackPos == item.info.stationTrackPos)
+                {
+                    if(track.trackName.isEmpty())
+                        break; //Fallback to position
                     return track.trackName;
+                }
             }
 
             //Fallback to track position
-            return item.info.stationTrackPos;
+            return QString("#%1").arg(item.info.stationTrackPos);
         }
         case StationTrackSideCol:
             return getTrackSideName(item.info.trackSide);
@@ -136,26 +140,13 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
 
     switch (role)
     {
-    case Qt::EditRole:
+    case Qt::DisplayRole:
     {
         switch (idx.column())
         {
         case StationTrackCol:
         {
-            if(value.type() == QVariant::Int)
-            {
-                bool ok = false;
-                int trk = value.toInt(&ok);
-                if(!ok || trk < 0 || trk > 255) //FIXME: max track?
-                    return false;
-
-                if(item.info.stationTrackPos == trk)
-                    return false;
-
-                //Set station track
-                item.info.stationTrackPos = trk;
-            }
-            else if(value.type() == QVariant::String)
+            if(value.type() == QVariant::String)
             {
                 QString name = value.toString();
                 if(name.isEmpty())
@@ -177,7 +168,36 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
                     return false;
                 }
 
+                //Set station track
                 item.info.stationTrackPos = pos;
+            }
+            else
+            {
+                return false;
+            }
+            break;
+        }
+        }
+        break;
+    }
+    case Qt::EditRole:
+    {
+        switch (idx.column())
+        {
+        case StationTrackCol:
+        {
+            if(value.type() == QVariant::Int)
+            {
+                bool ok = false;
+                int trk = value.toInt(&ok);
+                if(!ok || trk < 0 || trk > 255) //FIXME: max track?
+                    return false;
+
+                if(item.info.stationTrackPos == trk)
+                    return false;
+
+                //Set station track
+                item.info.stationTrackPos = trk;
             }
             else
             {
@@ -372,6 +392,14 @@ bool NodeFinderTurnoutModel::itemIsInXML(const ssplib::TrackConnectionItem &item
             return true;
     }
     return false;
+}
+
+void NodeFinderTurnoutModel::refreshData()
+{
+    //Tell view to refresh cells
+    QModelIndex first = index(0, 0);
+    QModelIndex last = index(m_plan->trackConnections.size() - 1, NCols - 1);
+    emit dataChanged(first, last);
 }
 
 bool NodeFinderTurnoutModel::addItem()

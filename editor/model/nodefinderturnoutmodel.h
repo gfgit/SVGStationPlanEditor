@@ -52,6 +52,9 @@ public:
 
     bool itemIsInXML(const ssplib::TrackConnectionItem &item) const;
 
+public slots:
+    void refreshData();
+
 private:
     friend class NodeFinderSVGWidget;
     NodeFinderMgr *nodeMgr;
