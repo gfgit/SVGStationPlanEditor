@@ -8,7 +8,7 @@ class QSvgRenderer;
 namespace ssplib {
 
 class StationPlan;
-class ItemBase;
+struct ItemBase;
 
 class SSPViewer : public QWidget
 {
