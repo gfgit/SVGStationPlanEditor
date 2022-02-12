@@ -29,6 +29,9 @@ public slots:
     void setZoom(int val);
     void zoomToFit();
 
+private: 
+    void loadSVG_internal(QIODevice *dev);
+
 private:
     Ui::MainWindow *ui;
     QScrollArea *scrollArea;

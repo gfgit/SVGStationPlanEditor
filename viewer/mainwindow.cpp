@@ -10,7 +10,12 @@
 #include <QDockWidget>
 
 #include <QFileDialog>
+
+#ifdef Q_OS_WASM
+#include <QBuffer>
+#else
 #include <QFile>
+#endif
 
 #include <QDebug>
 
@@ -82,6 +87,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadSVG()
 {
+#ifdef Q_OS_WASM
+    //Qt Wasm does not support standard filedialog to load client side files
+    QFileDialog::getOpenFileContent(QString("SVG (*.svg);;All Files (*)"), [this](const QString& fileName, const QByteArray& contents)
+    {
+        QByteArray copy = contents;
+        QBuffer buff(&copy);
+        buff.open(QIODevice::ReadOnly);
+        loadSVG_internal(&buff);
+    });
+#else
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
                                                     QString("SVG (*.svg);;All Files (*)"));
@@ -95,40 +110,8 @@ void MainWindow::loadSVG()
         return;
     }
 
-    ssplib::StreamParser parser(stationPlan, &f);
-    if(!parser.parse())
-    {
-        qDebug() << "Parsing error";
-        return;
-    }
-
-    f.reset();
-    QXmlStreamReader xml(&f);
-    if(!mSvg->load(&xml))
-    {
-        qDebug() << "SVG loading error";
-        return;
-    }
-
-    //Show everithing
-    for(ssplib::ItemBase& label : stationPlan->labels)
-    {
-        label.visible = true;
-    }
-    for(ssplib::ItemBase& track : stationPlan->platforms)
-    {
-        track.visible = true;
-    }
-    for(ssplib::ItemBase& track : stationPlan->trackConnections)
-    {
-        track.visible = true;
-    }
-    stationPlan->drawLabels = true;
-    stationPlan->drawTracks = true;
-    stationPlan->platformPenWidth = 2;
-
-    setZoom(100);
-    zoomToFit();
+    loadSVG_internal(&f);
+#endif
 }
 
 void MainWindow::setZoom(int val)
@@ -157,4 +140,42 @@ void MainWindow::zoomToFit()
 
     const int val = qMin(zoomH, zoomV);
     setZoom(val);
+}
+
+void MainWindow::loadSVG_internal(QIODevice *dev)
+{
+    ssplib::StreamParser parser(stationPlan, dev);
+    if(!parser.parse())
+    {
+        qDebug() << "Parsing error";
+        return;
+    }
+
+    dev->reset();
+    QXmlStreamReader xml(dev);
+    if(!mSvg->load(&xml))
+    {
+        qDebug() << "SVG loading error";
+        return;
+    }
+
+    //Show everithing
+    for(ssplib::ItemBase& label : stationPlan->labels)
+    {
+        label.visible = true;
+    }
+    for(ssplib::ItemBase& track : stationPlan->platforms)
+    {
+        track.visible = true;
+    }
+    for(ssplib::ItemBase& track : stationPlan->trackConnections)
+    {
+        track.visible = true;
+    }
+    stationPlan->drawLabels = true;
+    stationPlan->drawTracks = true;
+    stationPlan->platformPenWidth = 2;
+
+    setZoom(100);
+    zoomToFit();
 }
