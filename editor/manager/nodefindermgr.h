@@ -11,7 +11,7 @@
 #include "utils/nodefindereditingmodes.h"
 
 namespace ssplib {
-class ItemBase;
+struct ItemBase;
 class StationPlan;
 class EditingInfo;
 } // namespace ssplib
