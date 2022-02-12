@@ -70,6 +70,9 @@ target_link_libraries(
 # Set compiler definitions
 target_compile_definitions(${SSP_EDITOR_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS} -DSSPLIB_ENABLE_EDITING)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  add_qt_wasm_app(${SSP_VIEWER_TARGET})
+endif()
 
 ## Install and Deploy ##
 

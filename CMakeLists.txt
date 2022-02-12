@@ -40,6 +40,24 @@ set(SSP_PROJECT_DEFINITIONS ${SSP_PROJECT_DEFINITIONS} -DAPPVERSION="${PROJECT_V
 # Include our custom FindXXX moudules in '/cmake' subdirectory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    # Fix for emscripten not locating Qt5
+    # It doesn't detect Qt from just Qt5_DIR, instead it wants all Qt5{module}_DIR set
+    # Set MY_Qt5_CMAKE_DIR to your Qt5 cmake directory (e.g. /path/to/qt/5.15.2/wasm_32/lib/cmake)
+    if(NOT MY_Qt5_CMAKE_DIR)
+        set(MY_Qt5_CMAKE_DIR /home/filippo/Qt/5.15.2/wasm_32/lib/cmake)
+    endif()
+
+    file(GLOB files "${MY_Qt5_CMAKE_DIR}/*")
+    foreach(file ${files})
+        string(FIND ${file} "/" LAST_SLASH_POS REVERSE)
+        MATH(EXPR LAST_SLASH_POS "${LAST_SLASH_POS}+1")
+        string(SUBSTRING ${file} ${LAST_SLASH_POS} -1 MY_QT_DIR_NAME)
+
+        set(${MY_QT_DIR_NAME}_DIR ${file})
+    endforeach()
+endif()
+
 find_package(Qt5 REQUIRED
     COMPONENTS
     Core
@@ -79,6 +97,10 @@ else()
 endif()
 
 include(LocateWinDeployQt)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    include(QtWasmCMake)
+endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

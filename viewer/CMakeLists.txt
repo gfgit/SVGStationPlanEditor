@@ -64,6 +64,10 @@ target_link_libraries(
 # Set compiler definitions
 target_compile_definitions(${SSP_VIEWER_TARGET} PRIVATE ${SSP_PROJECT_DEFINITIONS})
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  add_qt_wasm_app(${SSP_VIEWER_TARGET})
+endif()
+
 ## Install and Deploy ##
 
 # Copy executable
