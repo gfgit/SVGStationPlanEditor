@@ -10,6 +10,7 @@
 
 add_subdirectory(manager)
 add_subdirectory(model)
+add_subdirectory(svg_creator)
 add_subdirectory(utils)
 add_subdirectory(view)
 
