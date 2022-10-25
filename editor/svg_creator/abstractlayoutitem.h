@@ -6,7 +6,7 @@
 #include <QString>
 
 class QXmlStreamWriter;
-
+class QGraphicsScene;
 
 class AbstractLayoutItem
 {
@@ -19,10 +19,10 @@ public:
     {
         QString name;
         QString description;
-        QStringList enumNames;
+        QVariant::Type type = QVariant::Invalid;
+        QStringList enumNames = {};
         double min = 0;
         double max = 0;
-        QVariant::Type type = QVariant::Invalid;
     };
 
     virtual QString itemType() = 0;
@@ -32,6 +32,8 @@ public:
     virtual QVariantMap getProperties() = 0;
 
     virtual bool setProperties(const QVariantMap& map) = 0;
+
+    virtual bool addToScene(QGraphicsScene *scene) = 0;
 
     virtual void writeSVGElements(QXmlStreamWriter& xml) = 0;
 };
