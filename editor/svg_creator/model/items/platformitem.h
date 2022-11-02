@@ -1,7 +1,7 @@
 #ifndef PLATFORMITEM_H
 #define PLATFORMITEM_H
 
-#include "abstractlayoutitem.h"
+#include "svg_creator/model/abstractlayoutitem.h"
 
 class QGraphicsLineItem;
 
