@@ -1,7 +1,15 @@
 #ifndef NODEFINDEREDITINGMODES_H
 #define NODEFINDEREDITINGMODES_H
 
-//Editing mode
+enum class ProgramMode
+{
+    NoMode = 0,
+    SVGCreationMode,
+    SVGMappingMode,
+    NModes
+};
+
+//Editing modes for SVGMapping
 enum class EditingModes
 {
     NoSVGLoaded = 0,

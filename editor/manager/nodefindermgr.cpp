@@ -222,9 +222,15 @@ bool NodeFinderMgr::loadXML(QIODevice *dev)
     return converter->loadXML(dev);
 }
 
-void NodeFinderMgr::clearXML()
+void NodeFinderMgr::clearXMLInEditor()
 {
     converter->clearXML();
+}
+
+void NodeFinderMgr::clearDocument()
+{
+    clearCurrentItem();
+    converter->clear();
 }
 
 ssplib::StationPlan *NodeFinderMgr::getStationPlan() const

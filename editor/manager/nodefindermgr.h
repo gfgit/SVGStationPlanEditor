@@ -44,7 +44,9 @@ public:
     bool saveSVG(QIODevice *dev);
 
     bool loadXML(QIODevice *dev);
-    void clearXML();
+    void clearXMLInEditor();
+
+    void clearDocument();
 
     //For NodeFinderSVGWidget
     inline NodeFinderSVGConverter *getConverter() const { return converter; }

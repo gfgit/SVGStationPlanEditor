@@ -6,6 +6,8 @@
 #include <QSpinBox>
 #include <QDockWidget>
 
+#include <QActionGroup>
+
 #include <QFileDialog>
 #include <QFile>
 
@@ -18,56 +20,26 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    zoom(0)
+    zoom(0),
+    m_progMode(ProgramMode::NModes)
 {
     ui->setupUi(this);
 
     nodeMgr = new NodeFinderMgr(this);
 
+    setupActions();
+
     scrollArea = new QScrollArea(this);
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setAlignment(Qt::AlignCenter);
     setCentralWidget(scrollArea);
+
+
     scrollArea->setWidget(nodeMgr->getCentralWidget(this));
-
-    zoomSlider = new QSlider(Qt::Horizontal, this);
-    zoomSlider->setRange(25, 400);
-    zoomSlider->setToolTip(tr("Zoom"));
-    connect(zoomSlider, &QSlider::valueChanged, this, &MainWindow::setZoom);
-    statusBar()->addPermanentWidget(zoomSlider);
-
-    zoomSpin = new QSpinBox(this);
-    zoomSpin->setRange(25, 400);
-    zoomSpin->setSuffix(QChar('%'));
-    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::setZoom);
-    statusBar()->addPermanentWidget(zoomSpin);
 
     statusBar()->addPermanentWidget(nodeMgr->getStatusWidget(this));
 
-    QMenu *fileMenu = new QMenu(tr("File"), this);
-    fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVG);
-    fileMenu->addAction(tr("Save SVG"), this, &MainWindow::saveConvertedSVG);
-    fileMenu->addAction(tr("Load XML"), this, &MainWindow::loadXML);
-    fileMenu->addAction(tr("Unload XML"), nodeMgr, &NodeFinderMgr::clearXML);
-    ui->menubar->addMenu(fileMenu);
-
-    QMenu *viewMenu = new QMenu(tr("View"), this);
-    viewMenu->addAction(tr("Zoom In"), this, [this](){ setZoom(zoom - zoom%25 + 25); });
-    viewMenu->addAction(tr("Zoom Out"), this, [this](){ setZoom(zoom - zoom%25 - 25); });
-    ui->menubar->addMenu(viewMenu);
-
-    auto addDockMode = [this, viewMenu](EditingModes mode)
-    {
-        QWidget *w = nodeMgr->getDockWidget(mode);
-        QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
-        dockWidget->setWidget(w);
-        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-        viewMenu->addAction(dockWidget->toggleViewAction());
-    };
-
-    addDockMode(EditingModes::LabelEditing);
-    addDockMode(EditingModes::StationTrackEditing);
-    addDockMode(EditingModes::TrackPathEditing);
+    setProgramMode(ProgramMode::NoMode);
 }
 
 MainWindow::~MainWindow()
@@ -75,7 +47,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::loadXML()
+void MainWindow::loadXMLInEditor()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
@@ -93,7 +65,7 @@ void MainWindow::loadXML()
     nodeMgr->loadXML(&f);
 }
 
-void MainWindow::loadSVG()
+void MainWindow::loadSVGInEditor()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
@@ -113,6 +85,7 @@ void MainWindow::loadSVG()
         QMessageBox::warning(this, tr("Loading Error"), tr("Could not load SVG from '%1'").arg(fileName));
     }
 
+    setProgramMode(ProgramMode::SVGMappingMode);
     setZoom(100);
 }
 
@@ -134,6 +107,13 @@ void MainWindow::saveConvertedSVG()
     nodeMgr->saveSVG(&f);
 }
 
+void MainWindow::clearDocument()
+{
+    nodeMgr->clearDocument();
+
+    setProgramMode(ProgramMode::NoMode);
+}
+
 void MainWindow::setZoom(int val)
 {
     if(val == zoom || val > 400 || val < 25)
@@ -146,4 +126,91 @@ void MainWindow::setZoom(int val)
     QSize s = scrollArea->widget()->sizeHint();
     s = s * zoom / 100;
     scrollArea->widget()->resize(s);
+}
+
+void MainWindow::setupActions()
+{
+    //Creator
+    QMenu *svgCreatorSubMenu = new QMenu(tr("Create SVG"));
+    svgCreatorSubMenu->addAction(tr("From XML File"));
+    svgCreatorSubMenu->addAction(tr("New Empty SVG"));
+
+    QAction *creatorSaveSVG_act = new QAction(tr("Save To SVG"), this);
+    m_creatorActions->addAction(creatorSaveSVG_act);
+
+    //Editor
+    QMenu *editorMenu = new QMenu(tr("Editor"), this);
+    editorMenu->addAction(tr("Load XML"), this, &MainWindow::loadXMLInEditor);
+    editorMenu->addAction(tr("Unload XML"), nodeMgr, &NodeFinderMgr::clearXMLInEditor);
+    m_editorActions->addAction(editorMenu->menuAction());
+    editorMenu->addSeparator();
+
+    auto addDockMode = [this, editorMenu](EditingModes mode)
+    {
+        QWidget *w = nodeMgr->getDockWidget(mode);
+        QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
+        dockWidget->setWidget(w);
+        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+        editorMenu->addAction(dockWidget->toggleViewAction());
+    };
+
+    addDockMode(EditingModes::LabelEditing);
+    addDockMode(EditingModes::StationTrackEditing);
+    addDockMode(EditingModes::TrackPathEditing);
+
+    QAction *editorSaveSVG_act = new QAction(tr("Save SVG"), this);
+    connect(editorSaveSVG_act, &QAction::triggered, this, &MainWindow::saveConvertedSVG);
+    m_editorActions->addAction(editorSaveSVG_act);
+
+    //File
+    QMenu *fileMenu = new QMenu(tr("File"), this);
+    fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVGInEditor);
+    fileMenu->addAction(editorSaveSVG_act);
+    fileMenu->addSeparator();
+    fileMenu->addMenu(svgCreatorSubMenu);
+    fileMenu->addAction(creatorSaveSVG_act);
+    fileMenu->addSeparator();
+    QAction *m_closeAction = fileMenu->addAction(tr("Close"), this, &MainWindow::clearDocument);
+
+    //View
+    zoomSlider = new QSlider(Qt::Horizontal, this);
+    zoomSlider->setRange(25, 400);
+    zoomSlider->setToolTip(tr("Zoom"));
+    connect(zoomSlider, &QSlider::valueChanged, this, &MainWindow::setZoom);
+    statusBar()->addPermanentWidget(zoomSlider);
+
+    zoomSpin = new QSpinBox(this);
+    zoomSpin->setRange(25, 400);
+    zoomSpin->setSuffix(QChar('%'));
+    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::setZoom);
+    statusBar()->addPermanentWidget(zoomSpin);
+
+    QMenu *viewMenu = new QMenu(tr("View"), this);
+    m_viewActions->addAction(viewMenu->addAction(tr("Zoom In"), this, [this](){ setZoom(zoom - zoom%25 + 25); }));
+    m_viewActions->addAction(viewMenu->addAction(tr("Zoom Out"), this, [this](){ setZoom(zoom - zoom%25 - 25); }));
+    m_viewActions->addAction(m_closeAction);
+
+    //Menubar
+    ui->menubar->addMenu(fileMenu);
+    ui->menubar->addMenu(editorMenu);
+    ui->menubar->addMenu(viewMenu);
+}
+
+void MainWindow::setProgramMode(ProgramMode mode)
+{
+    if(m_progMode == mode)
+        return;
+
+    m_progMode = mode;
+
+    const bool enableViewActions = m_progMode != ProgramMode::NoMode;
+    m_viewActions->setEnabled(enableViewActions);
+    zoomSlider->setEnabled(enableViewActions);
+    zoomSpin->setEnabled(enableViewActions);
+
+    const bool enableCreatorActions = m_progMode != ProgramMode::SVGCreationMode;
+    m_creatorActions->setEnabled(enableCreatorActions);
+
+    const bool enableEditorActions = m_progMode != ProgramMode::SVGMappingMode;
+    m_editorActions->setEnabled(enableEditorActions);
 }

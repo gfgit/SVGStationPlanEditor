@@ -3,11 +3,14 @@
 
 #include <QMainWindow>
 
+#include "utils/nodefindereditingmodes.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 class QScrollArea;
 class QSlider;
 class QSpinBox;
+class QActionGroup;
 QT_END_NAMESPACE
 
 class NodeFinderMgr;
@@ -21,10 +24,16 @@ public:
     ~MainWindow();
 
 public slots:
-    void loadXML();
-    void loadSVG();
+    void loadXMLInEditor();
+    void loadSVGInEditor();
     void saveConvertedSVG();
+    void clearDocument();
     void setZoom(int val);
+
+private:
+    void setupActions();
+
+    void setProgramMode(ProgramMode mode);
 
 private:
     Ui::MainWindow *ui;
@@ -32,6 +41,11 @@ private:
     QSlider *zoomSlider;
     QSpinBox *zoomSpin;
     int zoom;
+
+    ProgramMode m_progMode;
+    QActionGroup *m_viewActions;
+    QActionGroup *m_creatorActions;
+    QActionGroup *m_editorActions;
 
     NodeFinderMgr *nodeMgr;
 };
