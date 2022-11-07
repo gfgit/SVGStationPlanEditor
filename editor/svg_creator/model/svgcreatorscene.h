@@ -5,7 +5,9 @@
 
 #include <QVector>
 
-class QGraphicScene;
+class QIODevice;
+
+class QGraphicsScene;
 class QGraphicsRectItem;
 class QGraphicsSimpleTextItem;
 class QGraphicsLineItem;
@@ -33,6 +35,15 @@ struct GateItem
     QGraphicsSimpleTextItem *gateLabel;
     QGraphicsRectItem *gateStationRect;
     QChar gateLetter;
+
+    struct GateTrack
+    {
+        int number;
+        QGraphicsSimpleTextItem *trackLabelItem;
+        QGraphicsLineItem *trackLineItem;
+    };
+
+    QVector<GateTrack> outTracks;
 };
 
 class SvgCreatorScene : public QObject
@@ -41,10 +52,28 @@ class SvgCreatorScene : public QObject
 public:
     explicit SvgCreatorScene(QObject *parent = nullptr);
 
-private:
-    QGraphicScene *m_scene;
+    void clear();
+    bool loadStationXML(QIODevice *dev);
 
-    StationLabel *stLabel;
+    inline QGraphicsScene *getScene() const { return m_scene; }
+
+private slots:
+    void onSelectionChanged();
+
+    PlatformItem createPlatform(const QString& name, int num);
+    void movePlatformTo(PlatformItem& item, const QPointF& pos);
+
+    GateItem createGate(QChar name, int outTrackCnt);
+    void moveGateTo(GateItem& item, const QPointF& pos);
+
+private:
+    void createStLabel();
+
+private:
+    QGraphicsScene *m_scene;
+    QGraphicsRectItem *m_bkItem;
+
+    StationLabel stLabel;
 
     QVector<GateItem> gates;
     QVector<PlatformItem> platforms;
