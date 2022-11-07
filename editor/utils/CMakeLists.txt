@@ -12,5 +12,8 @@ set(SSP_EDITOR_SOURCES
   utils/pathutils.cpp
   utils/pathutils.h
 
+  utils/ieditor.cpp
+  utils/ieditor.h
+
   PARENT_SCOPE
 )
