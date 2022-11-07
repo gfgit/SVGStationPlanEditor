@@ -5,10 +5,10 @@
 
 class QGraphicsLineItem;
 
-class PlatformItem : public AbstractLayoutItem
+class PlatformLayoutItem : public AbstractLayoutItem
 {
 public:
-    PlatformItem();
+    PlatformLayoutItem();
 
     QString itemType() override;
 

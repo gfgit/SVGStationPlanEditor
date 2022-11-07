@@ -42,17 +42,17 @@ void writeSVGLine(QXmlStreamWriter &xml, const QLineF& l, const QXmlStreamAttrib
     xml.writeEndElement();
 }
 
-PlatformItem::PlatformItem()
+PlatformLayoutItem::PlatformLayoutItem()
 {
     platfLineItem = new QGraphicsLineItem;
 }
 
-QString PlatformItem::itemType()
+QString PlatformLayoutItem::itemType()
 {
     return QStringLiteral("Platform");
 }
 
-QVector<AbstractLayoutItem::PropertyDescr> PlatformItem::getPropertyDescriptors()
+QVector<AbstractLayoutItem::PropertyDescr> PlatformLayoutItem::getPropertyDescriptors()
 {
     QVector<PropertyDescr> vec;
 
@@ -83,7 +83,7 @@ QVector<AbstractLayoutItem::PropertyDescr> PlatformItem::getPropertyDescriptors(
     return vec;
 }
 
-QVariantMap PlatformItem::getProperties()
+QVariantMap PlatformLayoutItem::getProperties()
 {
     QVariantMap map;
     map.insert(NameProp, platfName);
@@ -92,7 +92,7 @@ QVariantMap PlatformItem::getProperties()
     return map;
 }
 
-bool PlatformItem::setProperties(const QVariantMap &map)
+bool PlatformLayoutItem::setProperties(const QVariantMap &map)
 {
     platfName = map.value(NameProp).toString();
     platfNum = map.value(NumberProp).toInt();
@@ -100,13 +100,13 @@ bool PlatformItem::setProperties(const QVariantMap &map)
     return true;
 }
 
-bool PlatformItem::addToScene(QGraphicsScene *scene)
+bool PlatformLayoutItem::addToScene(QGraphicsScene *scene)
 {
     scene->addItem(platfLineItem);
     return true;
 }
 
-void PlatformItem::writeSVGElements(QXmlStreamWriter &xml)
+void PlatformLayoutItem::writeSVGElements(QXmlStreamWriter &xml)
 {
     QXmlStreamAttributes attrs;
     attrs.append(SvgNameProp, platfName);
