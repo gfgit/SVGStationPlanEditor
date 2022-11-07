@@ -142,7 +142,7 @@ QString NodeFinderMgr::getModeName(EditingModes mode) const
 
 QWidget *NodeFinderMgr::getStatusWidget(QWidget *parent)
 {
-    if(statusWidget && statusWidget->parent() == parent)
+    if(statusWidget)
         return statusWidget;
 
     //Create a new one
@@ -152,7 +152,7 @@ QWidget *NodeFinderMgr::getStatusWidget(QWidget *parent)
 
 QWidget *NodeFinderMgr::getCentralWidget(QWidget *parent)
 {
-    if(centralWidget && centralWidget->parent() == parent)
+    if(centralWidget)
         return centralWidget;
 
     //Create a new one
