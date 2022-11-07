@@ -14,7 +14,7 @@
 #include <QFile>
 
 #include "manager/nodefindermgr.h"
-#include "svg_creator/model/svgcreatorscene.h"
+#include "svg_creator/svgcreatormanager.h"
 
 #include <QMessageBox>
 
@@ -31,7 +31,7 @@ EditorMainWindow::EditorMainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     nodeMgr = new NodeFinderMgr(this);
-    m_scene = new SvgCreatorScene(this);
+    svgCreator = new SvgCreatorManager(this);
 
     scrollArea = new QScrollArea(this);
     scrollArea->setBackgroundRole(QPalette::Dark);
@@ -42,7 +42,7 @@ EditorMainWindow::EditorMainWindow(QWidget *parent) :
     m_view->setBackgroundRole(QPalette::Dark);
     m_view->setAlignment(Qt::AlignCenter);
     m_view->hide();
-    m_view->setScene(m_scene->getScene());
+    m_view->setScene(svgCreator->getScene());
 
     setupActions();
     setProgramMode(ProgramMode::NoMode);
@@ -116,7 +116,7 @@ void EditorMainWindow::saveConvertedSVG()
 void EditorMainWindow::clearDocument()
 {
     nodeMgr->clearDocument();
-    m_scene->clear();
+    svgCreator->clear();
 
     setProgramMode(ProgramMode::NoMode);
 }
@@ -156,7 +156,7 @@ void EditorMainWindow::createSVGFromFile()
         return;
     }
 
-    if(!m_scene->loadStationXML(&f))
+    if(!svgCreator->loadStationXML(&f))
     {
 
     }

@@ -15,7 +15,7 @@ class QGraphicsView;
 QT_END_NAMESPACE
 
 class NodeFinderMgr;
-class SvgCreatorScene;
+class SvgCreatorManager;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -53,7 +53,7 @@ private:
     QActionGroup *m_editorActions;
 
     NodeFinderMgr *nodeMgr;
-    SvgCreatorScene *m_scene;
+    SvgCreatorManager *svgCreator;
     QWidget *extraStatusWidget;
 };
 #endif // MAINWINDOW_H
