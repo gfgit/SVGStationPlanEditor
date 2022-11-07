@@ -15,13 +15,13 @@ QT_END_NAMESPACE
 
 class NodeFinderMgr;
 
-class MainWindow : public QMainWindow
+class EditorMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    EditorMainWindow(QWidget *parent = nullptr);
+    ~EditorMainWindow();
 
 public slots:
     void loadXMLInEditor();

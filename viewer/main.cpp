@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationDisplayName(QLatin1String("SVG Station Plan Viewer"));
     QApplication a(argc, argv);
 
-    MainWindow w;
+    ViewerMainWindow w;
     w.show();
 
     return a.exec();

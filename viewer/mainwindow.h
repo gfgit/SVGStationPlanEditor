@@ -16,13 +16,13 @@ class SSPViewer;
 class StationPlan;
 } // namespace ssplib
 
-class MainWindow : public QMainWindow
+class ViewerMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ViewerMainWindow(QWidget *parent = nullptr);
+    ~ViewerMainWindow();
 
 public slots:
     void loadSVG();

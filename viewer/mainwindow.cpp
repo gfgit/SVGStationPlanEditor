@@ -14,7 +14,7 @@
 
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent) :
+ViewerMainWindow::ViewerMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     stationPlan(nullptr),
@@ -37,25 +37,25 @@ MainWindow::MainWindow(QWidget *parent) :
     zoomSlider = new QSlider(Qt::Horizontal, this);
     zoomSlider->setRange(25, 400);
     zoomSlider->setToolTip(tr("Zoom"));
-    connect(zoomSlider, &QSlider::valueChanged, this, &MainWindow::setZoom);
+    connect(zoomSlider, &QSlider::valueChanged, this, &ViewerMainWindow::setZoom);
     statusBar()->addPermanentWidget(zoomSlider);
 
     zoomSpin = new QSpinBox(this);
     zoomSpin->setRange(25, 400);
     zoomSpin->setSuffix(QChar('%'));
-    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::setZoom);
+    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &ViewerMainWindow::setZoom);
     statusBar()->addPermanentWidget(zoomSpin);
 
     //statusBar()->addPermanentWidget(nodeMgr->getStatusWidget(this));
 
     QMenu *fileMenu = new QMenu(tr("File"), this);
-    fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVG);
+    fileMenu->addAction(tr("Open SVG"), this, &ViewerMainWindow::loadSVG);
     ui->menubar->addMenu(fileMenu);
 
     QMenu *viewMenu = new QMenu(tr("View"), this);
     viewMenu->addAction(tr("Zoom In"), this, [this](){ setZoom(zoom - zoom%25 + 25); });
     viewMenu->addAction(tr("Zoom Out"), this, [this](){ setZoom(zoom - zoom%25 - 25); });
-    viewMenu->addAction(tr("Zoom Fit"), this, &MainWindow::zoomToFit);
+    viewMenu->addAction(tr("Zoom Fit"), this, &ViewerMainWindow::zoomToFit);
     ui->menubar->addMenu(viewMenu);
 
 //    auto addDockMode = [this, viewMenu](EditingModes mode)
@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    addDockMode(EditingModes::TrackPathEditing);
 }
 
-MainWindow::~MainWindow()
+ViewerMainWindow::~ViewerMainWindow()
 {
     delete ui;
 
@@ -80,7 +80,7 @@ MainWindow::~MainWindow()
     stationPlan = nullptr;
 }
 
-void MainWindow::loadSVG()
+void ViewerMainWindow::loadSVG()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
@@ -131,7 +131,7 @@ void MainWindow::loadSVG()
     zoomToFit();
 }
 
-void MainWindow::setZoom(int val)
+void ViewerMainWindow::setZoom(int val)
 {
     val = qBound(25, val, 400);
 
@@ -147,7 +147,7 @@ void MainWindow::setZoom(int val)
     scrollArea->widget()->resize(s);
 }
 
-void MainWindow::zoomToFit()
+void ViewerMainWindow::zoomToFit()
 {
     const QSize available = scrollArea->size();
     const QSize contents = scrollArea->widget()->sizeHint();

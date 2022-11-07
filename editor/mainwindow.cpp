@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent) :
+EditorMainWindow::EditorMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     zoom(0),
@@ -42,12 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
     setProgramMode(ProgramMode::NoMode);
 }
 
-MainWindow::~MainWindow()
+EditorMainWindow::~EditorMainWindow()
 {
     delete ui;
 }
 
-void MainWindow::loadXMLInEditor()
+void EditorMainWindow::loadXMLInEditor()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
@@ -65,7 +65,7 @@ void MainWindow::loadXMLInEditor()
     nodeMgr->loadXML(&f);
 }
 
-void MainWindow::loadSVGInEditor()
+void EditorMainWindow::loadSVGInEditor()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QString(), QString(),
@@ -89,7 +89,7 @@ void MainWindow::loadSVGInEditor()
     setZoom(100);
 }
 
-void MainWindow::saveConvertedSVG()
+void EditorMainWindow::saveConvertedSVG()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     QString(), QString(),
@@ -107,14 +107,14 @@ void MainWindow::saveConvertedSVG()
     nodeMgr->saveSVG(&f);
 }
 
-void MainWindow::clearDocument()
+void EditorMainWindow::clearDocument()
 {
     nodeMgr->clearDocument();
 
     setProgramMode(ProgramMode::NoMode);
 }
 
-void MainWindow::setZoom(int val)
+void EditorMainWindow::setZoom(int val)
 {
     if(val == zoom || val > 400 || val < 25)
         return;
@@ -128,7 +128,7 @@ void MainWindow::setZoom(int val)
     scrollArea->widget()->resize(s);
 }
 
-void MainWindow::setupActions()
+void EditorMainWindow::setupActions()
 {
     //Creator
     QMenu *svgCreatorSubMenu = new QMenu(tr("Create SVG"));
@@ -140,7 +140,7 @@ void MainWindow::setupActions()
 
     //Editor
     QMenu *editorMenu = new QMenu(tr("Editor"), this);
-    editorMenu->addAction(tr("Load XML"), this, &MainWindow::loadXMLInEditor);
+    editorMenu->addAction(tr("Load XML"), this, &EditorMainWindow::loadXMLInEditor);
     editorMenu->addAction(tr("Unload XML"), nodeMgr, &NodeFinderMgr::clearXMLInEditor);
     m_editorActions->addAction(editorMenu->menuAction());
     editorMenu->addSeparator();
@@ -159,30 +159,30 @@ void MainWindow::setupActions()
     addDockMode(EditingModes::TrackPathEditing);
 
     QAction *editorSaveSVG_act = new QAction(tr("Save SVG"), this);
-    connect(editorSaveSVG_act, &QAction::triggered, this, &MainWindow::saveConvertedSVG);
+    connect(editorSaveSVG_act, &QAction::triggered, this, &EditorMainWindow::saveConvertedSVG);
     m_editorActions->addAction(editorSaveSVG_act);
 
     //File
     QMenu *fileMenu = new QMenu(tr("File"), this);
-    fileMenu->addAction(tr("Open SVG"), this, &MainWindow::loadSVGInEditor);
+    fileMenu->addAction(tr("Open SVG"), this, &EditorMainWindow::loadSVGInEditor);
     fileMenu->addAction(editorSaveSVG_act);
     fileMenu->addSeparator();
     fileMenu->addMenu(svgCreatorSubMenu);
     fileMenu->addAction(creatorSaveSVG_act);
     fileMenu->addSeparator();
-    QAction *m_closeAction = fileMenu->addAction(tr("Close"), this, &MainWindow::clearDocument);
+    QAction *m_closeAction = fileMenu->addAction(tr("Close"), this, &EditorMainWindow::clearDocument);
 
     //View
     zoomSlider = new QSlider(Qt::Horizontal, this);
     zoomSlider->setRange(25, 400);
     zoomSlider->setToolTip(tr("Zoom"));
-    connect(zoomSlider, &QSlider::valueChanged, this, &MainWindow::setZoom);
+    connect(zoomSlider, &QSlider::valueChanged, this, &EditorMainWindow::setZoom);
     statusBar()->addPermanentWidget(zoomSlider);
 
     zoomSpin = new QSpinBox(this);
     zoomSpin->setRange(25, 400);
     zoomSpin->setSuffix(QChar('%'));
-    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::setZoom);
+    connect(zoomSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &EditorMainWindow::setZoom);
     statusBar()->addPermanentWidget(zoomSpin);
 
     QMenu *viewMenu = new QMenu(tr("View"), this);
@@ -196,7 +196,7 @@ void MainWindow::setupActions()
     ui->menubar->addMenu(viewMenu);
 }
 
-void MainWindow::setProgramMode(ProgramMode mode)
+void EditorMainWindow::setProgramMode(ProgramMode mode)
 {
     if(m_progMode == mode)
         return;
