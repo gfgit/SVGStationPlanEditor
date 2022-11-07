@@ -1,82 +1,32 @@
 #ifndef SVGCREATORSCENE_H
 #define SVGCREATORSCENE_H
 
-#include <QObject>
+#include <QGraphicsScene>
 
-#include <QVector>
+class SvgCreatorManager;
 
-class QIODevice;
-
-class QGraphicsScene;
-class QGraphicsRectItem;
-class QGraphicsSimpleTextItem;
-class QGraphicsLineItem;
-
-struct StationLabel
-{
-    QGraphicsSimpleTextItem *text = nullptr;
-    QGraphicsRectItem *bgRect = nullptr;
-    QString stationName;
-};
-
-struct PlatformItem
-{
-    QGraphicsLineItem *left = nullptr;
-    QGraphicsLineItem *right = nullptr;
-    QGraphicsRectItem *nameBgRect = nullptr;
-    QGraphicsSimpleTextItem *nameText = nullptr;
-    QGraphicsRectItem *platfEndRect = nullptr;
-    QString platfName;
-    int platfNum;
-};
-
-struct GateItem
-{
-    QGraphicsSimpleTextItem *gateLabel;
-    QGraphicsRectItem *gateStationRect;
-    QChar gateLetter;
-
-    struct GateTrack
-    {
-        int number;
-        QGraphicsSimpleTextItem *trackLabelItem;
-        QGraphicsLineItem *trackLineItem;
-    };
-
-    QVector<GateTrack> outTracks;
-};
-
-class SvgCreatorScene : public QObject
+class SvgCreatorScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit SvgCreatorScene(QObject *parent = nullptr);
+    explicit SvgCreatorScene(SvgCreatorManager *mgr, QObject *parent = nullptr);
 
-    void clear();
-    bool loadStationXML(QIODevice *dev);
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *ev) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *ev) override;
 
-    inline QGraphicsScene *getScene() const { return m_scene; }
-
-private slots:
-    void onSelectionChanged();
-
-    PlatformItem createPlatform(const QString& name, int num);
-    void movePlatformTo(PlatformItem& item, const QPointF& pos);
-
-    GateItem createGate(QChar name, int outTrackCnt);
-    void moveGateTo(GateItem& item, const QPointF& pos);
+    void drawBackground(QPainter *painter, const QRectF &rect) override;
+    void drawForeground(QPainter *painter, const QRectF &rect) override;
 
 private:
-    void createStLabel();
+    SvgCreatorManager *manager;
 
-private:
-    QGraphicsScene *m_scene;
-    QGraphicsRectItem *m_bkItem;
-
-    StationLabel stLabel;
-
-    QVector<GateItem> gates;
-    QVector<PlatformItem> platforms;
+    bool isDrawingLine = false;
+    QPointF lineStart;
+    QPointF lineEnd;
+    QPointF lineRoundedEnd;
 };
 
 #endif // SVGCREATORSCENE_H

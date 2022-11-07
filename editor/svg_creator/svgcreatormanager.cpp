@@ -1,7 +1,7 @@
 #include "svgcreatormanager.h"
 
 #include <QGraphicsItem>
-#include <QGraphicsScene>
+#include "model/svgcreatorscene.h"
 
 #include "ssplib/parsing/stationinfoparser.h"
 #include "ssplib/stationplan.h"
@@ -11,7 +11,7 @@
 SvgCreatorManager::SvgCreatorManager(QObject *parent) :
     QObject{parent}
 {
-    m_scene = new QGraphicsScene(this);
+    m_scene = new SvgCreatorScene(this);
 }
 
 void SvgCreatorManager::clear()
@@ -208,8 +208,6 @@ GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
 
 void SvgCreatorManager::moveGateTo(GateItem &item, const QPointF &pos)
 {
-    qDebug() << "Moveing Gate" << item.gateLetter;
-
     QRectF br = item.gateStationRect->rect();
     br.moveCenter(pos);
     item.gateStationRect->setRect(br);

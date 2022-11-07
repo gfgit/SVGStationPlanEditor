@@ -48,8 +48,6 @@ struct GateItem
     QVector<GateTrack> outTracks;
 };
 
-class SvgCreatorScene;
-
 class SvgCreatorManager : public QObject
 {
     Q_OBJECT
@@ -71,7 +69,8 @@ private:
     void createStLabel();
 
 private:
-    QGraphicsScene *m_scene;
+    friend class SvgCreatorScene;
+    SvgCreatorScene *m_scene;
 
     StationLabel stLabel;
 
