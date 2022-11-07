@@ -66,8 +66,6 @@ bool StationInfoReader::parse()
         }
     }
 
-    parseStation();
-
     if(xml.hasError())
     {
         qWarning() << "XML Error:" << xml.lineNumber() << xml.columnNumber() << xml.errorString();
