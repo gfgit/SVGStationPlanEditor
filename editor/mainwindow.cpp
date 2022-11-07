@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 
 #include <QScrollArea>
+#include <QGraphicsView>
+
 #include <QSlider>
 #include <QSpinBox>
 #include <QDockWidget>
@@ -12,6 +14,7 @@
 #include <QFile>
 
 #include "manager/nodefindermgr.h"
+#include "svg_creator/model/svgcreatorscene.h"
 
 #include <QMessageBox>
 
@@ -20,25 +23,28 @@
 EditorMainWindow::EditorMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    m_view(nullptr),
     zoom(0),
-    m_progMode(ProgramMode::NModes)
+    m_progMode(ProgramMode::NModes),
+    extraStatusWidget(nullptr)
 {
     ui->setupUi(this);
 
     nodeMgr = new NodeFinderMgr(this);
-
-    setupActions();
+    m_scene = new SvgCreatorScene(this);
 
     scrollArea = new QScrollArea(this);
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setAlignment(Qt::AlignCenter);
     setCentralWidget(scrollArea);
 
+    m_view = new QGraphicsView(this);
+    m_view->setBackgroundRole(QPalette::Dark);
+    m_view->setAlignment(Qt::AlignCenter);
+    m_view->hide();
+    m_view->setScene(m_scene->getScene());
 
-    scrollArea->setWidget(nodeMgr->getCentralWidget(this));
-
-    statusBar()->addPermanentWidget(nodeMgr->getStatusWidget(this));
-
+    setupActions();
     setProgramMode(ProgramMode::NoMode);
 }
 
@@ -110,6 +116,7 @@ void EditorMainWindow::saveConvertedSVG()
 void EditorMainWindow::clearDocument()
 {
     nodeMgr->clearDocument();
+    m_scene->clear();
 
     setProgramMode(ProgramMode::NoMode);
 }
@@ -123,16 +130,49 @@ void EditorMainWindow::setZoom(int val)
     zoomSlider->setValue(zoom);
     zoomSpin->setValue(zoom);
 
-    QSize s = scrollArea->widget()->sizeHint();
-    s = s * zoom / 100;
-    scrollArea->widget()->resize(s);
+    QWidget *contentWidget = scrollArea->widget();
+    if(contentWidget)
+    {
+        QSizeF s = contentWidget->sizeHint();
+        s = s * double(zoom) / 100.0;
+        contentWidget->resize(s.toSize());
+    }
+
+    m_view->setTransform(QTransform::fromScale(val / 100.0, val / 100.0));
+}
+
+void EditorMainWindow::createSVGFromFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    QString(), QString(),
+                                                    QString("XML (*.xml);;All Files (*)"));
+    if(fileName.isEmpty())
+        return;
+
+    QFile f(fileName);
+    if(!f.open(QFile::ReadOnly))
+    {
+        qDebug() << f.errorString();
+        return;
+    }
+
+    if(!m_scene->loadStationXML(&f))
+    {
+
+    }
+
+    setProgramMode(ProgramMode::SVGCreationMode);
 }
 
 void EditorMainWindow::setupActions()
 {
+    m_viewActions = new QActionGroup(this);
+    m_creatorActions = new QActionGroup(this);
+    m_editorActions = new QActionGroup(this);
+
     //Creator
     QMenu *svgCreatorSubMenu = new QMenu(tr("Create SVG"));
-    svgCreatorSubMenu->addAction(tr("From XML File"));
+    svgCreatorSubMenu->addAction(tr("From XML File"), this, &EditorMainWindow::createSVGFromFile);
     svgCreatorSubMenu->addAction(tr("New Empty SVG"));
 
     QAction *creatorSaveSVG_act = new QAction(tr("Save To SVG"), this);
@@ -154,9 +194,9 @@ void EditorMainWindow::setupActions()
         editorMenu->addAction(dockWidget->toggleViewAction());
     };
 
-    addDockMode(EditingModes::LabelEditing);
-    addDockMode(EditingModes::StationTrackEditing);
-    addDockMode(EditingModes::TrackPathEditing);
+    //addDockMode(EditingModes::LabelEditing);
+    //addDockMode(EditingModes::StationTrackEditing);
+    //addDockMode(EditingModes::TrackPathEditing);
 
     QAction *editorSaveSVG_act = new QAction(tr("Save SVG"), this);
     connect(editorSaveSVG_act, &QAction::triggered, this, &EditorMainWindow::saveConvertedSVG);
@@ -208,9 +248,50 @@ void EditorMainWindow::setProgramMode(ProgramMode mode)
     zoomSlider->setEnabled(enableViewActions);
     zoomSpin->setEnabled(enableViewActions);
 
-    const bool enableCreatorActions = m_progMode != ProgramMode::SVGCreationMode;
+    const bool enableCreatorActions = m_progMode == ProgramMode::SVGCreationMode;
     m_creatorActions->setEnabled(enableCreatorActions);
 
-    const bool enableEditorActions = m_progMode != ProgramMode::SVGMappingMode;
+    const bool enableEditorActions = m_progMode == ProgramMode::SVGMappingMode;
     m_editorActions->setEnabled(enableEditorActions);
+
+    QWidget *currentWidget = scrollArea->takeWidget();
+    if(currentWidget)
+    {
+        currentWidget->setParent(this);
+        currentWidget->hide();
+    }
+
+    currentWidget = centralWidget();
+    if(currentWidget)
+    {
+        takeCentralWidget();
+        currentWidget->hide();
+    }
+
+    if(extraStatusWidget)
+    {
+        statusBar()->removeWidget(extraStatusWidget);
+        extraStatusWidget->hide();
+        extraStatusWidget = nullptr;
+    }
+
+    if(enableEditorActions)
+    {
+        setCentralWidget(scrollArea);
+        scrollArea->show();
+
+        currentWidget = nodeMgr->getCentralWidget(this);
+        scrollArea->setWidget(currentWidget);
+
+        extraStatusWidget = nodeMgr->getStatusWidget(this);
+        statusBar()->addPermanentWidget(extraStatusWidget);
+        extraStatusWidget->show();
+    }
+    else if(enableCreatorActions)
+    {
+        setCentralWidget(m_view);
+        m_view->show();
+    }
+
+    setZoom(100);
 }

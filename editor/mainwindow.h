@@ -11,9 +11,11 @@ class QScrollArea;
 class QSlider;
 class QSpinBox;
 class QActionGroup;
+class QGraphicsView;
 QT_END_NAMESPACE
 
 class NodeFinderMgr;
+class SvgCreatorScene;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -30,6 +32,8 @@ public slots:
     void clearDocument();
     void setZoom(int val);
 
+    void createSVGFromFile();
+
 private:
     void setupActions();
 
@@ -38,6 +42,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QScrollArea *scrollArea;
+    QGraphicsView *m_view;
     QSlider *zoomSlider;
     QSpinBox *zoomSpin;
     int zoom;
@@ -48,5 +53,7 @@ private:
     QActionGroup *m_editorActions;
 
     NodeFinderMgr *nodeMgr;
+    SvgCreatorScene *m_scene;
+    QWidget *extraStatusWidget;
 };
 #endif // MAINWINDOW_H
