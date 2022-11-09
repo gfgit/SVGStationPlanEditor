@@ -114,7 +114,7 @@ void SvgCreatorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
         if(ev->modifiers().testFlag(Qt::ControlModifier))
         {
             //Round angle to 45 degrees
-            QLineF line(lineStart, lineEnd);
+            QLineF line(lineStartSnapped, lineEnd);
             const double angle = line.angle();
             double roundedAngle = qRound(angle / 45.0) * 45;
             line.setAngle(roundedAngle);
