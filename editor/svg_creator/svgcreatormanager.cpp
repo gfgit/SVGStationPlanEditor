@@ -138,35 +138,38 @@ PlatformItem SvgCreatorManager::createPlatform(const QString &name, int num)
     item.platfNum = num;
 
     QRectF sr = m_scene->sceneRect();
-    item.left = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
+    item.lineItem = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
 
     item.nameBgRect = m_scene->addRect(QRectF(), QPen(), Qt::lightGray);
     item.nameText = m_scene->addSimpleText(item.platfName, font);
     item.nameText->setBrush(Qt::red);
 
+    item.group = m_scene->createItemGroup({item.nameText, item.nameBgRect, item.lineItem});
+    item.group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+
     //Center text horizontally
     QRectF br = item.nameText->boundingRect();
 
-    br.moveCenter(item.left->pos() + item.left->line().center());
+    br.moveCenter(item.lineItem->pos() + item.lineItem->line().center());
     item.nameText->setPos(br.topLeft());
 
     br.adjust(-3, -3, 3, 3);
     item.nameBgRect->setRect(br);
 
     item.nameBgRect->setZValue(item.nameText->zValue() - 1);
-    item.left->setZValue(item.nameBgRect->zValue() - 1);
+    item.lineItem->setZValue(item.nameBgRect->zValue() - 1);
 
     return item;
 }
 
 void SvgCreatorManager::movePlatformTo(PlatformItem &item, const QPointF &pos)
 {
-    item.left->setPos(pos);
+    item.lineItem->setPos(pos);
 
     //Center text horizontally
     QRectF br = item.nameText->boundingRect();
 
-    br.moveCenter(item.left->pos() + item.left->line().center());
+    br.moveCenter(item.lineItem->pos() + item.lineItem->line().center());
     item.nameText->setPos(br.topLeft());
 
     br.adjust(-3, -3, 3, 3);
@@ -192,6 +195,8 @@ GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
 
     item.gateLabel = m_scene->addSimpleText(item.gateLetter, letterFont);
     item.gateStationRect = m_scene->addRect(labelRect, QPen(), Qt::lightGray);
+    item.group = m_scene->createItemGroup({item.gateLabel, item.gateStationRect});
+    item.group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 
     for(int i = 0; i < outTrackCnt; i++)
     {
@@ -200,6 +205,9 @@ GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
         track.trackLabelItem = m_scene->addSimpleText(QString::number(track.number), numberFont);
         track.trackLineItem = m_scene->addLine(GateTrackLine);
         track.trackLineItem->setPen(linePen);
+
+        item.group->addToGroup(track.trackLabelItem);
+        item.group->addToGroup(track.trackLineItem);
 
         item.outTracks.append(track);
     }
@@ -250,11 +258,24 @@ void SvgCreatorManager::createStLabel()
 {
     QFont font(QStringLiteral("sans-serif"), 20, QFont::Bold);
 
+    if(!stLabel.group)
+    {
+        stLabel.group = new QGraphicsItemGroup;
+        stLabel.group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+        m_scene->addItem(stLabel.group);
+    }
+
     if (!stLabel.bgRect)
+    {
         stLabel.bgRect = m_scene->addRect(QRectF(), QPen(), Qt::gray);
+        stLabel.group->addToGroup(stLabel.bgRect);
+    }
 
     if (!stLabel.text)
+    {
         stLabel.text = m_scene->addSimpleText(QString(), font);
+        stLabel.group->addToGroup(stLabel.text);
+    }
 
     stLabel.text->setText(stLabel.stationName);
     stLabel.bgRect->setZValue(stLabel.text->zValue() - 1);
@@ -273,4 +294,5 @@ void SvgCreatorManager::createStLabel()
 void SvgCreatorManager::addTrackConnection(const TrackConnectionItem &item)
 {
     trackConnections.append(item);
+    item.lineItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 }

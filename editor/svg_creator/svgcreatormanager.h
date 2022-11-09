@@ -10,12 +10,14 @@ class QIODevice;
 class QGraphicsScene;
 class SvgCreatorScene;
 
+class QGraphicsItemGroup;
 class QGraphicsRectItem;
 class QGraphicsSimpleTextItem;
 class QGraphicsLineItem;
 
 struct StationLabel
 {
+    QGraphicsItemGroup *group = nullptr;
     QGraphicsSimpleTextItem *text = nullptr;
     QGraphicsRectItem *bgRect = nullptr;
     QString stationName;
@@ -23,26 +25,27 @@ struct StationLabel
 
 struct PlatformItem
 {
-    QGraphicsLineItem *left = nullptr;
-    QGraphicsLineItem *right = nullptr;
+    QGraphicsItemGroup *group = nullptr;
+    QGraphicsLineItem *lineItem = nullptr;
     QGraphicsRectItem *nameBgRect = nullptr;
     QGraphicsSimpleTextItem *nameText = nullptr;
-    QGraphicsRectItem *platfEndRect = nullptr;
+
     QString platfName;
-    int platfNum;
+    int platfNum = -1;
 };
 
 struct GateItem
 {
-    QGraphicsSimpleTextItem *gateLabel;
-    QGraphicsRectItem *gateStationRect;
+    QGraphicsItemGroup *group = nullptr;
+    QGraphicsSimpleTextItem *gateLabel = nullptr;
+    QGraphicsRectItem *gateStationRect = nullptr;
     QChar gateLetter;
 
     struct GateTrack
     {
-        int number;
-        QGraphicsSimpleTextItem *trackLabelItem;
-        QGraphicsLineItem *trackLineItem;
+        int number = -1;
+        QGraphicsSimpleTextItem *trackLabelItem = nullptr;
+        QGraphicsLineItem *trackLineItem = nullptr;
     };
 
     QVector<GateTrack> outTracks;
@@ -51,16 +54,16 @@ struct GateItem
 struct TrackConnection
 {
     QChar gateLetter;
-    int gateTrackNumber;
+    int gateTrackNumber = -1;
     QString platfName;
-    int platfNumber;
-    bool plaftWestSide;
+    int platfNumber = -1;
+    bool plaftWestSide = false;
 };
 
 struct TrackConnectionItem
 {
     QVector<TrackConnection> connections;
-    QGraphicsLineItem *lineItem;
+    QGraphicsLineItem *lineItem = nullptr;
 };
 
 class SvgCreatorManager : public QObject
