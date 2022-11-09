@@ -19,69 +19,93 @@ SvgCreatorScene::SvgCreatorScene(SvgCreatorManager *mgr, QObject *parent) :
 
 void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
 {
-    QGraphicsItem *item = itemAt(ev->scenePos(), QTransform());
-    if(!item)
-        return;
-
     int idx = -1;
-    for(int i = 0; i < manager->trackConnections.size(); i++)
+    QGraphicsItem *item = itemAt(ev->scenePos(), QTransform());
+
+    if(item)
     {
-        if(manager->trackConnections.at(i).lineItem == item)
+        //Find track connection
+        for(int i = 0; i < manager->trackConnections.size(); i++)
         {
-            idx = i;
-            break;
+            if(manager->trackConnections.at(i).lineItem == item)
+            {
+                idx = i;
+                break;
+            }
         }
     }
-
-    if(idx == -1)
-        return;
 
     ev->accept();
 
     QMenu menu(ev->widget());
-    QAction *deleteItem = menu.addAction(tr("Delete Item"));
+    QAction *deleteItemAction = nullptr;
+    if(idx != -1)
+    {
+        //There's an item selected
+        deleteItemAction = menu.addAction(tr("Delete Item"));
+        menu.addSeparator();
+    }
+
+    QAction *enableDrawLineAction = menu.addAction(tr("Draw Tracks"));
+    enableDrawLineAction->setCheckable(true);
+    enableDrawLineAction->setChecked(m_toolMode == ToolMode::DrawTracks);
 
     QAction *chosenAction = menu.exec(ev->screenPos());
-    if(chosenAction == deleteItem)
+    if(deleteItemAction && chosenAction == deleteItemAction)
     {
         manager->trackConnections.removeAt(idx);
         removeItem(item);
         delete item;
         update();
     }
+
+    m_toolMode = enableDrawLineAction->isChecked() ? ToolMode::DrawTracks : ToolMode::MoveItems;
 }
 
 void SvgCreatorScene::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 {
-    if(isDrawingLine)
+    if(m_toolMode == ToolMode::DrawTracks)
     {
-        isDrawingLine = false;
+        ev->accept();
 
-        if(ev->button() == Qt::LeftButton)
+        if(isDrawingLine)
         {
-            addTrackConnection(QLineF(lineStartSnapped, lineRoundedEnd));
+            //End current floating line
+            isDrawingLine = false;
+
+            if(ev->button() == Qt::LeftButton)
+            {
+                //Apply line with left button, cancel with right click
+                addTrackConnection(QLineF(lineStartSnapped, lineRoundedEnd));
+            }
+
+            lineStart = lineEnd = lineStartSnapped = lineRoundedEnd = QPointF();
+            update();
+            return;
         }
+        else if(ev->button() == Qt::LeftButton)
+        {
+            //Start drawing a new line
+            isDrawingLine = true;
+            lineStart = lineEnd = lineRoundedEnd = ev->scenePos();
 
-        lineStart = lineEnd = lineStartSnapped = lineRoundedEnd = QPointF();
-        update();
+            lineStartSnapped = lineStart;
+            if(!ev->modifiers().testFlag(Qt::ShiftModifier))
+                snapToPoint(lineStartSnapped, lineStart);
+
+            update();
+            return;
+        }
     }
-    else if(ev->button() == Qt::LeftButton)
-    {
-        isDrawingLine = true;
-        lineStart = lineEnd = lineRoundedEnd = ev->scenePos();
 
-        lineStartSnapped = lineStart;
-        if(!ev->modifiers().testFlag(Qt::ShiftModifier))
-            snapToPoint(lineStartSnapped, lineStart);
-
-        update();
-    }
+    QGraphicsScene::mousePressEvent(ev);
 }
 
 void SvgCreatorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
 {
-    if(isDrawingLine)
+    if(m_toolMode == ToolMode::DrawTracks && isDrawingLine)
     {
+        ev->accept();
         lineEnd = ev->scenePos();
 
         //Use exact mouse pos
@@ -104,7 +128,10 @@ void SvgCreatorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *ev)
         }
 
         update();
+        return;
     }
+
+    QGraphicsScene::mouseMoveEvent(ev);
 }
 
 void SvgCreatorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *ev)

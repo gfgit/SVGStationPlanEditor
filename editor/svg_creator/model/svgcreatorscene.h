@@ -9,6 +9,13 @@ class SvgCreatorScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
+    enum class ToolMode
+    {
+        MoveItems = 0,
+        DrawTracks,
+        NTools
+    };
+
     explicit SvgCreatorScene(SvgCreatorManager *mgr, QObject *parent = nullptr);
 
 protected:
@@ -28,6 +35,8 @@ private:
 
 private:
     SvgCreatorManager *manager;
+
+    ToolMode m_toolMode = ToolMode::DrawTracks;
 
     bool isDrawingLine = false;
     QPointF lineStart;
