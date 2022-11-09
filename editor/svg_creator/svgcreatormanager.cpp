@@ -28,9 +28,8 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 {
     ssplib::StationPlan plan;
     ssplib::StationInfoReader reader(&plan, dev);
-    if (!reader.parse()) {
+    if (!reader.parse())
         return false;
-    }
 
     clear();
 
@@ -46,8 +45,6 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
                      sceneRect.top() + sceneRect.height() * 0.2,
                      sceneRect.width() / 3,
                      sceneRect.height() * 0.7);
-
-    m_scene->addRect(platfArea, QPen(), Qt::green)->setZValue(-4);
 
     const double platfDistance = platfArea.height() / plan.platforms.size();
     QPointF platfPos = platfArea.topLeft();
@@ -88,8 +85,6 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
                     sceneRect.top() + sceneRect.height() * 0.15,
                     sceneRect.width() / 7,
                     sceneRect.height() * 0.8);
-
-    m_scene->addRect(gateArea, QPen(), Qt::yellow)->setZValue(-4);
 
     const double westGateDistance = gateArea.height() / westGateCount;
     const double eastGateDistance = gateArea.height() / eastGateCount;
