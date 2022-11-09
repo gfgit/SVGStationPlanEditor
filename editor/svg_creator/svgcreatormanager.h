@@ -48,6 +48,21 @@ struct GateItem
     QVector<GateTrack> outTracks;
 };
 
+struct TrackConnection
+{
+    QChar gateLetter;
+    int gateTrackNumber;
+    QString platfName;
+    int platfNumber;
+    bool plaftWestSide;
+};
+
+struct TrackConnectionItem
+{
+    QVector<TrackConnection> connections;
+    QGraphicsLineItem *lineItem;
+};
+
 class SvgCreatorManager : public QObject
 {
     Q_OBJECT
@@ -68,6 +83,8 @@ private:
 
     void createStLabel();
 
+    void addTrackConnection(const TrackConnectionItem& item);
+
 private:
     friend class SvgCreatorScene;
     SvgCreatorScene *m_scene;
@@ -76,6 +93,7 @@ private:
 
     QVector<GateItem> gates;
     QVector<PlatformItem> platforms;
+    QVector<TrackConnectionItem> trackConnections;
 };
 
 #endif // SVGCREATORMANAGER_H

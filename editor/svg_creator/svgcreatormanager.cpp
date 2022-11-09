@@ -19,6 +19,7 @@ void SvgCreatorManager::clear()
     stLabel = StationLabel();
     gates.clear();
     platforms.clear();
+    trackConnections.clear();
 
     m_scene->clear();
 }
@@ -267,4 +268,9 @@ void SvgCreatorManager::createStLabel()
 
     br.adjust(-5, -5, 5, 5);
     stLabel.bgRect->setRect(br);
+}
+
+void SvgCreatorManager::addTrackConnection(const TrackConnectionItem &item)
+{
+    trackConnections.append(item);
 }
