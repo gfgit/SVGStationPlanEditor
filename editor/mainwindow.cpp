@@ -39,6 +39,7 @@ EditorMainWindow::EditorMainWindow(QWidget *parent) :
     setCentralWidget(scrollArea);
 
     m_view = new QGraphicsView(this);
+    m_view->setMouseTracking(true);
     m_view->setBackgroundRole(QPalette::Dark);
     m_view->setAlignment(Qt::AlignCenter);
     m_view->hide();
