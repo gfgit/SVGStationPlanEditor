@@ -33,7 +33,7 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     clear();
 
-    QRectF sceneRect(QPointF(), QSizeF(1000, 500));
+    QRectF sceneRect(QPointF(), QSizeF(1500, 500));
     m_scene->setSceneRect(sceneRect);
 
     stLabel.stationName = plan.stationName;
