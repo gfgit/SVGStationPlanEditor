@@ -164,21 +164,76 @@ void SvgCreatorScene::drawForeground(QPainter *painter, const QRectF &rect)
     }
 }
 
+inline QLineF mapLineToScene(QGraphicsLineItem *item)
+{
+    return QLineF(item->mapToScene(item->line().p1()),
+                  item->mapToScene(item->line().p2()));
+}
+
 void SvgCreatorScene::addTrackConnection(const QLineF &line)
 {
     QPen pen(Qt::darkBlue, 5);
     pen.setCapStyle(Qt::RoundCap);
 
-    TrackConnectionItem item;
-    item.lineItem = addLine(line, pen);
+    QVector<TrackConnectionItem> itemsToAdd;
 
-    manager->addTrackConnection(item);
-}
+    QLineF remainingLine = line;
 
-inline QLineF mapLineToScene(QGraphicsLineItem *item)
-{
-    return QLineF(item->mapToScene(item->line().p1()),
-                  item->mapToScene(item->line().p2()));
+    //Check collisions
+    for(TrackConnectionItem& other : manager->trackConnections)
+    {
+        if(remainingLine.isNull())
+            break;
+
+        const QLineF otherLine = mapLineToScene(other.lineItem);
+
+        QPointF intersection;
+        QLineF::IntersectionType res = otherLine.intersects(remainingLine, &intersection);
+        if(res != QLineF::BoundedIntersection)
+            continue;
+
+        //Split
+        const bool isOtherEdge = (qFuzzyCompare(intersection.x(), otherLine.x1()) &&
+                                  qFuzzyCompare(intersection.y(), otherLine.y1())) ||
+                                 (qFuzzyCompare(intersection.x(), otherLine.x2()) &&
+                                  qFuzzyCompare(intersection.y(), otherLine.y2()));
+        if(!isOtherEdge)
+        {
+            TrackConnectionItem otherCopy;
+            otherCopy.connections = other.connections;
+            otherCopy.lineItem = addLine(QLineF(otherLine.p1(), intersection), other.lineItem->pen());
+
+            QLineF otherRemaining(other.lineItem->mapFromScene(intersection),
+                                  other.lineItem->line().p2());
+            other.lineItem->setLine(otherRemaining);
+            itemsToAdd.append(otherCopy);
+        }
+
+        const bool isOurEdge = (qFuzzyCompare(intersection.x(), remainingLine.x1()) &&
+                                qFuzzyCompare(intersection.y(), remainingLine.y1())) ||
+                               (qFuzzyCompare(intersection.x(), remainingLine.x2()) &&
+                                qFuzzyCompare(intersection.y(), remainingLine.y2()));
+        if(!isOurEdge)
+        {
+            TrackConnectionItem track;
+            track.lineItem = addLine(QLineF(remainingLine.p1(), intersection), pen);
+            itemsToAdd.append(track);
+
+            //Cut first part
+            remainingLine.setP1(intersection);
+        }
+    }
+
+    if(!remainingLine.isNull())
+    {
+        //Add last part
+        TrackConnectionItem track;
+        track.lineItem = addLine(remainingLine, pen);
+        itemsToAdd.append(track);
+    }
+
+    for(const auto &item : itemsToAdd)
+        manager->addTrackConnection(item);
 }
 
 bool SvgCreatorScene::snapToPoint(QPointF &pos, const QPointF& startPos)
