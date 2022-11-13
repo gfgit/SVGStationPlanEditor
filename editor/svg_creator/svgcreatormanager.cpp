@@ -453,18 +453,25 @@ void SvgTrackItemSplitter::calculateIntersections()
         if(m_item == &other)
             continue; //Skip ourselves
 
-        const QLineF otherLine = mapLineToScene(other.lineItem, other.lineItem->line());
+        Entry entry;
+        entry.otherItem = &other;
+        entry.otherLine = mapLineToScene(other.lineItem, other.lineItem->line());
 
-        QPointF intersection;
-        QLineF::IntersectionType res = otherLine.intersects(remainingLine, &intersection);
+        QLineF::IntersectionType res = entry.otherLine.intersects(remainingLine, &entry.intersection);
         if(res != QLineF::BoundedIntersection)
             continue;
 
-        Entry entry;
-        entry.otherItem = &other;
-        entry.otherLine = otherLine;
-        entry.intersection = intersection;
-        entry.distance = (originalLine.p1() - intersection).manhattanLength();
+        entry.distance = (originalLine.p1() - entry.intersection).manhattanLength();
+
+        const bool isOurEdge = (remainingLine.p1() == entry.intersection) ||
+                               (remainingLine.p2() == entry.intersection);
+
+        const bool isOtherEdge = (entry.otherLine.p1() == entry.intersection) ||
+                               (entry.otherLine.p2() == entry.intersection);
+
+        if(isOurEdge && isOtherEdge)
+            continue; //Skip because item are simply concatenated, no split needed
+
         m_intersections.append(entry);
     }
 
