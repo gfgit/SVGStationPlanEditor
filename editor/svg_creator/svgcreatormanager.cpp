@@ -393,7 +393,7 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
         QLineF segment(remainingLine.p1(), entry.intersection);
         if(isLastSegment && isOurEdge)
             segment = remainingLine; //Last segment with edge takes all remaining line
-        remainingLine.setP1(entry.intersection);
+        remainingLine.setP1(segment.p2());
 
         if(segment.p1() == originalLine.p1())
         {
