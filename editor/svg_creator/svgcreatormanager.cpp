@@ -344,7 +344,12 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
     if(skip)
     {
         currentIndex++;
-        return !isLastSegment;
+
+        if(isLastSegment)
+            return false; //We split last one
+
+        drawIntersection();
+        return true;
     }
 
     auto scene = static_cast<SvgCreatorScene*>(manager->getScene());
