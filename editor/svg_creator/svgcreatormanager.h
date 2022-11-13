@@ -128,7 +128,7 @@ private:
 
 private:
     SvgCreatorManager *manager;
-    TrackConnectionItem *m_item;
+    int m_itemRefIdx;
 
     struct Entry
     {
