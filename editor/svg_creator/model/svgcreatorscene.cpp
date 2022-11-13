@@ -272,8 +272,6 @@ bool SvgCreatorScene::snapToPoint(QPointF &pos, const QPointF& startPos)
         //Give up snapping, try extending line to intersect
         nearestDistance = -1;
         QLineF currentLine(startPos, pos);
-        if(currentLine.isNull())
-            return false; //No line to extend
 
         for(auto item : list)
         {
@@ -285,7 +283,23 @@ bool SvgCreatorScene::snapToPoint(QPointF &pos, const QPointF& startPos)
             QLineF otherLine = mapLineToScene(line);
 
             QPointF intersection;
-            QLineF::IntersectionType res = currentLine.intersects(otherLine, &intersection);
+            QLineF::IntersectionType res = QLineF::NoIntersection;
+
+            if(currentLine.isNull())
+            {
+                //Null line, set perpendicular direction, then calculate
+                //Perpendicular line has inverted slope
+                const double x2 = startPos.x() + otherLine.dy();
+                const double y2 = startPos.y() - otherLine.dx();
+                QLineF perpendicular = currentLine;
+                perpendicular.setP2(QPointF(x2, y2));
+                res = perpendicular.intersects(otherLine, &intersection);
+            }
+            else
+            {
+                res = currentLine.intersects(otherLine, &intersection);
+            }
+
             if(res == QLineF::NoIntersection)
                 continue;
 
