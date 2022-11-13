@@ -77,24 +77,27 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
     enableDrawLineAction->setChecked(m_toolMode == ToolMode::DrawTracks);
 
     QAction *chosenAction = menu.exec(ev->screenPos());
+
+    //Reset highlight
+    if(auto line = qgraphicsitem_cast<QGraphicsLineItem *>(item))
+    {
+        line->setPen(originalPen);
+    }
+
+    //Apply mode
+    m_toolMode = enableDrawLineAction->isChecked() ? ToolMode::DrawTracks : ToolMode::MoveItems;
+
     if(deleteItemAction && chosenAction == deleteItemAction)
     {
         manager->trackConnections.removeAt(idx);
         removeItem(item);
         delete item;
         update();
+        return;
     }
     else if(splitTrackAction && chosenAction == splitTrackAction)
     {
         emit manager->splitTrackRequested(&manager->trackConnections[idx]);
-    }
-
-    m_toolMode = enableDrawLineAction->isChecked() ? ToolMode::DrawTracks : ToolMode::MoveItems;
-
-    //Reset highlight
-    if(auto line = qgraphicsitem_cast<QGraphicsLineItem *>(item))
-    {
-        line->setPen(originalPen);
     }
 }
 
