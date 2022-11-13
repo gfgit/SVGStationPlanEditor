@@ -23,6 +23,7 @@ public:
 
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *ev) override;
+    void keyPressEvent(QKeyEvent *ev) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *ev) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *ev) override;
@@ -35,6 +36,8 @@ private:
     void addTrackConnection(const QLineF& line);
 
     bool snapToPoint(QPointF &pos, const QPointF &startPos);
+
+    void endCurrentLineDrawing(bool store);
 
 private:
     SvgCreatorManager *manager;

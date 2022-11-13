@@ -6,6 +6,8 @@
 #include <QPainter>
 
 #include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
+
 #include <QGraphicsLineItem>
 
 #include <QDebug>
@@ -76,6 +78,17 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
     m_toolMode = enableDrawLineAction->isChecked() ? ToolMode::DrawTracks : ToolMode::MoveItems;
 }
 
+void SvgCreatorScene::keyPressEvent(QKeyEvent *ev)
+{
+    if(isDrawingLine && ev->matches(QKeySequence::Cancel))
+    {
+        endCurrentLineDrawing(false);
+        return;
+    }
+
+    QGraphicsScene::keyPressEvent(ev);
+}
+
 void SvgCreatorScene::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 {
     if(m_toolMode == ToolMode::DrawTracks)
@@ -84,17 +97,7 @@ void SvgCreatorScene::mousePressEvent(QGraphicsSceneMouseEvent *ev)
 
         if(isDrawingLine)
         {
-            //End current floating line
-            isDrawingLine = false;
-
-            if(ev->button() == Qt::LeftButton)
-            {
-                //Apply line with left button, cancel with right click
-                addTrackConnection(QLineF(lineStartSnapped, lineRoundedEnd));
-            }
-
-            lineStart = lineEnd = lineStartSnapped = lineRoundedEnd = QPointF();
-            update();
+            endCurrentLineDrawing(ev->button() == Qt::LeftButton);
             return;
         }
         else if(ev->button() == Qt::LeftButton)
@@ -289,4 +292,22 @@ bool SvgCreatorScene::snapToPoint(QPointF &pos, const QPointF& startPos)
 
     pos = nearestCandidate;
     return true;
+}
+
+void SvgCreatorScene::endCurrentLineDrawing(bool store)
+{
+    if(!isDrawingLine)
+        return;
+
+    //End current floating line
+    isDrawingLine = false;
+
+    if(store)
+    {
+        //Apply line with left button, cancel with right click
+        addTrackConnection(QLineF(lineStartSnapped, lineRoundedEnd));
+    }
+
+    lineStart = lineEnd = lineStartSnapped = lineRoundedEnd = QPointF();
+    update();
 }
