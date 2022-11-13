@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include <QVector>
+#include <QLineF>
 
 class QIODevice;
 
@@ -77,6 +78,9 @@ public:
 
     QGraphicsScene *getScene() const;
 
+signals:
+    void splitTrackRequested(TrackConnectionItem *item, bool silent = false);
+
 private:
     PlatformItem createPlatform(const QString& name, int num);
     void movePlatformTo(PlatformItem& item, const QPointF& pos);
@@ -89,6 +93,7 @@ private:
     void addTrackConnection(const TrackConnectionItem& item);
 
 private:
+    friend class SvgTrackItemSplitter;
     friend class SvgCreatorScene;
     SvgCreatorScene *m_scene;
 
@@ -97,6 +102,46 @@ private:
     QVector<GateItem> gates;
     QVector<PlatformItem> platforms;
     QVector<TrackConnectionItem> trackConnections;
+};
+
+class SvgTrackItemSplitter
+{
+public:
+    SvgTrackItemSplitter(SvgCreatorManager *mgr);
+    ~SvgTrackItemSplitter();
+
+    void setItem(TrackConnectionItem *item);
+
+    inline int getIntersectionCount() const { return m_intersections.size(); }
+
+    int getCurrentIndex() const { return currentIndex; }
+
+    QPointF getCurrentPoint() const;
+
+    bool applyIntersection(bool skip = false);
+
+    void clearOverlay();
+
+private:
+    void calculateIntersections();
+    void drawIntersection();
+
+private:
+    SvgCreatorManager *manager;
+    TrackConnectionItem *m_item;
+
+    struct Entry
+    {
+        TrackConnectionItem *otherItem;
+        QLineF otherLine;
+        QPointF intersection;
+        double distance;
+    };
+    QVector<Entry> m_intersections;
+
+    QLineF originalLine;
+    QLineF remainingLine;
+    int currentIndex;
 };
 
 #endif // SVGCREATORMANAGER_H

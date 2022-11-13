@@ -32,6 +32,7 @@ EditorMainWindow::EditorMainWindow(QWidget *parent) :
 
     nodeMgr = new NodeFinderMgr(this);
     svgCreator = new SvgCreatorManager(this);
+    connect(svgCreator, &SvgCreatorManager::splitTrackRequested, this, &EditorMainWindow::execSplit);
 
     scrollArea = new QScrollArea(this);
     scrollArea->setBackgroundRole(QPalette::Dark);
@@ -163,6 +164,52 @@ void EditorMainWindow::createSVGFromFile()
     }
 
     setProgramMode(ProgramMode::SVGCreationMode);
+}
+
+void EditorMainWindow::execSplit(TrackConnectionItem *item, bool silent)
+{
+    SvgTrackItemSplitter splitter(svgCreator);
+    splitter.setItem(item);
+
+    if(splitter.getIntersectionCount() == 0)
+    {
+        if(!silent)
+        {
+            //Tell the user
+            QMessageBox::information(this, tr("Track Split"),
+                                     tr("Selected track has no intersections to split."));
+        }
+        return;
+    }
+
+    bool skip = false;
+
+    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    msgBox->setIcon(QMessageBox::Question);
+    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->addButton(tr("Split"), QMessageBox::YesRole);
+    msgBox->addButton(tr("Skip"), QMessageBox::NoRole);
+
+    QString text = tr("Split intersection (%2/%1).\n"
+                      "To make a diamond crossing press Skip.\n"
+                      "To make a tournout or double-slip switch press Split.")
+                       .arg(splitter.getIntersectionCount());
+
+    do {
+        msgBox->setText(text.arg(splitter.getCurrentIndex() + 1)); //Make 1-based index
+        msgBox->exec();
+        if(!msgBox)
+            break;
+
+        if(msgBox->standardButton(msgBox->clickedButton()) == QMessageBox::Cancel)
+            break;
+
+        int role = msgBox->buttonRole(msgBox->clickedButton());
+        skip = (role == QMessageBox::NoRole);
+    }
+    while(splitter.applyIntersection(skip));
+
+    delete msgBox;
 }
 
 void EditorMainWindow::setupActions()

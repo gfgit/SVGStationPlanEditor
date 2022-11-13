@@ -291,3 +291,178 @@ void SvgCreatorManager::addTrackConnection(const TrackConnectionItem &item)
     trackConnections.append(item);
     item.lineItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 }
+
+SvgTrackItemSplitter::SvgTrackItemSplitter(SvgCreatorManager *mgr) :
+    manager(mgr),
+    m_item(nullptr),
+    currentIndex(-1)
+{
+
+}
+
+SvgTrackItemSplitter::~SvgTrackItemSplitter()
+{
+    clearOverlay();
+}
+
+inline QLineF mapLineToScene(QGraphicsItem *item, const QLineF& l)
+{
+    return QLineF(item->mapToScene(l.p1()),
+                  item->mapToScene(l.p2()));
+}
+
+inline QLineF mapLineFromScene(QGraphicsItem *item, const QLineF& l)
+{
+    return QLineF(item->mapFromScene(l.p1()),
+                  item->mapFromScene(l.p2()));
+}
+
+void SvgTrackItemSplitter::setItem(TrackConnectionItem *item)
+{
+    m_item = item;
+    calculateIntersections();
+}
+
+QPointF SvgTrackItemSplitter::getCurrentPoint() const
+{
+    if(currentIndex < m_intersections.size())
+        return m_intersections.at(currentIndex).intersection;
+    return QPointF();
+}
+
+bool SvgTrackItemSplitter::applyIntersection(bool skip)
+{
+    if(currentIndex >= m_intersections.size())
+        return false;
+
+    if(skip)
+    {
+        currentIndex++;
+        return true;
+    }
+
+    auto scene = static_cast<SvgCreatorScene*>(manager->getScene());
+    const Entry& entry = m_intersections.at(currentIndex);
+
+    //Split
+    const bool isOtherEdge = (entry.otherLine.p1() == entry.intersection) ||
+                             (entry.otherLine.p2() == entry.intersection);
+    if(!isOtherEdge)
+    {
+        TrackConnectionItem otherSplit;
+        otherSplit.connections = entry.otherItem->connections;
+        otherSplit.lineItem = scene->addLine(QLineF(entry.otherLine.p1(), entry.intersection),
+                                            entry.otherItem->lineItem->pen());
+
+        QLineF otherRemaining(entry.intersection, entry.otherLine.p2());
+        entry.otherItem->lineItem->setLine(mapLineFromScene(entry.otherItem->lineItem, otherRemaining));
+
+        manager->addTrackConnection(otherSplit);
+    }
+
+    const bool isOurEdge = (remainingLine.p1() == entry.intersection) ||
+                           (remainingLine.p2() == entry.intersection);
+
+    const bool isLastSegment = currentIndex == m_intersections.size() - 1;
+
+    if(!isOurEdge || (isLastSegment && !remainingLine.isNull()))
+    {
+        QLineF segment(remainingLine.p1(), entry.intersection);
+        if(isLastSegment && !isOurEdge)
+            segment = remainingLine;
+        remainingLine.setP1(entry.intersection);
+
+        if(segment.p1() == originalLine.p1())
+        {
+            //Assign first segment to original item
+            QLineF segmentMapped = mapLineFromScene(m_item->lineItem, segment);
+            m_item->lineItem->setLine(segmentMapped);
+        }
+        else
+        {
+            TrackConnectionItem ourSplit;
+            ourSplit.connections = m_item->connections;
+            ourSplit.lineItem = scene->addLine(segment, m_item->lineItem->pen());
+            manager->addTrackConnection(ourSplit);
+        }
+    }
+
+    if(!remainingLine.isNull())
+    {
+        TrackConnectionItem ourSplit;
+        ourSplit.connections = m_item->connections;
+        ourSplit.lineItem = scene->addLine(remainingLine, m_item->lineItem->pen());
+        manager->addTrackConnection(ourSplit);
+    }
+
+    //Increment index
+    currentIndex++;
+
+    if(isLastSegment)
+        return false; //We split last one
+
+    drawIntersection();
+    return true;
+}
+
+void SvgTrackItemSplitter::clearOverlay()
+{
+    static_cast<SvgCreatorScene*>(manager->getScene())->clearOverlayLines();
+}
+
+void SvgTrackItemSplitter::calculateIntersections()
+{
+    m_intersections.clear();
+    originalLine = remainingLine = QLineF();
+    currentIndex = -1;
+
+    if(!m_item)
+        return;
+
+    originalLine = mapLineToScene(m_item->lineItem, m_item->lineItem->line());
+    remainingLine = originalLine;
+
+    //Check collisions
+    for(TrackConnectionItem& other : manager->trackConnections)
+    {
+        if(m_item == &other)
+            continue; //Skip ourselves
+
+        const QLineF otherLine = mapLineToScene(other.lineItem, other.lineItem->line());
+
+        QPointF intersection;
+        QLineF::IntersectionType res = otherLine.intersects(remainingLine, &intersection);
+        if(res != QLineF::BoundedIntersection)
+            continue;
+
+        Entry entry;
+        entry.otherItem = &other;
+        entry.otherLine = otherLine;
+        entry.intersection = intersection;
+        entry.distance = (originalLine.p1() - intersection).manhattanLength();
+        m_intersections.append(entry);
+    }
+
+
+
+    if(m_intersections.size())
+    {
+        //Sort by distance from start point
+        std::sort(m_intersections.begin(), m_intersections.end(),
+                  [](const Entry& lhs, const Entry& rhs)
+                  {
+                      return lhs.distance < rhs.distance;
+                  });
+
+        currentIndex = 0;
+        drawIntersection();
+    }
+}
+
+void SvgTrackItemSplitter::drawIntersection()
+{
+    auto scene = static_cast<SvgCreatorScene*>(manager->getScene());
+    const Entry& entry = m_intersections.at(currentIndex);
+
+    scene->setOverlayLines(remainingLine, entry.otherLine);
+}

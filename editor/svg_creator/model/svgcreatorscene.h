@@ -18,6 +18,9 @@ public:
 
     explicit SvgCreatorScene(SvgCreatorManager *mgr, QObject *parent = nullptr);
 
+    void setOverlayLines(const QLineF& lineA, const QLineF& lineB);
+    void clearOverlayLines();
+
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *ev) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *ev) override;
@@ -43,6 +46,10 @@ private:
     QPointF lineEnd;
     QPointF lineStartSnapped;
     QPointF lineRoundedEnd;
+
+    QLineF overlayLineA;
+    QLineF overlayLineB;
+    bool hasOverlayLines = false;
 };
 
 #endif // SVGCREATORSCENE_H

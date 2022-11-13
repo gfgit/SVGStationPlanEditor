@@ -16,6 +16,7 @@ QT_END_NAMESPACE
 
 class NodeFinderMgr;
 class SvgCreatorManager;
+class TrackConnectionItem;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -33,6 +34,8 @@ public slots:
     void setZoom(int val);
 
     void createSVGFromFile();
+
+    void execSplit(TrackConnectionItem *item, bool silent);
 
 private:
     void setupActions();
