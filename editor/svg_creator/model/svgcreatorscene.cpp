@@ -37,9 +37,17 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
 {
     int idx = -1;
     QGraphicsItem *item = itemAt(ev->scenePos(), QTransform());
+    QPen originalPen;
 
     if(item)
     {
+        if(auto line = qgraphicsitem_cast<QGraphicsLineItem *>(item))
+        {
+            //Highlight item
+            originalPen = line->pen();
+            line->setPen(QPen(Qt::red, originalPen.widthF() * 1.2));
+        }
+
         //Find track connection
         for(int i = 0; i < manager->trackConnections.size(); i++)
         {
@@ -55,10 +63,12 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
 
     QMenu menu(ev->widget());
     QAction *deleteItemAction = nullptr;
+    QAction *splitTrackAction = nullptr;
     if(idx != -1)
     {
         //There's an item selected
         deleteItemAction = menu.addAction(tr("Delete Item"));
+        splitTrackAction = menu.addAction(tr("Split Track"));
         menu.addSeparator();
     }
 
@@ -74,8 +84,18 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
         delete item;
         update();
     }
+    else if(splitTrackAction && chosenAction == splitTrackAction)
+    {
+        emit manager->splitTrackRequested(&manager->trackConnections[idx]);
+    }
 
     m_toolMode = enableDrawLineAction->isChecked() ? ToolMode::DrawTracks : ToolMode::MoveItems;
+
+    //Reset highlight
+    if(auto line = qgraphicsitem_cast<QGraphicsLineItem *>(item))
+    {
+        line->setPen(originalPen);
+    }
 }
 
 void SvgCreatorScene::keyPressEvent(QKeyEvent *ev)
