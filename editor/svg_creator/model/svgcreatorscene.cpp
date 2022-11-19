@@ -1,5 +1,6 @@
 #include "svgcreatorscene.h"
 #include "svg_creator/svgcreatormanager.h"
+#include "svgconnectionsmodel.h"
 
 #include <QMenu>
 
@@ -16,7 +17,7 @@ SvgCreatorScene::SvgCreatorScene(SvgCreatorManager *mgr, QObject *parent) :
     QGraphicsScene(parent),
     manager(mgr)
 {
-
+    connModel = new SvgConnectionsModel(this);
 }
 
 void SvgCreatorScene::setOverlayLines(const QLineF &lineA, const QLineF &lineB)
@@ -76,6 +77,9 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
     enableDrawLineAction->setCheckable(true);
     enableDrawLineAction->setChecked(m_toolMode == ToolMode::DrawTracks);
 
+    menu.addSeparator();
+    QAction *autoDiscoverConnections = menu.addAction(tr("Discover connections"));
+
     QAction *chosenAction = menu.exec(ev->screenPos());
 
     //Reset highlight
@@ -98,6 +102,10 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
     else if(splitTrackAction && chosenAction == splitTrackAction)
     {
         emit manager->splitTrackRequested(manager->trackConnections[idx]);
+    }
+    else if(chosenAction == autoDiscoverConnections)
+    {
+        discoverConnections();
     }
 }
 
@@ -368,4 +376,139 @@ void SvgCreatorScene::endCurrentLineDrawing(bool store)
 
     lineStart = lineEnd = lineStartSnapped = lineRoundedEnd = QPointF();
     update();
+}
+
+inline QLineF mapLineToScene(QGraphicsItem *item, const QLineF& l)
+{
+    return QLineF(item->mapToScene(l.p1()),
+                  item->mapToScene(l.p2()));
+}
+
+void SvgCreatorScene::discoverConnections()
+{
+    if(manager->platforms.isEmpty())
+        return;
+
+    QVector<GateConnectionData> vec;
+    for(const PlatformItem* platform : qAsConst(manager->platforms))
+    {
+        discoverPlatform(platform, vec);
+    }
+
+    connModel->setConnections(vec);
+}
+
+void SvgCreatorScene::discoverPlatform(const PlatformItem *platform, QVector<GateConnectionData> &vec)
+{
+    QLineF platfLine = mapLineToScene(platform->lineItem, platform->lineItem->line());
+
+    GateConnectionData platformData;
+    platformData.platfName = platform->platfName;
+    platformData.platfNum = platform->platfNum;
+    platformData.items.append(platform->lineItem);
+    platformData.westSide = platfLine.x2() < platfLine.x1();
+
+    discoverRecursive(platform->lineItem, platfLine, platformData, vec);
+
+    //Now start from opposite side
+    platfLine = QLineF(platfLine.p2(), platfLine.p1());
+    platformData.westSide = !platformData.westSide;
+    discoverRecursive(platform->lineItem, platfLine, platformData, vec);
+}
+
+void SvgCreatorScene::discoverRecursive(QGraphicsLineItem *prevItem, const QLineF& prevLine, const GateConnectionData &prevData,
+                                        QVector<GateConnectionData> &vec)
+{
+    const int MAX_DEPTH = 100;
+
+    const double MAX_DISTANCE = 15;
+    QRectF toleranceRect(QPointF(), QSize(MAX_DISTANCE, MAX_DISTANCE));
+    toleranceRect.moveCenter(prevLine.p2());
+    auto list = items(toleranceRect, Qt::IntersectsItemShape);
+
+    QLineF currentLine;
+
+    QGraphicsLineItem *lineItem = nullptr;
+    for(auto item : list)
+    {
+        if(item == prevItem)
+            continue; //Skip ourselves
+
+        lineItem = qgraphicsitem_cast<QGraphicsLineItem *>(item);
+        if(!lineItem)
+            continue;
+
+        GraphicsItemType type = GraphicsItemType(lineItem->data(GraphicsItemTypeKey).toInt());
+        if(type == GraphicsItemType::Platform)
+        {
+            //Cannot go back inside other platform
+            continue;
+        }
+
+        if(type == GraphicsItemType::GateTrack)
+        {
+            //Good, we found a gate. Register it.
+            bool found = false;
+            for(const GateItem* gate : qAsConst(manager->gates))
+            {
+                //TODO: set gate letter in item data
+                for(auto track : gate->outTracks)
+                {
+                    if(track.trackLineItem == lineItem)
+                    {
+                        GateConnectionData gateData = prevData;
+                        gateData.gateLetter = gate->gateLetter;
+                        gateData.gateTrackNum = track.number;
+                        gateData.items.append(lineItem);
+                        vec.append(gateData);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found)
+                    break;
+            }
+            continue;
+        }
+
+        if(type != GraphicsItemType::ConnectionTrack)
+            continue; //Not a connection track
+
+        if(prevData.items.size() > MAX_DEPTH)
+            continue; //Do not scan child items
+
+        //Found a connection track
+        currentLine = mapLineToScene(lineItem, lineItem->line());
+
+        const double distanceP1 = (prevLine.p2() - currentLine.p1()).manhattanLength();
+        const double distanceP2 = (prevLine.p2() - currentLine.p2()).manhattanLength();
+
+        if(distanceP1 > distanceP2)
+        {
+            //Travelled in opposite direction
+            //Invert segment so P1 is always the start
+            currentLine = QLineF(currentLine.p2(), currentLine.p1());
+        }
+
+        const double angle = qMin(prevLine.angleTo(currentLine), currentLine.angleTo(prevLine));
+        if(angle > 90)
+            continue; //Do not tollerate curves sharper than 90 degrees
+
+        if(prevData.items.contains(lineItem))
+        {
+            qWarning() << "Cycle detected, skipping";
+            continue;
+        }
+
+        GateConnectionData childData = prevData;
+        childData.items.append(lineItem);
+
+        discoverRecursive(lineItem, currentLine, childData, vec);
+    }
+}
+
+SvgConnectionsModel *SvgCreatorScene::getConnModel() const
+{
+    return connModel;
 }

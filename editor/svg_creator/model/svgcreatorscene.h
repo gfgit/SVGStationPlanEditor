@@ -4,6 +4,9 @@
 #include <QGraphicsScene>
 
 class SvgCreatorManager;
+class SvgConnectionsModel;
+class PlatformItem;
+class GateConnectionData;
 
 class SvgCreatorScene : public QGraphicsScene
 {
@@ -20,6 +23,8 @@ public:
 
     void setOverlayLines(const QLineF& lineA, const QLineF& lineB);
     void clearOverlayLines();
+
+    SvgConnectionsModel *getConnModel() const;
 
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *ev) override;
@@ -39,8 +44,14 @@ private:
 
     void endCurrentLineDrawing(bool store);
 
+    void discoverConnections();
+    void discoverPlatform(const PlatformItem *platform, QVector<GateConnectionData> &vec);
+    void discoverRecursive(QGraphicsLineItem *prevItem, const QLineF& prevLine, const GateConnectionData &prevData,
+                           QVector<GateConnectionData> &vec);
+
 private:
     SvgCreatorManager *manager;
+    SvgConnectionsModel *connModel;
 
     ToolMode m_toolMode = ToolMode::DrawTracks;
 
