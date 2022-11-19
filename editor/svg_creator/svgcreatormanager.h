@@ -91,6 +91,8 @@ public:
 
     QGraphicsScene *getScene() const;
 
+    QAbstractItemModel *getConnectionsModel() const;
+
 signals:
     void splitTrackRequested(TrackConnectionItem *item, bool silent = false);
 

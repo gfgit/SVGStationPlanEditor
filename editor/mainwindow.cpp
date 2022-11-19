@@ -17,6 +17,7 @@
 #include "svg_creator/svgcreatormanager.h"
 
 #include <QMessageBox>
+#include <QTableView>
 
 #include <QDebug>
 
@@ -225,6 +226,13 @@ void EditorMainWindow::setupActions()
 
     QAction *creatorSaveSVG_act = new QAction(tr("Save To SVG"), this);
     m_creatorActions->addAction(creatorSaveSVG_act);
+
+    QTableView *svgConnView = new QTableView;
+    svgConnView->setModel(svgCreator->getConnectionsModel());
+    QDockWidget *dockWidget = new QDockWidget(tr("Connections"));
+    dockWidget->setWidget(svgConnView);
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+    svgCreatorSubMenu->addAction(dockWidget->toggleViewAction());
 
     //Editor
     QMenu *editorMenu = new QMenu(tr("Editor"), this);

@@ -2,6 +2,7 @@
 
 #include <QGraphicsItem>
 #include "model/svgcreatorscene.h"
+#include "model/svgconnectionsmodel.h"
 
 #include "ssplib/parsing/stationinfoparser.h"
 #include "ssplib/stationplan.h"
@@ -125,6 +126,11 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 QGraphicsScene *SvgCreatorManager::getScene() const
 {
     return m_scene;
+}
+
+QAbstractItemModel *SvgCreatorManager::getConnectionsModel() const
+{
+    return m_scene->getConnModel();
 }
 
 PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num)
