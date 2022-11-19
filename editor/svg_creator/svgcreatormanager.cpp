@@ -438,7 +438,7 @@ void SvgTrackItemSplitter::calculateIntersections()
     remainingLine = originalLine;
 
     //Check collisions
-    for(TrackConnectionItem* other : manager->trackConnections)
+    for(TrackConnectionItem* other : qAsConst(manager->trackConnections))
     {
         if(m_item == other)
             continue; //Skip ourselves
