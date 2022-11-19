@@ -304,7 +304,7 @@ void SvgCreatorManager::addTrackConnection(TrackConnectionItem *item)
 
 SvgTrackItemSplitter::SvgTrackItemSplitter(SvgCreatorManager *mgr) :
     manager(mgr),
-    m_itemRefIdx(-1),
+    m_item(nullptr),
     currentIndex(-1)
 {
 
@@ -329,11 +329,7 @@ inline QLineF mapLineFromScene(QGraphicsItem *item, const QLineF& l)
 
 void SvgTrackItemSplitter::setItem(TrackConnectionItem *item)
 {
-    //Store index because pointer might become invalid if vector is reallocated
-    //FIXME: find a better way to pass item references around
-    m_itemRefIdx = -1;
-    if(item && manager->trackConnections.size())
-        m_itemRefIdx = manager->trackConnections.indexOf(item);
+    m_item = item;
     calculateIntersections();
 }
 
@@ -346,7 +342,7 @@ QPointF SvgTrackItemSplitter::getCurrentPoint() const
 
 bool SvgTrackItemSplitter::applyIntersection(bool skip)
 {
-    if(m_itemRefIdx == -1 || currentIndex >= m_intersections.size())
+    if(!m_item || currentIndex >= m_intersections.size())
         return false;
 
     const bool isLastSegment = currentIndex == m_intersections.size() - 1;
@@ -364,20 +360,6 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
 
     auto scene = static_cast<SvgCreatorScene*>(manager->getScene());
     const Entry& entry = m_intersections.at(currentIndex);
-
-    QVector<TrackConnection> itemConnections;
-    QGraphicsLineItem *lineItem = nullptr;
-    if(m_itemRefIdx < manager->trackConnections.size())
-    {
-        TrackConnectionItem* item = manager->trackConnections[m_itemRefIdx];
-        itemConnections = item->connections;
-        lineItem = item->lineItem;
-    }
-    else
-    {
-        //Error
-        return false;
-    }
 
     //Split
     const bool isOtherEdge = (entry.otherLine.p1() == entry.intersection) ||
@@ -408,14 +390,14 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
         if(segment.p1() == originalLine.p1())
         {
             //Assign first segment to original item
-            QLineF segmentMapped = mapLineFromScene(lineItem, segment);
-            lineItem->setLine(segmentMapped);
+            QLineF segmentMapped = mapLineFromScene(m_item->lineItem, segment);
+            m_item->lineItem->setLine(segmentMapped);
         }
         else
         {
             TrackConnectionItem *ourSplit = new TrackConnectionItem;
-            ourSplit->connections = itemConnections;
-            ourSplit->lineItem = scene->addLine(segment, lineItem->pen());
+            ourSplit->connections = m_item->connections;
+            ourSplit->lineItem = scene->addLine(segment, m_item->lineItem->pen());
             manager->addTrackConnection(ourSplit);
         }
     }
@@ -423,8 +405,8 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
     if(isLastSegment && !remainingLine.isNull())
     {
         TrackConnectionItem *ourSplit = new TrackConnectionItem;
-        ourSplit->connections = itemConnections;
-        ourSplit->lineItem = scene->addLine(remainingLine, lineItem->pen());
+        ourSplit->connections = m_item->connections;
+        ourSplit->lineItem = scene->addLine(remainingLine, m_item->lineItem->pen());
         manager->addTrackConnection(ourSplit);
     }
 
@@ -449,10 +431,8 @@ void SvgTrackItemSplitter::calculateIntersections()
     originalLine = remainingLine = QLineF();
     currentIndex = -1;
 
-    if(m_itemRefIdx == -1)
+    if(!m_item)
         return;
-
-    const TrackConnectionItem *m_item = manager->trackConnections[m_itemRefIdx];
 
     originalLine = mapLineToScene(m_item->lineItem, m_item->lineItem->line());
     remainingLine = originalLine;
