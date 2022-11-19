@@ -51,7 +51,7 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
         //Find track connection
         for(int i = 0; i < manager->trackConnections.size(); i++)
         {
-            if(manager->trackConnections.at(i).lineItem == item)
+            if(manager->trackConnections.at(i)->lineItem == item)
             {
                 idx = i;
                 break;
@@ -97,7 +97,7 @@ void SvgCreatorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev)
     }
     else if(splitTrackAction && chosenAction == splitTrackAction)
     {
-        emit manager->splitTrackRequested(&manager->trackConnections[idx]);
+        emit manager->splitTrackRequested(manager->trackConnections[idx]);
     }
 }
 
@@ -244,11 +244,11 @@ void SvgCreatorScene::addTrackConnection(const QLineF &line)
     pen.setCapStyle(Qt::RoundCap);
 
     //Add last part
-    TrackConnectionItem track;
-    track.lineItem = addLine(line, pen);
+    TrackConnectionItem *track = new TrackConnectionItem;
+    track->lineItem = addLine(line, pen);
     manager->addTrackConnection(track);
 
-    emit manager->splitTrackRequested(&manager->trackConnections.last(), true);
+    emit manager->splitTrackRequested(track, true);
 }
 
 bool SvgCreatorScene::snapToPoint(QPointF &pos, const QPointF& startPos)

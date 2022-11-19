@@ -82,15 +82,15 @@ signals:
     void splitTrackRequested(TrackConnectionItem *item, bool silent = false);
 
 private:
-    PlatformItem createPlatform(const QString& name, int num);
+    PlatformItem *createPlatform(const QString& name, int num);
     void movePlatformTo(PlatformItem& item, const QPointF& pos);
 
-    GateItem createGate(QChar name, int outTrackCnt);
+    GateItem *createGate(QChar name, int outTrackCnt);
     void moveGateTo(GateItem& item, const QPointF& pos);
 
     void createStLabel();
 
-    void addTrackConnection(const TrackConnectionItem& item);
+    void addTrackConnection(TrackConnectionItem *item);
 
 private:
     friend class SvgTrackItemSplitter;
@@ -99,9 +99,9 @@ private:
 
     StationLabel stLabel;
 
-    QVector<GateItem> gates;
-    QVector<PlatformItem> platforms;
-    QVector<TrackConnectionItem> trackConnections;
+    QVector<GateItem *> gates;
+    QVector<PlatformItem *> platforms;
+    QVector<TrackConnectionItem *> trackConnections;
 };
 
 class SvgTrackItemSplitter

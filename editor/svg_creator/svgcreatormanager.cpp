@@ -17,8 +17,14 @@ SvgCreatorManager::SvgCreatorManager(QObject *parent) :
 void SvgCreatorManager::clear()
 {
     stLabel = StationLabel();
+
+    qDeleteAll(gates);
     gates.clear();
+
+    qDeleteAll(platforms);
     platforms.clear();
+
+    qDeleteAll(trackConnections);
     trackConnections.clear();
 
     m_scene->clear();
@@ -58,8 +64,8 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     for (const auto &track : qAsConst(plan.platforms))
     {
-        PlatformItem item = createPlatform(track.trackName, track.trackPos);
-        movePlatformTo(item, platfPos);
+        PlatformItem *item = createPlatform(track.trackName, track.trackPos);
+        movePlatformTo(*item, platfPos);
         platforms.append(item);
 
         platfPos.ry() += platfDistance;
@@ -98,7 +104,7 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     for (const auto &gate : qAsConst(plan.labels))
     {
-        GateItem item = createGate(gate.gateLetter, gate.gateOutTrkCount);
+        GateItem *item = createGate(gate.gateLetter, gate.gateOutTrkCount);
 
         QPointF gatePos;
         if (gate.gateSide == ssplib::Side::West) {
@@ -109,7 +115,7 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
             eastGatePos.ry() -= eastGateDistance; //Go up
         }
 
-        moveGateTo(item, gatePos);
+        moveGateTo(*item, gatePos);
         gates.append(item);
     }
 
@@ -121,38 +127,38 @@ QGraphicsScene *SvgCreatorManager::getScene() const
     return m_scene;
 }
 
-PlatformItem SvgCreatorManager::createPlatform(const QString &name, int num)
+PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num)
 {
     QFont font(QStringLiteral("sans-serif"), 12, QFont::Bold);
 
     QPen linePen(Qt::black, 5);
     linePen.setCapStyle(Qt::RoundCap);
 
-    PlatformItem item;
-    item.platfName = name;
-    item.platfNum = num;
+    PlatformItem *item = new PlatformItem;
+    item->platfName = name;
+    item->platfNum = num;
 
     QRectF sr = m_scene->sceneRect();
-    item.lineItem = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
+    item->lineItem = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
 
-    item.nameBgRect = m_scene->addRect(QRectF(), QPen(), Qt::lightGray);
-    item.nameText = m_scene->addSimpleText(item.platfName, font);
-    item.nameText->setBrush(Qt::red);
+    item->nameBgRect = m_scene->addRect(QRectF(), QPen(), Qt::lightGray);
+    item->nameText = m_scene->addSimpleText(item->platfName, font);
+    item->nameText->setBrush(Qt::red);
 
-    item.group = m_scene->createItemGroup({item.nameText, item.nameBgRect, item.lineItem});
-    item.group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    item->group = m_scene->createItemGroup({item->nameText, item->nameBgRect, item->lineItem});
+    item->group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 
     //Center text horizontally
-    QRectF br = item.nameText->boundingRect();
+    QRectF br = item->nameText->boundingRect();
 
-    br.moveCenter(item.lineItem->pos() + item.lineItem->line().center());
-    item.nameText->setPos(br.topLeft());
+    br.moveCenter(item->lineItem->pos() + item->lineItem->line().center());
+    item->nameText->setPos(br.topLeft());
 
     br.adjust(-3, -3, 3, 3);
-    item.nameBgRect->setRect(br);
+    item->nameBgRect->setRect(br);
 
-    item.nameBgRect->setZValue(item.nameText->zValue() - 1);
-    item.lineItem->setZValue(item.nameBgRect->zValue() - 1);
+    item->nameBgRect->setZValue(item->nameText->zValue() - 1);
+    item->lineItem->setZValue(item->nameBgRect->zValue() - 1);
 
     return item;
 }
@@ -175,7 +181,7 @@ void SvgCreatorManager::movePlatformTo(PlatformItem &item, const QPointF &pos)
 
 const QLineF GateTrackLine(0, 0, 30, 0);
 
-GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
+GateItem* SvgCreatorManager::createGate(QChar name, int outTrackCnt)
 {
     const QRectF labelRect(0, 0, 100, 50);
 
@@ -185,13 +191,13 @@ GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
     QFont letterFont(QStringLiteral("sans-serif"), 12, QFont::Bold);
     QFont numberFont(QStringLiteral("sans-serif"), 9, QFont::Normal);
 
-    GateItem item;
-    item.gateLetter = name;
+    GateItem *item = new GateItem;
+    item->gateLetter = name;
 
-    item.gateLabel = m_scene->addSimpleText(item.gateLetter, letterFont);
-    item.gateStationRect = m_scene->addRect(labelRect, QPen(), Qt::lightGray);
-    item.group = m_scene->createItemGroup({item.gateLabel, item.gateStationRect});
-    item.group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    item->gateLabel = m_scene->addSimpleText(item->gateLetter, letterFont);
+    item->gateStationRect = m_scene->addRect(labelRect, QPen(), Qt::lightGray);
+    item->group = m_scene->createItemGroup({item->gateLabel, item->gateStationRect});
+    item->group->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 
     for(int i = 0; i < outTrackCnt; i++)
     {
@@ -201,10 +207,11 @@ GateItem SvgCreatorManager::createGate(QChar name, int outTrackCnt)
         track.trackLineItem = m_scene->addLine(GateTrackLine);
         track.trackLineItem->setPen(linePen);
 
-        item.group->addToGroup(track.trackLabelItem);
-        item.group->addToGroup(track.trackLineItem);
 
-        item.outTracks.append(track);
+        item->group->addToGroup(track.trackLabelItem);
+        item->group->addToGroup(track.trackLineItem);
+
+        item->outTracks.append(track);
     }
 
     return item;
@@ -286,10 +293,10 @@ void SvgCreatorManager::createStLabel()
     stLabel.bgRect->setRect(br);
 }
 
-void SvgCreatorManager::addTrackConnection(const TrackConnectionItem &item)
+void SvgCreatorManager::addTrackConnection(TrackConnectionItem *item)
 {
     trackConnections.append(item);
-    item.lineItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    item->lineItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 }
 
 SvgTrackItemSplitter::SvgTrackItemSplitter(SvgCreatorManager *mgr) :
@@ -323,7 +330,7 @@ void SvgTrackItemSplitter::setItem(TrackConnectionItem *item)
     //FIXME: find a better way to pass item references around
     m_itemRefIdx = -1;
     if(item && manager->trackConnections.size())
-        m_itemRefIdx = (item - &manager->trackConnections.first());
+        m_itemRefIdx = manager->trackConnections.indexOf(item);
     calculateIntersections();
 }
 
@@ -359,9 +366,9 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
     QGraphicsLineItem *lineItem = nullptr;
     if(m_itemRefIdx < manager->trackConnections.size())
     {
-        TrackConnectionItem& item = manager->trackConnections[m_itemRefIdx];
-        itemConnections = item.connections;
-        lineItem = item.lineItem;
+        TrackConnectionItem* item = manager->trackConnections[m_itemRefIdx];
+        itemConnections = item->connections;
+        lineItem = item->lineItem;
     }
     else
     {
@@ -374,9 +381,9 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
                              (entry.otherLine.p2() == entry.intersection);
     if(!isOtherEdge)
     {
-        TrackConnectionItem otherSplit;
-        otherSplit.connections = entry.otherItem->connections;
-        otherSplit.lineItem = scene->addLine(QLineF(entry.otherLine.p1(), entry.intersection),
+        TrackConnectionItem *otherSplit = new TrackConnectionItem;
+        otherSplit->connections = entry.otherItem->connections;
+        otherSplit->lineItem = scene->addLine(QLineF(entry.otherLine.p1(), entry.intersection),
                                             entry.otherItem->lineItem->pen());
 
         QLineF otherRemaining(entry.intersection, entry.otherLine.p2());
@@ -403,18 +410,18 @@ bool SvgTrackItemSplitter::applyIntersection(bool skip)
         }
         else
         {
-            TrackConnectionItem ourSplit;
-            ourSplit.connections = itemConnections;
-            ourSplit.lineItem = scene->addLine(segment, lineItem->pen());
+            TrackConnectionItem *ourSplit = new TrackConnectionItem;
+            ourSplit->connections = itemConnections;
+            ourSplit->lineItem = scene->addLine(segment, lineItem->pen());
             manager->addTrackConnection(ourSplit);
         }
     }
 
     if(isLastSegment && !remainingLine.isNull())
     {
-        TrackConnectionItem ourSplit;
-        ourSplit.connections = itemConnections;
-        ourSplit.lineItem = scene->addLine(remainingLine, lineItem->pen());
+        TrackConnectionItem *ourSplit = new TrackConnectionItem;
+        ourSplit->connections = itemConnections;
+        ourSplit->lineItem = scene->addLine(remainingLine, lineItem->pen());
         manager->addTrackConnection(ourSplit);
     }
 
@@ -442,20 +449,20 @@ void SvgTrackItemSplitter::calculateIntersections()
     if(m_itemRefIdx == -1)
         return;
 
-    const TrackConnectionItem *m_item = &manager->trackConnections[m_itemRefIdx];
+    const TrackConnectionItem *m_item = manager->trackConnections[m_itemRefIdx];
 
     originalLine = mapLineToScene(m_item->lineItem, m_item->lineItem->line());
     remainingLine = originalLine;
 
     //Check collisions
-    for(TrackConnectionItem& other : manager->trackConnections)
+    for(TrackConnectionItem* other : manager->trackConnections)
     {
-        if(m_item == &other)
+        if(m_item == other)
             continue; //Skip ourselves
 
         Entry entry;
-        entry.otherItem = &other;
-        entry.otherLine = mapLineToScene(other.lineItem, other.lineItem->line());
+        entry.otherItem = other;
+        entry.otherLine = mapLineToScene(other->lineItem, other->lineItem->line());
 
         QLineF::IntersectionType res = entry.otherLine.intersects(remainingLine, &entry.intersection);
         if(res != QLineF::BoundedIntersection)
