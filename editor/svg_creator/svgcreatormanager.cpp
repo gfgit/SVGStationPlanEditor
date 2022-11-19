@@ -140,6 +140,7 @@ PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num)
 
     QRectF sr = m_scene->sceneRect();
     item->lineItem = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
+    item->lineItem->setData(GraphicsItemTypeKey, int(GraphicsItemType::Platform));
 
     item->nameBgRect = m_scene->addRect(QRectF(), QPen(), Qt::lightGray);
     item->nameText = m_scene->addSimpleText(item->platfName, font);
@@ -207,6 +208,7 @@ GateItem* SvgCreatorManager::createGate(QChar name, int outTrackCnt)
         track.trackLineItem = m_scene->addLine(GateTrackLine);
         track.trackLineItem->setPen(linePen);
 
+        track.trackLineItem->setData(GraphicsItemTypeKey, int(GraphicsItemType::GateTrack));
 
         item->group->addToGroup(track.trackLabelItem);
         item->group->addToGroup(track.trackLineItem);
@@ -297,6 +299,7 @@ void SvgCreatorManager::addTrackConnection(TrackConnectionItem *item)
 {
     trackConnections.append(item);
     item->lineItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    item->lineItem->setData(GraphicsItemTypeKey, int(GraphicsItemType::ConnectionTrack));
 }
 
 SvgTrackItemSplitter::SvgTrackItemSplitter(SvgCreatorManager *mgr) :

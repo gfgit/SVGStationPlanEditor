@@ -16,6 +16,19 @@ class QGraphicsRectItem;
 class QGraphicsSimpleTextItem;
 class QGraphicsLineItem;
 
+class QAbstractItemModel;
+
+enum class GraphicsItemType
+{
+    Unknown = 0,
+    Platform,
+    GateTrack,
+    ConnectionTrack
+};
+
+constexpr int GraphicsItemTypeKey = 1;
+constexpr int GraphicsOldPenKey = 2;
+
 struct StationLabel
 {
     QGraphicsItemGroup *group = nullptr;
