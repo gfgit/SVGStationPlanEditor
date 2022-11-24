@@ -25,6 +25,8 @@ QVariant SvgConnectionsModel::headerData(int section, Qt::Orientation orientatio
             return tr("Platform");
         case PlatfSideCol:
             return tr("Side");
+        case TotalAngleCol:
+            return tr("Angle");
         default:
             break;
         }
@@ -64,6 +66,8 @@ QVariant SvgConnectionsModel::data(const QModelIndex &idx, int role) const
             return item.platfName;
         case PlatfSideCol:
             return item.westSide ? tr("West") : tr("East");
+        case TotalAngleCol:
+            return item.totalRotations;
         default:
             break;
         }

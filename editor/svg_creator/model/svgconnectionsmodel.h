@@ -13,6 +13,10 @@ struct GateConnectionData
     QChar gateLetter;
     int gateTrackNum = -1;
     int platfNum = -1;
+
+    //This is the sum of abs(angle) for every node
+    double totalRotations = 0;
+
     bool westSide = false;
     bool visible = false;
 
@@ -31,6 +35,7 @@ public:
         GateTrackCol,
         PlatformCol,
         PlatfSideCol,
+        TotalAngleCol,
         NCols
     };
 

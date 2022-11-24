@@ -395,6 +395,26 @@ void SvgCreatorScene::discoverConnections()
         discoverPlatform(platform, vec);
     }
 
+    auto lessThan = [](const GateConnectionData &lhs, const GateConnectionData &rhs)
+    {
+        //First sort by gate letter, then gate track, then platform, then side.
+        if(lhs.gateLetter != rhs.gateLetter)
+            return lhs.gateLetter < rhs.gateLetter;
+
+        if(lhs.gateTrackNum != rhs.gateTrackNum)
+            return lhs.gateTrackNum < rhs.gateTrackNum;
+
+        if(lhs.platfNum != rhs.platfNum)
+            return lhs.platfNum < rhs.platfNum;
+
+        if(lhs.westSide != rhs.westSide)
+            return lhs.westSide < rhs.westSide;
+
+        return lhs.totalRotations < rhs.totalRotations;
+    };
+
+    std::sort(vec.begin(), vec.end(), lessThan);
+
     connModel->setConnections(vec);
 }
 
@@ -413,6 +433,7 @@ void SvgCreatorScene::discoverPlatform(const PlatformItem *platform, QVector<Gat
     //Now start from opposite side
     platfLine = QLineF(platfLine.p2(), platfLine.p1());
     platformData.westSide = !platformData.westSide;
+    platformData.totalRotations = 0; //Reset
     discoverRecursive(platform->lineItem, platfLine, platformData, vec);
 }
 
@@ -503,6 +524,7 @@ void SvgCreatorScene::discoverRecursive(QGraphicsLineItem *prevItem, const QLine
 
         GateConnectionData childData = prevData;
         childData.items.append(lineItem);
+        childData.totalRotations += qAbs(angle);
 
         discoverRecursive(lineItem, currentLine, childData, vec);
     }
