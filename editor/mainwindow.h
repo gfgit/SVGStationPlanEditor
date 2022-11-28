@@ -18,6 +18,9 @@ class NodeFinderMgr;
 class SvgCreatorManager;
 class TrackConnectionItem;
 
+class QDockWidget;
+class QMenu;
+
 class EditorMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -58,5 +61,9 @@ private:
     NodeFinderMgr *nodeMgr;
     SvgCreatorManager *svgCreator;
     QWidget *extraStatusWidget;
+
+    QVector<QDockWidget *> currentDocks;
+    QMenu *editorMenu = nullptr;
+    QMenu *svgCreatorSubMenu = nullptr;
 };
 #endif // MAINWINDOW_H

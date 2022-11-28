@@ -236,7 +236,8 @@ void EditorMainWindow::setupActions()
     m_editorActions = new QActionGroup(this);
 
     //Creator
-    QMenu *svgCreatorSubMenu = new QMenu(tr("Create SVG"));
+    svgCreatorSubMenu = new QMenu(tr("Create SVG"));
+    svgCreatorSubMenu->setObjectName(QLatin1String("svg_creator_sub_menu"));
     svgCreatorSubMenu->addAction(tr("From XML File"), this, &EditorMainWindow::createSVGFromFile);
     svgCreatorSubMenu->addAction(tr("New Empty SVG"));
 
@@ -244,32 +245,13 @@ void EditorMainWindow::setupActions()
     connect(creatorSaveSVG_act, &QAction::triggered, this, &EditorMainWindow::saveConvertedSVG);
     m_creatorActions->addAction(creatorSaveSVG_act);
 
-    QTableView *svgConnView = new QTableView;
-    svgConnView->setModel(svgCreator->getConnectionsModel());
-    QDockWidget *dockWidget = new QDockWidget(tr("Connections"));
-    dockWidget->setWidget(svgConnView);
-    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-    svgCreatorSubMenu->addAction(dockWidget->toggleViewAction());
-
     //Editor
-    QMenu *editorMenu = new QMenu(tr("Editor"), this);
+    editorMenu = new QMenu(tr("Editor"), this);
+    editorMenu->setObjectName(QLatin1String("editor_menu"));
     editorMenu->addAction(tr("Load XML"), this, &EditorMainWindow::loadXMLInEditor);
     editorMenu->addAction(tr("Unload XML"), nodeMgr, &NodeFinderMgr::clearXMLInEditor);
     m_editorActions->addAction(editorMenu->menuAction());
     editorMenu->addSeparator();
-
-    auto addDockMode = [this, editorMenu](EditingModes mode)
-    {
-        QWidget *w = nodeMgr->getDockWidget(mode);
-        QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
-        dockWidget->setWidget(w);
-        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-        editorMenu->addAction(dockWidget->toggleViewAction());
-    };
-
-    //addDockMode(EditingModes::LabelEditing);
-    //addDockMode(EditingModes::StationTrackEditing);
-    //addDockMode(EditingModes::TrackPathEditing);
 
     QAction *editorSaveSVG_act = new QAction(tr("Save SVG"), this);
     connect(editorSaveSVG_act, &QAction::triggered, this, &EditorMainWindow::saveConvertedSVG);
@@ -364,6 +346,53 @@ void EditorMainWindow::setProgramMode(ProgramMode mode)
     {
         setCentralWidget(m_view);
         m_view->show();
+    }
+
+    //Setup docks
+    for(QDockWidget *dockWidget : qAsConst(currentDocks))
+    {
+        QWidget *w = dockWidget->widget();
+        w->hide();
+
+        dockWidget->setWidget(nullptr);
+        dockWidget->hide();
+
+        editorMenu->removeAction(dockWidget->toggleViewAction());
+        svgCreatorSubMenu->removeAction(dockWidget->toggleViewAction());
+
+        w->deleteLater();
+        dockWidget->deleteLater();
+    }
+    currentDocks.clear();
+
+    if(m_progMode == ProgramMode::SVGMappingMode)
+    {
+        auto addDockMode = [this](EditingModes mode)
+        {
+            QWidget *w = nodeMgr->getDockWidget(mode);
+
+            QDockWidget *dockWidget = new QDockWidget(w->windowTitle());
+            dockWidget->setWidget(w);
+            addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+            editorMenu->addAction(dockWidget->toggleViewAction());
+
+            currentDocks.append(dockWidget);
+        };
+
+        addDockMode(EditingModes::LabelEditing);
+        addDockMode(EditingModes::StationTrackEditing);
+        addDockMode(EditingModes::TrackPathEditing);
+    }
+    else if(m_progMode == ProgramMode::SVGCreationMode)
+    {
+        QTableView *svgConnView = new QTableView;
+        svgConnView->setModel(svgCreator->getConnectionsModel());
+        QDockWidget *dockWidget = new QDockWidget(tr("Connections"));
+        dockWidget->setWidget(svgConnView);
+        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+        svgCreatorSubMenu->addAction(dockWidget->toggleViewAction());
+
+        currentDocks.append(dockWidget);
     }
 
     setZoom(100);
