@@ -6,6 +6,8 @@
 #include <QVector>
 #include <QLineF>
 
+#include <utils/svg_trackconn_util.h>
+
 class QIODevice;
 
 class QGraphicsScene;
@@ -65,18 +67,9 @@ struct GateItem
     QVector<GateTrack> outTracks;
 };
 
-struct TrackConnection
-{
-    QChar gateLetter;
-    int gateTrackNumber = -1;
-    QString platfName;
-    int platfNumber = -1;
-    bool plaftWestSide = false;
-};
-
 struct TrackConnectionItem
 {
-    QVector<TrackConnection> connections;
+    QVector<ssplib::TrackConnectionInfo> connections;
     QGraphicsLineItem *lineItem = nullptr;
 };
 

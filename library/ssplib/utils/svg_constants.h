@@ -32,6 +32,7 @@ const QString Transform = QLatin1String("transform");
 const QString LabelName = QLatin1String("labelname");
 const QString TrackPos = QLatin1String("trackpos");
 const QString TrackConnections = QLatin1String("trackconn");
+const QString GateTrackNum = QLatin1String("gatetracknum");
 
 //Text processing, attribute white list
 const QStringList TSpanPassToTextAttrs{"x", "y", "style", "fill", "stroke", "font-family", "font-size", "font-weight",

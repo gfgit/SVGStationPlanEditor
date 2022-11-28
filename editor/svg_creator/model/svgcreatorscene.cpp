@@ -397,7 +397,7 @@ void SvgCreatorScene::discoverConnections()
 
     auto lessThan = [](const GateConnectionData &lhs, const GateConnectionData &rhs)
     {
-        //First sort by gate letter, then gate track, then platform, then side.
+        //First sort by gate letter, then gate track, then platform, then side, then rotations.
         if(lhs.gateLetter != rhs.gateLetter)
             return lhs.gateLetter < rhs.gateLetter;
 
@@ -413,8 +413,49 @@ void SvgCreatorScene::discoverConnections()
         return lhs.totalRotations < rhs.totalRotations;
     };
 
+    //Sort connection
     std::sort(vec.begin(), vec.end(), lessThan);
 
+    //Keep only best connection for every gate track/platform combination
+    QVector<GateConnectionData> filteredVec;
+    GateConnectionData lastConn;
+    for(const GateConnectionData& conn : qAsConst(vec))
+    {
+        if(lastConn.gateLetter == conn.gateLetter && lastConn.gateTrackNum == conn.gateTrackNum
+            && lastConn.platfNum == conn.platfNum && lastConn.westSide == conn.westSide)
+        {
+            //Same connection as previous but different path.
+            //Skip because sorted by min total rotations
+            continue;
+        }
+
+        lastConn = conn;
+        filteredVec.append(conn);
+    }
+
+    //Update track items
+    for(auto track : qAsConst(manager->trackConnections))
+    {
+        track->connections.clear();
+
+        for(const GateConnectionData& conn : qAsConst(filteredVec))
+        {
+
+            if(conn.items.contains(track->lineItem))
+            {
+                const ssplib::Side side = conn.westSide ? ssplib::Side::West : ssplib::Side::East;
+
+                ssplib::TrackConnectionInfo info;
+                info.gateTrackPos = conn.gateTrackNum;
+                info.gateLetter = conn.gateLetter;
+                info.stationTrackPos = conn.platfNum;
+                info.trackSide = side;
+                track->connections.append(info);
+            }
+        }
+    }
+
+    //Update model
     connModel->setConnections(vec);
 }
 
