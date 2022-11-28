@@ -5,6 +5,7 @@ set(SSP_LIBRARY_HEADERS
   utils/transform_utils.h
   utils/xmlelement.h
 
+  utils/svg_trackconn_util.h
 
   PARENT_SCOPE
 )
@@ -14,6 +15,8 @@ set(SSP_LIBRARY_SOURCES
   utils/svg_path_utils.cpp
   utils/transform_utils.cpp
   utils/xmlelement.cpp
+
+  utils/svg_trackconn_util.cpp
 
   PARENT_SCOPE
 )

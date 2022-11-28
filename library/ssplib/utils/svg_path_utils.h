@@ -5,6 +5,8 @@
 #include "xmlelement.h"
 #include <QPointF>
 
+#include "svg_trackconn_util.h"
+
 namespace ssplib {
 
 namespace utils {
@@ -14,10 +16,6 @@ bool parseNumberAndAdvance(double &outVal, QStringRef &str);
 bool parsePointAndAdvance(QPointF &outPoint, QStringRef &str);
 
 bool convertElementToPath(const XmlElement& e, QPainterPath& path);
-
-bool parseTrackConnectionAttribute(const QString& value, QVector<TrackConnectionInfo>& outVec);
-
-QString trackConnInfoToString(const QVector<TrackConnectionInfo>& vec);
 
 struct ElementStyle
 {
