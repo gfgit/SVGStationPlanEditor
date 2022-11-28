@@ -96,7 +96,7 @@ private:
     PlatformItem *createPlatform(const QString& name, int num);
     void movePlatformTo(PlatformItem& item, const QPointF& pos);
 
-    GateItem *createGate(QChar name, int outTrackCnt);
+    GateItem *createGate(QChar name, int outTrackCnt, bool isWest);
     void moveGateTo(GateItem& item, const QPointF& pos);
 
     void createStLabel();

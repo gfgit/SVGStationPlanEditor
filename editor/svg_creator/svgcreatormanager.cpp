@@ -106,7 +106,7 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     for (const auto &gate : qAsConst(plan.labels))
     {
-        GateItem *item = createGate(gate.gateLetter, gate.gateOutTrkCount);
+        GateItem *item = createGate(gate.gateLetter, gate.gateOutTrkCount, gate.gateSide == ssplib::Side::West);
 
         QPointF gatePos;
         if (gate.gateSide == ssplib::Side::West) {
@@ -195,7 +195,7 @@ void SvgCreatorManager::movePlatformTo(PlatformItem &item, const QPointF &pos)
 
 const QLineF GateTrackLine(0, 0, 30, 0);
 
-GateItem* SvgCreatorManager::createGate(QChar name, int outTrackCnt)
+GateItem* SvgCreatorManager::createGate(QChar name, int outTrackCnt, bool isWest)
 {
     const QRectF labelRect(0, 0, 100, 50);
 
@@ -216,7 +216,11 @@ GateItem* SvgCreatorManager::createGate(QChar name, int outTrackCnt)
     for(int i = 0; i < outTrackCnt; i++)
     {
         GateItem::GateTrack track;
-        track.number = i;
+        if(isWest)
+            track.number = outTrackCnt - i - 1; //Invert order
+        else
+            track.number = i;
+
         track.trackLabelItem = m_scene->addSimpleText(QString::number(track.number), numberFont);
         track.trackLineItem = m_scene->addLine(GateTrackLine);
         track.trackLineItem->setPen(linePen);
