@@ -88,10 +88,13 @@ public:
 
     void clear();
     bool loadStationXML(QIODevice *dev);
+    bool saveSVG(QIODevice *dev);
 
     QGraphicsScene *getScene() const;
 
     QAbstractItemModel *getConnectionsModel() const;
+
+    inline QString getStName() const { return stLabel.stationName; }
 
 signals:
     void splitTrackRequested(TrackConnectionItem *item, bool silent = false);
@@ -110,6 +113,7 @@ private:
 private:
     friend class SvgTrackItemSplitter;
     friend class SvgCreatorScene;
+    friend class SvgCreatorSVGWriter;
     SvgCreatorScene *m_scene;
 
     StationLabel stLabel;

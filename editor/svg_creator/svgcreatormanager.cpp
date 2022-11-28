@@ -4,6 +4,7 @@
 #include "model/svgcreatorscene.h"
 #include "model/svgconnectionsmodel.h"
 
+#include "model/svgcreatorsvgwriter.h"
 #include "ssplib/parsing/stationinfoparser.h"
 #include "ssplib/stationplan.h"
 
@@ -121,6 +122,12 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
     }
 
     return true;
+}
+
+bool SvgCreatorManager::saveSVG(QIODevice *dev)
+{
+    SvgCreatorSVGWriter writer(this);
+    return writer.writeSVG(dev);
 }
 
 QGraphicsScene *SvgCreatorManager::getScene() const

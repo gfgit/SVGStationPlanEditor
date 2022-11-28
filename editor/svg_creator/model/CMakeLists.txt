@@ -15,5 +15,8 @@ set(SSP_EDITOR_SOURCES
   svg_creator/model/svgconnectionsmodel.cpp
   svg_creator/model/svgconnectionsmodel.h
 
+  svg_creator/model/svgcreatorsvgwriter.cpp
+  svg_creator/model/svgcreatorsvgwriter.h
+
   PARENT_SCOPE
 )

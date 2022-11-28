@@ -100,8 +100,17 @@ void EditorMainWindow::loadSVGInEditor()
 
 void EditorMainWindow::saveConvertedSVG()
 {
+    QString baseFilename;
+    if(m_progMode == ProgramMode::SVGCreationMode)
+    {
+        baseFilename = svgCreator->getStName();
+        baseFilename.replace(' ', '_');
+        baseFilename.replace('-', '_');
+        baseFilename.append(QLatin1String(".svg"));
+    }
+
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    QString(), QString(),
+                                                    tr("Save SVG"), baseFilename,
                                                     QString("SVG (*.svg);;All Files (*)"));
     if(fileName.isEmpty())
         return;
@@ -113,7 +122,14 @@ void EditorMainWindow::saveConvertedSVG()
         return;
     }
 
-    nodeMgr->saveSVG(&f);
+    if(m_progMode == ProgramMode::SVGCreationMode)
+    {
+        svgCreator->saveSVG(&f);
+    }
+    else
+    {
+        nodeMgr->saveSVG(&f);
+    }
 }
 
 void EditorMainWindow::clearDocument()
@@ -225,6 +241,7 @@ void EditorMainWindow::setupActions()
     svgCreatorSubMenu->addAction(tr("New Empty SVG"));
 
     QAction *creatorSaveSVG_act = new QAction(tr("Save To SVG"), this);
+    connect(creatorSaveSVG_act, &QAction::triggered, this, &EditorMainWindow::saveConvertedSVG);
     m_creatorActions->addAction(creatorSaveSVG_act);
 
     QTableView *svgConnView = new QTableView;
