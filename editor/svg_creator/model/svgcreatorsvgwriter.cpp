@@ -2,6 +2,9 @@
 
 #include "svg_creator/svgcreatormanager.h"
 
+#include <utils/svg_constants.h>
+#include <utils/svg_trackconn_util.h>
+
 #include <QXmlStreamWriter>
 
 #include <QGraphicsScene>
@@ -114,16 +117,6 @@ bool SvgCreatorSVGWriter::writeSVG(QIODevice *dev)
     xml.writeAttribute(QLatin1String("height"), lengthFmt.arg(rect.height()));
     xml.writeAttribute(QLatin1String("viewBox"), viewBoxStr);
 
-    //<circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
-    xml.writeStartElement("circle");
-    xml.writeAttribute("cx", "50");
-    xml.writeAttribute("cy", "50");
-    xml.writeAttribute("r", "40");
-    xml.writeAttribute("stroke", "black");
-    xml.writeAttribute("stroke-width", "3");
-    xml.writeAttribute("fill", "red");
-    xml.writeEndElement();
-
     //Write track connections
     for(const auto& conn : qAsConst(manager->trackConnections))
     {
@@ -159,7 +152,8 @@ void SvgCreatorSVGWriter::writeTrackConn(QXmlStreamWriter &xml, const TrackConne
     writeLine(xml, line, item->lineItem->pen());
 
     //Add track connections
-    //TODO
+    QString connAttr = ssplib::utils::trackConnInfoToString(item->connections);
+    xml.writeAttribute(ssplib::svg_attr::TrackConnections, connAttr);
 
     xml.writeEndElement();
 }
@@ -174,7 +168,7 @@ void SvgCreatorSVGWriter::writePlatform(QXmlStreamWriter &xml, const PlatformIte
     writeLine(xml, line, item->lineItem->pen());
 
     //Add platform info
-    //TODO
+    xml.writeAttribute(ssplib::svg_attr::TrackPos, QString::number(item->platfNum));
 
     xml.writeEndElement(); // </line>
 
@@ -202,7 +196,8 @@ void SvgCreatorSVGWriter::writeGate(QXmlStreamWriter &xml, const GateItem *item)
         writeLine(xml, line, track.trackLineItem->pen());
 
         //Add gate track info
-        //TODO
+        xml.writeAttribute(ssplib::svg_attr::GateTrackNum, QString::number(track.number));
+        xml.writeAttribute(ssplib::svg_attr::LabelName, item->gateLetter);
 
         xml.writeEndElement(); // </line>
 
@@ -217,12 +212,13 @@ void SvgCreatorSVGWriter::writeGate(QXmlStreamWriter &xml, const GateItem *item)
     writeRect(xml,
               item->gateStationRect->mapRectToScene(item->gateStationRect->rect()),
               item->gateStationRect->brush());
+
+    //Add gate track info
+    xml.writeAttribute(ssplib::svg_attr::LabelName, item->gateLetter);
     xml.writeEndElement(); // </rect>
 
     //Add Gate label
     writeTextItemAttrs(xml, item->gateLabel);
-
-    //TODO: Add Gate info
 
     xml.writeEndElement(); // </g>
 }
@@ -236,18 +232,6 @@ void SvgCreatorSVGWriter::writeStLabel(QXmlStreamWriter &xml)
     writeRect(xml,
               manager->stLabel.bgRect->mapRectToScene(manager->stLabel.bgRect->rect()),
               manager->stLabel.bgRect->brush());
-    xml.writeEndElement(); // </rect>
-
-    xml.writeStartElement(QLatin1String("rect"));
-    writeRect(xml,
-              manager->stLabel.bgRect->mapRectToScene(manager->stLabel.text->boundingRect()),
-              Qt::green);
-    xml.writeEndElement(); // </rect>
-
-    xml.writeStartElement(QLatin1String("rect"));
-    writeRect(xml,
-              manager->stLabel.bgRect->mapRectToScene(manager->stLabel.text->sceneBoundingRect()),
-              Qt::yellow);
     xml.writeEndElement(); // </rect>
 
     //Text
