@@ -39,6 +39,12 @@ bool ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &label
     if(labelName.isEmpty())
         return false;
 
+    //Check if it's really a Gate label or a gate track
+    //TODO: for now we skip gate tracks, maybe in future we might
+    //      treat them in a special way to signal a train is coming in near futureS
+    if(!e.attribute(svg_attr::GateTrackNum).isEmpty())
+        return false;
+
     bool ok = true;
     labelName = labelName.simplified();
 
