@@ -1,5 +1,6 @@
 #include "svgcreatorsvgwriter.h"
 
+#include "qdebug.h"
 #include "svg_creator/svgcreatormanager.h"
 
 #include <utils/svg_constants.h>
@@ -44,22 +45,27 @@ void writeTextItemAttrs(QXmlStreamWriter &xml, QGraphicsSimpleTextItem *item)
 {
     xml.writeStartElement(QLatin1String("text"));
 
-    QPointF pos = item->scenePos();
+    QBrush brush = item->brush();
 
-    xml.writeAttribute(QLatin1String("x"), QString::number(pos.x()));
-    xml.writeAttribute(QLatin1String("y"), QString::number(pos.y()));
+    //Use rect center and then lower by half font size to get vertically centered
+    QPointF pos = item->sceneBoundingRect().center();
 
     QFont font = item->font();
     QString style = QLatin1String("font-size:");
     if(font.pixelSize() != -1)
     {
+        pos.ry() += font.pixelSize() / 2;
         style += QString::number(font.pixelSize());
         style += QLatin1String("px");
     }else{
+        pos.ry() += font.pointSizeF() / 2;
         style += QString::number(font.pointSizeF());
         style += QLatin1String("pt");
     }
     style += QLatin1String(";");
+
+    xml.writeAttribute(QLatin1String("x"), QString::number(pos.x()));
+    xml.writeAttribute(QLatin1String("y"), QString::number(pos.y()));
 
     int svgWeight = font.weight();
     switch (svgWeight)
@@ -80,11 +86,16 @@ void writeTextItemAttrs(QXmlStreamWriter &xml, QGraphicsSimpleTextItem *item)
     style += QLatin1String("font-weight:") + QString::number(svgWeight) + ';';
     style += QLatin1String("font-style:%1;").arg(font.italic() ? QLatin1String("italic") : QLatin1String("normal"));
 
-    style += QLatin1String("text-align:center;");
+    //Use text-anchor instead of text-align
+    style += QLatin1String("text-anchor:middle;");
+
+    style += QLatin1String("fill:%1;").arg(brush.color().name(QColor::HexRgb));
 
     if(style.endsWith(';'))
         style.chop(1);
     xml.writeAttribute(QLatin1String("style"), style);
+
+    qDebug() << "TEXT:" << font << style;
 
     xml.writeCharacters(item->text());
 
