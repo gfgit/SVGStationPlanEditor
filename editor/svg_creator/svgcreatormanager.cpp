@@ -32,7 +32,7 @@ void SvgCreatorManager::clear()
     m_scene->clear();
 }
 
-bool SvgCreatorManager::loadStationXML(QIODevice *dev)
+bool SvgCreatorManager::loadStationXML(QIODevice *dev, bool invertTracks)
 {
     ssplib::StationPlan plan;
     ssplib::StationInfoReader reader(&plan, dev);
@@ -41,7 +41,7 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     clear();
 
-    QRectF sceneRect(QPointF(), QSizeF(1500, 500));
+    QRectF sceneRect(QPointF(), QSizeF(2000, 700));
     m_scene->setSceneRect(sceneRect);
 
     stLabel.stationName = plan.stationName;
@@ -49,10 +49,12 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     //Lay platforms parallel
 
-    QRectF platfArea(sceneRect.left() + sceneRect.width() / 3,
-                     sceneRect.top() + sceneRect.height() * 0.2,
-                     sceneRect.width() / 3,
-                     sceneRect.height() * 0.7);
+    QRectF platfArea = sceneRect;
+    platfArea.setWidth(sceneRect.width() * 0.3);
+    platfArea.setHeight(sceneRect.height() * 0.6);
+
+    platfArea.moveCenter(sceneRect.center());
+    platfArea.moveTop(platfArea.top() + sceneRect.height() * 0.1);
 
     const double platfDistance = platfArea.height() / plan.platforms.size();
     QPointF platfPos = platfArea.topLeft();
@@ -60,13 +62,16 @@ bool SvgCreatorManager::loadStationXML(QIODevice *dev)
 
     std::sort(plan.platforms.begin(),
               plan.platforms.end(),
-              [](const ssplib::TrackItem &lhs, const ssplib::TrackItem &rhs) {
+              [invertTracks](const ssplib::TrackItem &lhs, const ssplib::TrackItem &rhs)
+              {
+                  if(invertTracks)
+                      return lhs.trackPos < rhs.trackPos;
                   return lhs.trackPos > rhs.trackPos;
               });
 
     for (const auto &track : qAsConst(plan.platforms))
     {
-        PlatformItem *item = createPlatform(track.trackName, track.trackPos);
+        PlatformItem *item = createPlatform(track.trackName, track.trackPos, platfArea.width());
         movePlatformTo(*item, platfPos);
         platforms.append(item);
 
@@ -140,7 +145,7 @@ QAbstractItemModel *SvgCreatorManager::getConnectionsModel() const
     return m_scene->getConnModel();
 }
 
-PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num)
+PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num, double width)
 {
     QFont font(QStringLiteral("sans-serif"), 12, QFont::Bold);
 
@@ -151,8 +156,7 @@ PlatformItem* SvgCreatorManager::createPlatform(const QString &name, int num)
     item->platfName = name;
     item->platfNum = num;
 
-    QRectF sr = m_scene->sceneRect();
-    item->lineItem = m_scene->addLine(0, 0, sr.width() / 3, 0, linePen);
+    item->lineItem = m_scene->addLine(0, 0, width, 0, linePen);
     item->lineItem->setData(GraphicsItemTypeKey, int(GraphicsItemType::Platform));
 
     item->nameBgRect = m_scene->addRect(QRectF(), QPen(), Qt::lightGray);

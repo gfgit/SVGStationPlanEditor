@@ -19,6 +19,8 @@
 #include <QMessageBox>
 #include <QTableView>
 
+#include <QInputDialog>
+
 #include <QDebug>
 
 EditorMainWindow::EditorMainWindow(QWidget *parent) :
@@ -175,7 +177,10 @@ void EditorMainWindow::createSVGFromFile()
         return;
     }
 
-    if(!svgCreator->loadStationXML(&f))
+    int ret = QInputDialog::getInt(this, tr("Track Order"),
+                                   tr("Put 1 if lower track go at top"));
+
+    if(!svgCreator->loadStationXML(&f, ret == 1))
     {
 
     }

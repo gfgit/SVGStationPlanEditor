@@ -80,7 +80,7 @@ public:
     explicit SvgCreatorManager(QObject *parent = nullptr);
 
     void clear();
-    bool loadStationXML(QIODevice *dev);
+    bool loadStationXML(QIODevice *dev, bool invertTracks);
     bool saveSVG(QIODevice *dev);
 
     QGraphicsScene *getScene() const;
@@ -93,7 +93,7 @@ signals:
     void splitTrackRequested(TrackConnectionItem *item, bool silent = false);
 
 private:
-    PlatformItem *createPlatform(const QString& name, int num);
+    PlatformItem *createPlatform(const QString& name, int num, double width);
     void movePlatformTo(PlatformItem& item, const QPointF& pos);
 
     GateItem *createGate(QChar name, int outTrackCnt, bool isWest);
