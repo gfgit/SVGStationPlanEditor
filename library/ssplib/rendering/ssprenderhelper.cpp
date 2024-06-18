@@ -65,7 +65,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
             if(!item.visible || item.elements.isEmpty())
                 continue; //Skip it
 
-            for(const auto& elem : qAsConst(item.elements))
+            for(const auto& elem : std::as_const(item.elements))
             {
                 //Do not draw path for labels
                 const QRectF r = elem.path.boundingRect();
@@ -95,7 +95,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
             else
                 trackPen.setColor(item.color);
 
-            for(const auto& elem : qAsConst(item.elements))
+            for(const auto& elem : std::as_const(item.elements))
             {
                 if(elem.strokeWidth == 0)
                     trackPen.setWidth(plan->platformPenWidth);
@@ -118,7 +118,7 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
             else
                 trackPen.setColor(item.color);
 
-            for(const auto& elem : qAsConst(item.elements))
+            for(const auto& elem : std::as_const(item.elements))
             {
                 if(elem.strokeWidth == 0)
                     trackPen.setWidth(plan->platformPenWidth);

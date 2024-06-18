@@ -182,7 +182,7 @@ bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
     if(!utils::parseStrokeWidth(e, parentStyle, elemPath.path.boundingRect(), elemPath.strokeWidth))
         elemPath.strokeWidth = 0;
 
-    for(const TrackConnectionInfo& info : qAsConst(infoVec))
+    for(const TrackConnectionInfo& info : std::as_const(infoVec))
     {
         //Find track connection
         int i = 0;

@@ -63,7 +63,7 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
         {
         case StationTrackCol:
         {
-            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
             {
                 if(track.trackPos == item.info.stationTrackPos)
                 {
@@ -153,7 +153,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
                     return false;
 
                 int pos = -1;
-                for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+                for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
                 {
                     if(track.trackName == name)
                     {
@@ -238,7 +238,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
                 return false;
 
             bool found = false;
-            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            for(const ssplib::LabelItem& gate : std::as_const(m_plan->labels))
             {
                 if(gate.gateLetter == gateLetter)
                 {
@@ -270,7 +270,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             if(item.info.gateTrackPos == trk)
                 return false;
 
-            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            for(const ssplib::LabelItem& gate : std::as_const(m_plan->labels))
             {
                 if(gate.gateLetter == item.info.gateLetter)
                 {
@@ -386,7 +386,7 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
 
 bool NodeFinderTurnoutModel::itemIsInXML(const ssplib::TrackConnectionItem &item) const
 {
-    for(const ssplib::TrackConnectionItem& conn : qAsConst(xmlPlan->trackConnections))
+    for(const ssplib::TrackConnectionItem& conn : std::as_const(xmlPlan->trackConnections))
     {
         if(conn.info.matchNames(item.info))
             return true;

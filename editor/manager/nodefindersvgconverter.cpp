@@ -88,7 +88,7 @@ bool NodeFinderSVGConverter::loadXML(QIODevice *dev)
     }
 
     //Create missing items and mirror data
-    for(const ssplib::LabelItem& gate : qAsConst(m_xmlPlan.labels))
+    for(const ssplib::LabelItem& gate : std::as_const(m_xmlPlan.labels))
     {
         bool found = false;
         for(int i = 0; i < m_plan.labels.size(); i++)
@@ -115,7 +115,7 @@ bool NodeFinderSVGConverter::loadXML(QIODevice *dev)
         }
     }
 
-    for(const ssplib::TrackItem& track : qAsConst(m_xmlPlan.platforms))
+    for(const ssplib::TrackItem& track : std::as_const(m_xmlPlan.platforms))
     {
         bool found = false;
         for(int i = 0; i < m_plan.platforms.size(); i++)
@@ -141,7 +141,7 @@ bool NodeFinderSVGConverter::loadXML(QIODevice *dev)
         }
     }
 
-    for(const ssplib::TrackConnectionItem& track : qAsConst(m_xmlPlan.trackConnections))
+    for(const ssplib::TrackConnectionItem& track : std::as_const(m_xmlPlan.trackConnections))
     {
         bool found = false;
         for(int i = 0; i < m_plan.trackConnections.size(); i++)

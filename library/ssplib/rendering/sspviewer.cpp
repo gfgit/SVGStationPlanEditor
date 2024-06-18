@@ -41,7 +41,7 @@ void SSPViewer::setPlan(StationPlan *newPlan)
 const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &outType) const
 {
     //First try with labels
-    for(const LabelItem& label : qAsConst(m_plan->labels))
+    for(const LabelItem& label : std::as_const(m_plan->labels))
     {
         for(const ElementPath& elem : label.elements)
         {
@@ -55,7 +55,7 @@ const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &
     }
 
     //Then try with station tracks
-    for(const TrackItem& track : qAsConst(m_plan->platforms))
+    for(const TrackItem& track : std::as_const(m_plan->platforms))
     {
         for(const ElementPath& elem : track.elements)
         {
@@ -72,7 +72,7 @@ const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &
 
     //Then try with track connections
     const TrackConnectionItem *possibleTrack = nullptr;
-    for(const TrackConnectionItem& track : qAsConst(m_plan->trackConnections))
+    for(const TrackConnectionItem& track : std::as_const(m_plan->trackConnections))
     {
         for(const ElementPath& elem : track.elements)
         {

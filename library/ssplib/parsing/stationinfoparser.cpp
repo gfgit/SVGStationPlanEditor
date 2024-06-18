@@ -151,7 +151,7 @@ void StationInfoReader::parseStation()
         std::sort(infoVec.begin(), infoVec.end());
 
         m_plan->trackConnections.reserve(infoVec.size());
-        for(const TrackConnectionInfo& info : qAsConst(infoVec))
+        for(const TrackConnectionInfo& info : std::as_const(infoVec))
         {
             TrackConnectionItem item;
             item.info = info;
@@ -173,7 +173,7 @@ void StationInfoReader::parseGate()
     if(gate.gateLetter < 'A' || gate.gateLetter > 'Z')
         return; //Invalid name
 
-    for(const LabelItem& other : qAsConst(m_plan->labels))
+    for(const LabelItem& other : std::as_const(m_plan->labels))
     {
         if(other.gateLetter == gate.gateLetter)
             return; //Name already exist
@@ -209,7 +209,7 @@ void StationInfoReader::parseTrack()
     if(!ok || track.trackPos < 0 || track.trackPos > 255) //TODO: max track?
         return;
 
-    for(const TrackItem& other : qAsConst(m_plan->platforms))
+    for(const TrackItem& other : std::as_const(m_plan->platforms))
     {
         if(other.trackPos == track.trackPos || other.trackName == track.trackName)
             return; //Name or Pos already exist
@@ -248,7 +248,7 @@ void StationInfoWriter::writeStation(const StationPlan *plan)
 
     //Write Gates
     xml.writeStartElement(ssp_info_tags::GateList);
-    for(const LabelItem& gate : qAsConst(plan->labels))
+    for(const LabelItem& gate : std::as_const(plan->labels))
     {
         xml.writeStartElement(ssp_info_tags::Gate);
 
@@ -265,7 +265,7 @@ void StationInfoWriter::writeStation(const StationPlan *plan)
 
     //Write Tracks
     xml.writeStartElement(ssp_info_tags::TrackList);
-    for(const TrackItem& track : qAsConst(plan->platforms))
+    for(const TrackItem& track : std::as_const(plan->platforms))
     {
         xml.writeStartElement(ssp_info_tags::Track);
 
