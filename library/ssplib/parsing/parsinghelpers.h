@@ -19,7 +19,7 @@ bool parseTrackConnection(utils::XmlElement &e,
 
 
 
-bool isElementSupported(const QStringRef& tag);
+bool isElementSupported(const QStringView &tag);
 bool isElementSupported(const QString& tag);
 
 } // namespace parsing

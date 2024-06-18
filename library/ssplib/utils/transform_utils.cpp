@@ -4,11 +4,13 @@
 
 #include <QtMath>
 
+#include <QVarLengthArray>
+
 using namespace ssplib;
 
-static inline const QChar *parseNumbersArray(const QStringRef &origStr, QVarLengthArray<qreal, 8> &points)
+static inline const QChar *parseNumbersArray(const QStringView &origStr, QVarLengthArray<qreal, 8> &points)
 {
-    QStringRef str = origStr;
+    QStringView str = origStr;
 
     double val = 0;
     while (!str.isEmpty() && str.at(0) != ')')
@@ -25,7 +27,7 @@ static inline const QChar *parseNumbersArray(const QStringRef &origStr, QVarLeng
 }
 
 
-QTransform ssplib::utils::parseTransformationMatrix(const QStringRef &value)
+QTransform ssplib::utils::parseTransformationMatrix(const QStringView &value)
 {
     if (value.isEmpty())
         return QTransform();
@@ -164,7 +166,7 @@ utils::Transform utils::combineTransform(const Transform &parent, const QString 
     }
     result.value.append(val);
 
-    QTransform matrix = parseTransformationMatrix(&val);
+    QTransform matrix = parseTransformationMatrix(val);
     result.matrix *= matrix;
     return result;
 }

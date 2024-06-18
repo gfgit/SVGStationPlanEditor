@@ -54,11 +54,11 @@ target_include_directories(
 target_link_libraries(
     ${SSP_EDITOR_TARGET}
     PRIVATE
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Svg
-    Qt5::Xml
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Svg
+    Qt6::Xml
     )
 
 target_link_libraries(

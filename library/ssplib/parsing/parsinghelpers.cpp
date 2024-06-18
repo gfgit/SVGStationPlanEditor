@@ -10,7 +10,7 @@ static const QString supportedElements[] =
      svg_tags::LineTag,
      svg_tags::PolylineTag};
 
-bool parsing::isElementSupported(const QStringRef &tag)
+bool parsing::isElementSupported(const QStringView &tag)
 {
     for(const QString& val : supportedElements)
     {

@@ -165,7 +165,7 @@ void StationInfoReader::parseStation()
 void StationInfoReader::parseGate()
 {
     LabelItem gate;
-    QStringRef name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
+    QStringView name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
     if(name.isEmpty())
         return;
 
@@ -198,7 +198,7 @@ void StationInfoReader::parseGate()
 void StationInfoReader::parseTrack()
 {
     TrackItem track;
-    QStringRef name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
+    QStringView name = xml.attributes().value(ssp_info_attrs::Name).trimmed();
     if(name.isEmpty())
         return;
 

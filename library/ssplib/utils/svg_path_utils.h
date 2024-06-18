@@ -9,9 +9,9 @@ namespace ssplib {
 
 namespace utils {
 
-bool parseNumberAndAdvance(double &outVal, QStringRef &str);
+bool parseNumberAndAdvance(double &outVal, QStringView &str);
 
-bool parsePointAndAdvance(QPointF &outPoint, QStringRef &str);
+bool parsePointAndAdvance(QPointF &outPoint, QStringView &str);
 
 bool convertElementToPath(const XmlElement& e, QPainterPath& path);
 

@@ -7,7 +7,7 @@ namespace ssplib {
 
 namespace utils {
 
-QTransform parseTransformationMatrix(const QStringRef &value);
+QTransform parseTransformationMatrix(const QStringView &value);
 
 struct Transform
 {
