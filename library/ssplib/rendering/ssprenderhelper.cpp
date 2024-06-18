@@ -67,8 +67,11 @@ void ssplib::SSPRenderHelper::drawPlan(QPainter *painter, StationPlan *plan, con
 
             for(const auto& elem : std::as_const(item.elements))
             {
-                //Do not draw path for labels
-                const QRectF r = elem.path.boundingRect();
+                // Do not draw path for labels
+                // Make sure rect does not have null size
+                QRectF r = elem.path.boundingRect();
+                double minSz = qMax(elem.strokeWidth, 0.1);
+                r.setSize(QSize(qMax(minSz, r.width()), qMax(minSz, r.height())));
 
                 QString text = item.labelText;
                 if(text.isEmpty())

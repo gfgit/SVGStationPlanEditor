@@ -45,7 +45,11 @@ const ItemBase *SSPViewer::findItemAtPos(const QPointF &scenePos, FindItemType &
     {
         for(const ElementPath& elem : label.elements)
         {
-            const QRectF bounds = elem.path.boundingRect();
+            // Make sure rect does not have null size
+            QRectF bounds = elem.path.boundingRect();
+            double minSz = qMax(elem.strokeWidth, 0.1);
+            bounds.setSize(QSize(qMax(minSz, bounds.width()), qMax(minSz, bounds.height())));
+
             if(bounds.contains(scenePos))
             {
                 outType = FindItemType::Label;
