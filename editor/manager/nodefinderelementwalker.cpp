@@ -61,7 +61,7 @@ bool NodeFinderElementWalker::prev()
             continue; //Skip tag
 
         m_status.currentMap = &it.value().elements;
-        m_status.iter = m_status.currentMap->end() - 1;
+        m_status.iter = std::prev(m_status.currentMap->end());
 
         return true;
     }

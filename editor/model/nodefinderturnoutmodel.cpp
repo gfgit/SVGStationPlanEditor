@@ -146,7 +146,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         {
         case StationTrackCol:
         {
-            if(value.type() == QVariant::String)
+            if(value.typeId() == QMetaType::QString)
             {
                 QString name = value.toString();
                 if(name.isEmpty())
@@ -186,7 +186,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         {
         case StationTrackCol:
         {
-            if(value.type() == QVariant::Int)
+            if(value.typeId() == QMetaType::Int)
             {
                 bool ok = false;
                 int trk = value.toInt(&ok);
