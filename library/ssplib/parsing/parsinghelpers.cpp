@@ -33,7 +33,7 @@ bool parsing::isElementSupported(const QString &tag)
 } // namespace ssplib
 
 
-bool ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels, const utils::ElementStyle &parentStyle)
+bool ssplib::parsing::parseLabel(utils::XmlElement &e, QList<LabelItem> &labels, const utils::ElementStyle &parentStyle)
 {
     QString labelName = e.attribute(svg_attr::LabelName);
     if(labelName.isEmpty())
@@ -94,7 +94,7 @@ bool ssplib::parsing::parseLabel(utils::XmlElement &e, QVector<LabelItem> &label
     return true;
 }
 
-bool ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms, const utils::ElementStyle& parentStyle)
+bool ssplib::parsing::parsePlatform(utils::XmlElement &e, QList<TrackItem> &platforms, const utils::ElementStyle& parentStyle)
 {
     QString trackPosStr = e.attribute(svg_attr::TrackPos);
     if(trackPosStr.isEmpty())
@@ -150,14 +150,14 @@ bool ssplib::parsing::parsePlatform(utils::XmlElement &e, QVector<TrackItem> &pl
 }
 
 bool ssplib::parsing::parseTrackConnection(utils::XmlElement &e,
-                                           QVector<TrackConnectionItem> &connections,
+                                           QList<TrackConnectionItem> &connections,
                                            const utils::ElementStyle &parentStyle)
 {
     QString trackConnStr = e.attribute(svg_attr::TrackConnections);
     if(trackConnStr.isEmpty())
         return false;
 
-    QVector<TrackConnectionInfo> infoVec;
+    QList<TrackConnectionInfo> infoVec;
     bool ok = utils::parseTrackConnectionAttribute(trackConnStr, infoVec);
 
     ElementPath elemPath;

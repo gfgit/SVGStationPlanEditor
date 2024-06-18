@@ -416,7 +416,7 @@ bool utils::convertElementToPath(const utils::XmlElement &e, QPainterPath &path)
     return false;
 }
 
-bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackConnectionInfo> &outVec)
+bool utils::parseTrackConnectionAttribute(const QString &value, QList<TrackConnectionInfo> &outVec)
 {
     TrackConnectionInfo info;
 
@@ -536,7 +536,7 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
     return true;
 }
 
-QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
+QString utils::trackConnInfoToString(const QList<TrackConnectionInfo> &vec)
 {
     QString value;
     value.reserve(8 * vec.size());

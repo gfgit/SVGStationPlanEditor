@@ -3,7 +3,7 @@
 
 #ifdef SSPLIB_ENABLE_EDITING
 
-#include <QVector>
+#include <QList>
 #include <QDomElement>
 
 #include <QMap>

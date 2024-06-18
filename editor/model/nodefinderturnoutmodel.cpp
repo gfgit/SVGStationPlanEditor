@@ -308,7 +308,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         for(ssplib::ElementPath &p : item.elements)
         {
             //Rebuild attribute
-            QVector<ssplib::TrackConnectionInfo> infoVec;
+            QList<ssplib::TrackConnectionInfo> infoVec;
             ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
             ssplib::TrackConnectionInfo::removeAllNames(infoVec, oldInfo); //Remove old
             infoVec.append(item.info); //Add new
@@ -348,7 +348,7 @@ bool NodeFinderTurnoutModel::addElementToItem(ssplib::ElementPath &p, ssplib::It
     int row = ptr - m_plan->trackConnections.data(); //Pointer aritmetics
 
     //Rebuild attribute
-    QVector<ssplib::TrackConnectionInfo> infoVec;
+    QList<ssplib::TrackConnectionInfo> infoVec;
     ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     infoVec.append(ptr->info);
     std::sort(infoVec.begin(), infoVec.end());
@@ -373,7 +373,7 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
     ssplib::ElementPath p = ptr->elements.takeAt(pos);
 
     //Rebuild attribute
-    QVector<ssplib::TrackConnectionInfo> infoVec;
+    QList<ssplib::TrackConnectionInfo> infoVec;
     ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     ssplib::TrackConnectionInfo::removeAllNames(infoVec, ptr->info);
     p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
@@ -437,7 +437,7 @@ bool NodeFinderTurnoutModel::removeItem(int row)
     for(ssplib::ElementPath& p : item.elements)
     {
         //Rebuild attribute
-        QVector<ssplib::TrackConnectionInfo> infoVec;
+        QList<ssplib::TrackConnectionInfo> infoVec;
         ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
         ssplib::TrackConnectionInfo::removeAllNames(infoVec, m_plan->trackConnections.at(row).info);
         p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));

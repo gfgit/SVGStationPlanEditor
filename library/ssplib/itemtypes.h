@@ -35,7 +35,7 @@ struct ElementPath
 
 struct ItemBase
 {
-    QVector<ElementPath> elements;
+    QList<ElementPath> elements;
     db_id itemId = 0;
     bool visible = false;
 };

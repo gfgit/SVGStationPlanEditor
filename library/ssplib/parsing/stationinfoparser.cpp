@@ -146,7 +146,7 @@ void StationInfoReader::parseStation()
     const QString conns = xml.attributes().value(ssp_info_attrs::Value).toString();
     if(!conns.isEmpty())
     {
-        QVector<TrackConnectionInfo> infoVec;
+        QList<TrackConnectionInfo> infoVec;
         utils::parseTrackConnectionAttribute(conns, infoVec);
         std::sort(infoVec.begin(), infoVec.end());
 
@@ -279,7 +279,7 @@ void StationInfoWriter::writeStation(const StationPlan *plan)
     //Write Track connections
     xml.writeStartElement(ssp_info_tags::TrackConnList);
 
-    QVector<TrackConnectionInfo> infoVec;
+    QList<TrackConnectionInfo> infoVec;
     infoVec.reserve(plan->trackConnections.size());
     for(const TrackConnectionItem& item : plan->trackConnections)
         infoVec.append(item.info);
