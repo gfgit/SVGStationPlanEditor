@@ -138,7 +138,7 @@ bool NodeFinderLabelModel::setData(const QModelIndex &idx, const QVariant &value
             if(item.gateLetter == letter)
                 return false;
 
-            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            for(const ssplib::LabelItem& gate : std::as_const(m_plan->labels))
             {
                 if(gate.gateLetter == letter)
                 {
@@ -266,7 +266,7 @@ bool NodeFinderLabelModel::removeElementFromItem(ssplib::ItemBase *item, int pos
 
 bool NodeFinderLabelModel::itemIsInXML(const ssplib::LabelItem &item) const
 {
-    for(const ssplib::LabelItem& gate : qAsConst(xmlPlan->labels))
+    for(const ssplib::LabelItem& gate : std::as_const(xmlPlan->labels))
     {
         if(gate.gateLetter == item.gateLetter)
             return true;

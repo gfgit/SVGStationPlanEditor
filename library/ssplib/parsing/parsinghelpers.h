@@ -9,17 +9,17 @@ namespace ssplib {
 
 namespace parsing {
 
-bool parseLabel(utils::XmlElement &e, QVector<LabelItem> &labels, const utils::ElementStyle &parentStyle);
+bool parseLabel(utils::XmlElement &e, QList<LabelItem> &labels, const utils::ElementStyle &parentStyle);
 
-bool parsePlatform(utils::XmlElement &e, QVector<TrackItem> &platforms, const utils::ElementStyle &parentStyle);
+bool parsePlatform(utils::XmlElement &e, QList<TrackItem> &platforms, const utils::ElementStyle &parentStyle);
 
 bool parseTrackConnection(utils::XmlElement &e,
-                          QVector<TrackConnectionItem> &connections,
+                          QList<TrackConnectionItem> &connections,
                           const utils::ElementStyle &parentStyle);
 
 
 
-bool isElementSupported(const QStringRef& tag);
+bool isElementSupported(const QStringView &tag);
 bool isElementSupported(const QString& tag);
 
 } // namespace parsing

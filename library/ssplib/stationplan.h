@@ -15,9 +15,9 @@ public:
     void clear();
 
 public:
-    QVector<LabelItem> labels;
-    QVector<TrackItem> platforms;
-    QVector<TrackConnectionItem> trackConnections;
+    QList<LabelItem> labels;
+    QList<TrackItem> platforms;
+    QList<TrackConnectionItem> trackConnections;
 
 public:
     QString stationName;

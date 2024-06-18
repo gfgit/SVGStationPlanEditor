@@ -40,7 +40,7 @@ set(SSP_PROJECT_DEFINITIONS ${SSP_PROJECT_DEFINITIONS} -DAPPVERSION="${PROJECT_V
 # Include our custom FindXXX moudules in '/cmake' subdirectory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-find_package(Qt5 REQUIRED
+find_package(Qt6 REQUIRED
     COMPONENTS
     Core
     Gui
@@ -48,7 +48,7 @@ find_package(Qt5 REQUIRED
     Svg
     LinguistTools)
 
-find_package(Qt5
+find_package(Qt6
     COMPONENTS
     Xml)
 

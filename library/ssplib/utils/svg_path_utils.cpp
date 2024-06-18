@@ -13,8 +13,8 @@ const char trackSideLetters[int(ssplib::Side::NSides)] = {
     'E' //ssplib::Side::East
 };
 
-static int parseNumber(double &outVal, const QStringRef &str)
-{
+static int parseNumber(double &outVal, const QStringView &str)
+{    
     //Calc number length
     int i = 0;
     int start = 0;
@@ -76,7 +76,7 @@ static int parseNumber(double &outVal, const QStringRef &str)
     }
 
     //Cut only number part and skip the rest to avoid confusing toDouble()
-    QStringRef numberStr = str.mid(start, i - start);
+    QStringView numberStr = str.mid(start, i - start);
     bool ok = false;
     outVal = numberStr.toDouble(&ok);
     if(!ok)
@@ -84,7 +84,7 @@ static int parseNumber(double &outVal, const QStringRef &str)
     return i;
 }
 
-static bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool isRelative, const double prev)
+static bool parseNumberAndAdvanceRelative(double &outNum, QStringView &str, bool isRelative, const double prev)
 {
     if(!utils::parseNumberAndAdvance(outNum, str))
         return false;
@@ -97,7 +97,7 @@ static bool parseNumberAndAdvanceRelative(double &outNum, QStringRef &str, bool 
     return true;
 }
 
-static bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringRef &str, bool isRelative, const QPointF& prev)
+static bool parsePointAndAdvanceRelative(QPointF &outPoint, QStringView &str, bool isRelative, const QPointF& prev)
 {
     if(!utils::parsePointAndAdvance(outPoint, str))
         return false;
@@ -133,28 +133,28 @@ static bool convertLine(const utils::XmlElement &e, QPainterPath &path)
     if(str.isEmpty())
         return false;
     double x1 = 0;
-    if(!parseNumber(x1, &str))
+    if(!parseNumber(x1, str))
         return false;
 
     str = e.attribute(QLatin1String("y1"));
     if(str.isEmpty())
         return false;
     double y1 = 0;
-    if(!parseNumber(y1, &str))
+    if(!parseNumber(y1, str))
         return false;
 
     str = e.attribute(QLatin1String("x2"));
     if(str.isEmpty())
         return false;
     double x2 = 0;
-    if(!parseNumber(x2, &str))
+    if(!parseNumber(x2, str))
         return false;
 
     str = e.attribute(QLatin1String("y2"));
     if(str.isEmpty())
         return false;
     double y2 = 0;
-    if(!parseNumber(y2, &str))
+    if(!parseNumber(y2, str))
         return false;
 
     path.moveTo(x1, y1);
@@ -168,7 +168,7 @@ static bool convertPolyline(const utils::XmlElement &e, QPainterPath &path)
     if(str.isEmpty())
         return false;
 
-    QStringRef strRef(&str);
+    QStringView strRef(str);
     strRef = strRef.trimmed();
     QPointF pt;
 
@@ -196,7 +196,7 @@ static bool convertPath(const utils::XmlElement &e, QPainterPath &path)
     if(str.isEmpty())
         return false;
 
-    QStringRef strRef(&str);
+    QStringView strRef(str);
 
     //Skip leading spaces
     strRef = strRef.trimmed();
@@ -338,19 +338,19 @@ static bool convertRect(const utils::XmlElement &e, QPainterPath &path)
     double x = 0, y = 0, w = 0, h = 0;
 
     QString str = e.attribute(QLatin1String("x"));
-    if(str.isEmpty() || !parseNumber(x, &str))
+    if(str.isEmpty() || !parseNumber(x, str))
         return false;
 
     str = e.attribute(QLatin1String("y"));
-    if(str.isEmpty() || !parseNumber(y, &str))
+    if(str.isEmpty() || !parseNumber(y, str))
         return false;
 
     str = e.attribute(QLatin1String("width"));
-    if(str.isEmpty() || !parseNumber(w, &str))
+    if(str.isEmpty() || !parseNumber(w, str))
         return false;
 
     str = e.attribute(QLatin1String("height"));
-    if(str.isEmpty() || !parseNumber(h, &str))
+    if(str.isEmpty() || !parseNumber(h, str))
         return false;
 
     path.addRect(x, y, w, h);
@@ -358,7 +358,7 @@ static bool convertRect(const utils::XmlElement &e, QPainterPath &path)
     return true;
 }
 
-bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
+bool utils::parseNumberAndAdvance(double &outVal, QStringView &str)
 {
     //Calc number length
     int i = parseNumber(outVal, str);
@@ -369,7 +369,7 @@ bool utils::parseNumberAndAdvance(double &outVal, QStringRef &str)
     return true;
 }
 
-bool utils::parsePointAndAdvance(QPointF &outPoint, QStringRef &str)
+bool utils::parsePointAndAdvance(QPointF &outPoint, QStringView &str)
 {
     //Points are separated by spaces
     //Coordinates are separated by spaces or comma or both
@@ -416,7 +416,7 @@ bool utils::convertElementToPath(const utils::XmlElement &e, QPainterPath &path)
     return false;
 }
 
-bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackConnectionInfo> &outVec)
+bool utils::parseTrackConnectionAttribute(const QString &value, QList<TrackConnectionInfo> &outVec)
 {
     TrackConnectionInfo info;
 
@@ -536,7 +536,7 @@ bool utils::parseTrackConnectionAttribute(const QString &value, QVector<TrackCon
     return true;
 }
 
-QString utils::trackConnInfoToString(const QVector<TrackConnectionInfo> &vec)
+QString utils::trackConnInfoToString(const QList<TrackConnectionInfo> &vec)
 {
     QString value;
     value.reserve(8 * vec.size());
@@ -606,7 +606,7 @@ utils::ElementStyle utils::parseStrokeWidthStyle(const utils::XmlElement &e, con
     {
         //Parse our stroke width
         double val = 0;
-        QStringRef ref(&strokeWidth);
+        QStringView ref(strokeWidth);
         if(parseNumberAndAdvance(val, ref))
         {
             if(ref.contains('%'))

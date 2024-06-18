@@ -3,7 +3,7 @@
 
 #include "iobjectmodel.h"
 
-#include <QVector>
+#include <QList>
 
 #include <ssplib/itemtypes.h>
 

@@ -13,12 +13,6 @@ XmlElement::XmlElement(const QString &tag, const QXmlStreamAttributes &attrs) :
 
 }
 
-XmlElement::XmlElement(const QStringRef &tag, const QXmlStreamAttributes &attrs) :
-    XmlElement(tag.toString(), attrs)
-{
-
-}
-
 #ifdef SSPLIB_ENABLE_EDITING
 XmlElement::XmlElement(QDomElement &e) :
     domElem(e), isDom(true)

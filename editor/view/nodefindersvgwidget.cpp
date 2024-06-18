@@ -67,7 +67,7 @@ void NodeFinderSVGWidget::paintEvent(QPaintEvent *)
         if(curPath.path.isEmpty())
         {
             //No current elem, draw item
-            for(const auto& elem : qAsConst(item->elements))
+            for(const auto& elem : std::as_const(item->elements))
             p.drawPath(elem.path);
 
             if(itemSubIdx >= 0 && itemSubIdx < item->elements.size())

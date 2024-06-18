@@ -129,7 +129,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
             if(item.trackName == name)
                 return false;
 
-            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
             {
                 if(track.trackName == name)
                 {
@@ -153,7 +153,7 @@ bool NodeFinderStationTracksModel::setData(const QModelIndex &idx, const QVarian
             if(item.trackPos == trk)
                 return false;
 
-            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
             {
                 if(track.trackPos == trk)
                 {
@@ -254,7 +254,7 @@ bool NodeFinderStationTracksModel::removeElementFromItem(ssplib::ItemBase *item,
 
 bool NodeFinderStationTracksModel::itemIsInXML(const ssplib::TrackItem &item) const
 {
-    for(const ssplib::TrackItem& track : qAsConst(xmlPlan->platforms))
+    for(const ssplib::TrackItem& track : std::as_const(xmlPlan->platforms))
     {
         if(track.trackPos == item.trackPos)
             return true;
@@ -267,7 +267,7 @@ bool NodeFinderStationTracksModel::addItem()
     nodeMgr->clearCurrentItem();
 
     int maxTrackPos = -1;
-    for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+    for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
     {
         if(track.trackPos > maxTrackPos)
             maxTrackPos = track.trackPos;

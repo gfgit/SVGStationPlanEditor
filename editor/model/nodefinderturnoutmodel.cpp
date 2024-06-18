@@ -63,7 +63,7 @@ QVariant NodeFinderTurnoutModel::data(const QModelIndex &idx, int role) const
         {
         case StationTrackCol:
         {
-            for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+            for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
             {
                 if(track.trackPos == item.info.stationTrackPos)
                 {
@@ -146,14 +146,14 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         {
         case StationTrackCol:
         {
-            if(value.type() == QVariant::String)
+            if(value.typeId() == QMetaType::QString)
             {
                 QString name = value.toString();
                 if(name.isEmpty())
                     return false;
 
                 int pos = -1;
-                for(const ssplib::TrackItem& track : qAsConst(m_plan->platforms))
+                for(const ssplib::TrackItem& track : std::as_const(m_plan->platforms))
                 {
                     if(track.trackName == name)
                     {
@@ -186,7 +186,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         {
         case StationTrackCol:
         {
-            if(value.type() == QVariant::Int)
+            if(value.typeId() == QMetaType::Int)
             {
                 bool ok = false;
                 int trk = value.toInt(&ok);
@@ -238,7 +238,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
                 return false;
 
             bool found = false;
-            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            for(const ssplib::LabelItem& gate : std::as_const(m_plan->labels))
             {
                 if(gate.gateLetter == gateLetter)
                 {
@@ -270,7 +270,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
             if(item.info.gateTrackPos == trk)
                 return false;
 
-            for(const ssplib::LabelItem& gate : qAsConst(m_plan->labels))
+            for(const ssplib::LabelItem& gate : std::as_const(m_plan->labels))
             {
                 if(gate.gateLetter == item.info.gateLetter)
                 {
@@ -308,7 +308,7 @@ bool NodeFinderTurnoutModel::setData(const QModelIndex &idx, const QVariant &val
         for(ssplib::ElementPath &p : item.elements)
         {
             //Rebuild attribute
-            QVector<ssplib::TrackConnectionInfo> infoVec;
+            QList<ssplib::TrackConnectionInfo> infoVec;
             ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
             ssplib::TrackConnectionInfo::removeAllNames(infoVec, oldInfo); //Remove old
             infoVec.append(item.info); //Add new
@@ -348,7 +348,7 @@ bool NodeFinderTurnoutModel::addElementToItem(ssplib::ElementPath &p, ssplib::It
     int row = ptr - m_plan->trackConnections.data(); //Pointer aritmetics
 
     //Rebuild attribute
-    QVector<ssplib::TrackConnectionInfo> infoVec;
+    QList<ssplib::TrackConnectionInfo> infoVec;
     ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     infoVec.append(ptr->info);
     std::sort(infoVec.begin(), infoVec.end());
@@ -373,7 +373,7 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
     ssplib::ElementPath p = ptr->elements.takeAt(pos);
 
     //Rebuild attribute
-    QVector<ssplib::TrackConnectionInfo> infoVec;
+    QList<ssplib::TrackConnectionInfo> infoVec;
     ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
     ssplib::TrackConnectionInfo::removeAllNames(infoVec, ptr->info);
     p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
@@ -386,7 +386,7 @@ bool NodeFinderTurnoutModel::removeElementFromItem(ssplib::ItemBase *item, int p
 
 bool NodeFinderTurnoutModel::itemIsInXML(const ssplib::TrackConnectionItem &item) const
 {
-    for(const ssplib::TrackConnectionItem& conn : qAsConst(xmlPlan->trackConnections))
+    for(const ssplib::TrackConnectionItem& conn : std::as_const(xmlPlan->trackConnections))
     {
         if(conn.info.matchNames(item.info))
             return true;
@@ -437,7 +437,7 @@ bool NodeFinderTurnoutModel::removeItem(int row)
     for(ssplib::ElementPath& p : item.elements)
     {
         //Rebuild attribute
-        QVector<ssplib::TrackConnectionInfo> infoVec;
+        QList<ssplib::TrackConnectionInfo> infoVec;
         ssplib::utils::parseTrackConnectionAttribute(p.elem.attribute(ssplib::svg_attr::TrackConnections), infoVec);
         ssplib::TrackConnectionInfo::removeAllNames(infoVec, m_plan->trackConnections.at(row).info);
         p.elem.setAttribute(ssplib::svg_attr::TrackConnections, ssplib::utils::trackConnInfoToString(infoVec));
